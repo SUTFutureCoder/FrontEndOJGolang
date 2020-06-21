@@ -42,15 +42,30 @@ func ScreenShot(c *gin.Context) {
 		logs.Fatalf("chrome dp save file error:%v", err)
 	}
 
-	appG.Response(http.StatusOK, e.SUCCESS, nil)
+	var executed interface{}
+	err := chromedp.Run(ctx, checkTextColor(url, &executed))
+	if err != nil {
+		logs.Fatal(err)
+	}
 
+
+	appG.Response(http.StatusOK, e.SUCCESS, executed)
+
+}
+
+func checkTextColor(url string, res *interface{}) chromedp.Action {
+	return chromedp.Tasks{
+		chromedp.Navigate(url),
+		//chromedp.EvaluateAsDevTools("if (document.getElementsByClassName('vueschool')) {const t1 = document.querySelector('.vueschool'); const t2 = getComputedStyle(t1).backgroundColor; console.log(t2)} else {console.log('0')}", res),
+		chromedp.EvaluateAsDevTools("if (document.getElementsByClassName('vueschool')) {const t1 = document.querySelector('.vueschool'); const t2 = getComputedStyle(t1).backgroundColor; t2;}", &res),
+	}
 }
 
 func elementFullScreenShot(url string, quantity int64, buf *[]byte) chromedp.Action {
 	return chromedp.Tasks{
 		chromedp.Navigate(url),
-		chromedp.WaitReady("#app", chromedp.ByID),
-		//chromedp.Sleep(60 * time.Second),
+		//chromedp.WaitReady("body"),
+		//chromedp.Sleep(20 * time.Second),
 		chromedp.ActionFunc(func(ctx context.Context) error {
 			// get layout metrics
 			_, _, contentSize, err := page.GetLayoutMetrics().Do(ctx)
