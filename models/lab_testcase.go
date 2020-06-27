@@ -19,10 +19,12 @@ type LabTestcase struct {
 	TimeLimit int `json:"time_limit"`
 	// MemLimit 测试用例内存限制
 	MemLimit int `json:"mem_limit"`
+	// WaitBefore 测试用例执行前等待
+	WaitBefore int `json:"wait_before"`
 }
 
 func GetTestcaseByIds(testcaseIds []interface{}) ([]LabTestcase, error) {
-	rows, err := DB.Query("SELECT id, testcase_code, testcase_desc, input, output, time_limit, mem_limit, status, creator, create_time, update_time FROM lab_testcase WHERE id IN (?" + strings.Repeat(",?", len(testcaseIds)-1) + ") AND status = 1", testcaseIds...)
+	rows, err := DB.Query("SELECT id, testcase_code, testcase_desc, input, output, time_limit, mem_limit, status, creator, create_time, update_time FROM lab_testcase WHERE id IN (?"+strings.Repeat(",?", len(testcaseIds)-1)+") AND status = 1", testcaseIds...)
 	defer rows.Close()
 	var testcases []LabTestcase
 	for rows.Next() {
@@ -34,6 +36,3 @@ func GetTestcaseByIds(testcaseIds []interface{}) ([]LabTestcase, error) {
 	return testcases, err
 
 }
-
-
-

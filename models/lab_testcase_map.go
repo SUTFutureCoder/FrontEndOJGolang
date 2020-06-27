@@ -27,6 +27,3 @@ func GetLabTestcaseMapByLabId(labId uint64) ([]interface{}, error) {
 	}
 	return testcaseIds, err
 }
-
-
-

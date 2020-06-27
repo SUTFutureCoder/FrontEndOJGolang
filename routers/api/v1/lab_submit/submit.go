@@ -11,7 +11,7 @@ import (
 	"time"
 )
 
-func Submit(c *gin.Context)  {
+func Submit(c *gin.Context) {
 
 	appG := app.Gin{
 		C: c,
@@ -31,7 +31,7 @@ func Submit(c *gin.Context)  {
 		&submitResult,
 		&creator,
 		&createTime,
-		)
+	)
 	defer stmt.Close()
 
 	if err != nil {
@@ -43,4 +43,3 @@ func Submit(c *gin.Context)  {
 	appG.Response(http.StatusOK, e.SUCCESS, nil)
 
 }
-

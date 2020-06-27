@@ -31,12 +31,12 @@ type Server struct {
 var ServerSetting = &Server{}
 
 type Database struct {
-	Type string
-	User string
-	Password string
-	Host string
-	Name string
-	TablePrefix string
+	Type         string
+	User         string
+	Password     string
+	Host         string
+	Name         string
+	TablePrefix  string
 	MaxOpenConns int
 	MaxIdleConns int
 }

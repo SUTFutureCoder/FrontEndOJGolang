@@ -11,7 +11,7 @@ import (
 	"time"
 )
 
-func Add(c *gin.Context)  {
+func Add(c *gin.Context) {
 	appG := app.Gin{
 		C: c,
 	}
@@ -28,7 +28,6 @@ func Add(c *gin.Context)  {
 	creator := "CaveJohson"
 	createTime := time.Now().UnixNano() / 1e6
 
-
 	tx, err := models.DB.Begin()
 
 	stmt, err := tx.Prepare("INSERT INTO lab_testcase (testcase_desc, testcase_code, input, output, time_limit, mem_limit,  creator, create_time) VALUES (?,?,?,?,?,?,?,?)")
@@ -41,18 +40,17 @@ func Add(c *gin.Context)  {
 		&memLimit,
 		&creator,
 		&createTime,
-		)
+	)
 
 	labTestCaseLastId, err := result.LastInsertId()
 
-
 	stmt, err = tx.Prepare("INSERT INTO lab_testcase_map (lab_id, testcase_id, creator, create_time) VALUES (?,?,?,?)")
 	result, err = stmt.Exec(
-			&labId,
-			&labTestCaseLastId,
-			&creator,
-			&createTime,
-		)
+		&labId,
+		&labTestCaseLastId,
+		&creator,
+		&createTime,
+	)
 	defer stmt.Close()
 
 	err = tx.Commit()

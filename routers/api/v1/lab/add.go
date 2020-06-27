@@ -23,7 +23,7 @@ func AddLab(c *gin.Context) {
 	labType, _ := strconv.ParseInt(labTypeStr, 10, 8)
 
 	lab := models.Lab{
-		Model:     models.Model{
+		Model: models.Model{
 			Creator:    "CaveJohson",
 			CreateTime: time.Now().UnixNano() / 1e6,
 		},

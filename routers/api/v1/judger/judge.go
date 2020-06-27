@@ -21,7 +21,7 @@ func Judge(c *gin.Context) {
 	submitId, err := strconv.Atoi(submitIdStr)
 
 	// 获取lab_id
-	labSubmit, err :=models.GetSubmitById(submitId)
+	labSubmit, err := models.GetSubmitById(submitId)
 	if err != nil {
 		log.Printf("")
 	}
@@ -41,7 +41,7 @@ func Judge(c *gin.Context) {
 
 	// 执行测试用例
 	testChamberFileName := caroline.WriteSubmitToFile(labSubmit)
-	caroline.ExecCaroline("file://" + testChamberFileName, testcases)
+	caroline.ExecCaroline("file://"+testChamberFileName, testcases)
 
 	appG.Response(http.StatusOK, e.SUCCESS, nil)
 

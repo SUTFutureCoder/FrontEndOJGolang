@@ -29,7 +29,7 @@ Compile OK:比赛结束前不能知道分数，仅显示编译是否通过。这
 Test:OJ网站管理员功能，可以测试运行。
 Other Error:你的程序出现了其它错误。
 System Error(SE):评测系统出现了问题。请向管理员汇报。
- */
+*/
 const (
 	EMPTY = iota
 	LABSUBMITSTATUS_PENDING
@@ -48,8 +48,6 @@ const (
 	LABSUBMITSTATUS_TEST
 	LABSUBMITSTATUS_OTHER_ERROR
 	LABSUBMITSTATUS_SYSTEM_ERROR
-
-
 )
 
 func GetSubmitById(submitId int) (*LabSubmit, error) {
