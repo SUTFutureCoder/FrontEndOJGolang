@@ -1,6 +1,7 @@
 package main
 
 import (
+	"FrontEndOJGolang/models"
 	"FrontEndOJGolang/pkg/setting"
 	"FrontEndOJGolang/routers"
 	"fmt"
@@ -11,6 +12,7 @@ import (
 
 func init() {
 	setting.Setup()
+	models.Setup()
 }
 
 func main() {
@@ -22,13 +24,19 @@ func main() {
 	endPoint := fmt.Sprintf(":%d", setting.ServerSetting.HttpPort)
 
 	server := &http.Server{
-		Addr: endPoint,
-		Handler: routersInit(),
-		ReadTimeout: readTimeout,
-		WriteTimeout:  writeTimeout,
+		Addr:         endPoint,
+		Handler:      routersInit(),
+		ReadTimeout:  readTimeout,
+		WriteTimeout: writeTimeout,
 	}
 
-	log.Printf("[SUCCESS] Falcon X Lunched")
+	// 自检
+	if models.DB == nil {
+		log.Fatalln("[FATAL] Database setup failed")
+		return
+	}
+
+	log.Printf("[SUCCESS] Project Caroline")
 
 	server.ListenAndServe()
 }

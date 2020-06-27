@@ -18,13 +18,12 @@ import (
 func ScreenShot(c *gin.Context) {
 
 	appG := app.Gin{C: c}
-	
+
 	url, _ := c.GetPostForm("url")
 	quantility, _ := c.GetPostForm("quanlity")
 
 	ctx, cancel := chromedp.NewContext(context.Background())
 	defer cancel()
-
 
 	var buf []byte
 	if err := chromedp.Run(ctx, elementScreenShot(url, "#app", &buf)); err != nil {
@@ -47,7 +46,6 @@ func ScreenShot(c *gin.Context) {
 	if err != nil {
 		logs.Fatal(err)
 	}
-
 
 	appG.Response(http.StatusOK, e.SUCCESS, executed)
 
@@ -77,9 +75,9 @@ func elementFullScreenShot(url string, quantity int64, buf *[]byte) chromedp.Act
 
 			err = emulation.SetDeviceMetricsOverride(width, height, 1, false).
 				WithScreenOrientation(&emulation.ScreenOrientation{
-					Type: emulation.OrientationTypePortraitPrimary,
+					Type:  emulation.OrientationTypePortraitPrimary,
 					Angle: 0,
-			}).Do(ctx)
+				}).Do(ctx)
 			if err != nil {
 				return err
 			}
@@ -87,12 +85,12 @@ func elementFullScreenShot(url string, quantity int64, buf *[]byte) chromedp.Act
 			*buf, err = page.CaptureScreenshot().
 				WithQuality(quantity).
 				WithClip(&page.Viewport{
-					X:	contentSize.X,
-					Y:  contentSize.Y,
-					Width: contentSize.Width,
+					X:      contentSize.X,
+					Y:      contentSize.Y,
+					Width:  contentSize.Width,
 					Height: contentSize.Height,
-					Scale: 1,
-			}).Do(ctx)
+					Scale:  1,
+				}).Do(ctx)
 
 			if err != nil {
 				return err

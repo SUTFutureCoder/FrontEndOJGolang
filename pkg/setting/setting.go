@@ -10,20 +10,38 @@ import (
 type App struct {
 	LogSavePath string
 	LogSaveName string
-	LogFileExt string
-
+	LogFileExt  string
 }
 
 var AppSetting = &App{}
 
+type Judger struct {
+	TestChamberBaseDir string
+}
+
+var JudgerSetting = &Judger{}
+
 type Server struct {
-	RunMode	string
-	HttpPort int
-	ReadTimeout time.Duration
+	RunMode      string
+	HttpPort     int
+	ReadTimeout  time.Duration
 	WriteTimeout time.Duration
 }
 
 var ServerSetting = &Server{}
+
+type Database struct {
+	Type string
+	User string
+	Password string
+	Host string
+	Name string
+	TablePrefix string
+	MaxOpenConns int
+	MaxIdleConns int
+}
+
+var DatabaseSetting = &Database{}
 
 var cfg *ini.File
 
@@ -36,6 +54,8 @@ func Setup() {
 
 	mapTo("app", AppSetting)
 	mapTo("server", ServerSetting)
+	mapTo("database", DatabaseSetting)
+	mapTo("judger", JudgerSetting)
 
 	ServerSetting.ReadTimeout = ServerSetting.ReadTimeout * time.Second
 	ServerSetting.WriteTimeout = ServerSetting.WriteTimeout * time.Second
@@ -47,4 +67,3 @@ func mapTo(s string, v interface{}) {
 		log.Fatalf("Cfg.MapTo %s err: %v", s, err)
 	}
 }
-
