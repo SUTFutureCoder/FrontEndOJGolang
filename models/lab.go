@@ -28,7 +28,7 @@ const (
 	LABTYPE_OTHER
 )
 
-func InsertLab(lab Lab) error {
+func InsertLab(lab *Lab) error {
 	stmt, err := DB.Prepare("INSERT INTO lab (lab_name, lab_desc, lab_type, lab_sample, creator, create_time) VALUES(?,?,?,?,?,?)")
 	defer stmt.Close()
 	if err != nil {
@@ -36,12 +36,12 @@ func InsertLab(lab Lab) error {
 		return err
 	}
 	_, err = stmt.Exec(
-		&lab.LabName,
-		&lab.LabDesc,
-		&lab.LabType,
-		&lab.LabSample,
-		&lab.Creator,
-		&lab.CreateTime,
+		lab.LabName,
+		lab.LabDesc,
+		lab.LabType,
+		lab.LabSample,
+		lab.Creator,
+		lab.CreateTime,
 	)
 	return nil
 }

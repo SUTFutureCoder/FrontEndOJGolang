@@ -1,6 +1,7 @@
 package models
 
 import (
+	"database/sql"
 	"strings"
 )
 
@@ -24,15 +25,33 @@ type LabTestcase struct {
 }
 
 func GetTestcaseByIds(testcaseIds []interface{}) ([]LabTestcase, error) {
-	rows, err := DB.Query("SELECT id, testcase_code, testcase_desc, input, output, time_limit, mem_limit, status, creator, create_time, update_time FROM lab_testcase WHERE id IN (?"+strings.Repeat(",?", len(testcaseIds)-1)+") AND status = 1", testcaseIds...)
+	rows, err := DB.Query("SELECT id, testcase_code, testcase_desc, input, output, time_limit, mem_limit, wait_before, status, creator, create_time, update_time FROM lab_testcase WHERE id IN (?"+strings.Repeat(",?", len(testcaseIds)-1)+") AND status = 1", testcaseIds...)
 	defer rows.Close()
 	var testcases []LabTestcase
 	for rows.Next() {
 		var testcase LabTestcase
-		err = rows.Scan(&testcase.ID, &testcase.TestcaseCode, &testcase.TestcaseDesc, &testcase.Input, &testcase.Output, &testcase.TimeLimit, &testcase.MemLimit, &testcase.Status, &testcase.Creator, &testcase.CreateTime, &testcase.UpdateTime)
+		err = rows.Scan(&testcase.ID, &testcase.TestcaseCode, &testcase.TestcaseDesc, &testcase.Input, &testcase.Output, &testcase.TimeLimit, &testcase.MemLimit, &testcase.WaitBefore, &testcase.Status, &testcase.Creator, &testcase.CreateTime, &testcase.UpdateTime)
 		testcases = append(testcases, testcase)
 	}
 	rows.Close()
 	return testcases, err
 
+}
+
+func InsertLabTestCase(tx *sql.Tx, labTestCase *LabTestcase) (int64, error) {
+	stmt, err := tx.Prepare("INSERT INTO lab_testcase (testcase_desc, testcase_code, input, output, time_limit, mem_limit, wait_before, creator, create_time) VALUES (?,?,?,?,?,?,?,?,?)")
+	result, err := stmt.Exec(
+		labTestCase.TestcaseDesc,
+		labTestCase.TestcaseCode,
+		labTestCase.Input,
+		labTestCase.Output,
+		labTestCase.TimeLimit,
+		labTestCase.MemLimit,
+		labTestCase.WaitBefore,
+		labTestCase.Creator,
+		labTestCase.CreateTime,
+	)
+
+	labTestCaseLastId, err := result.LastInsertId()
+	return labTestCaseLastId, err
 }

@@ -16,7 +16,8 @@ func Add(c *gin.Context) {
 		C: c,
 	}
 
-	labId, _ := c.GetPostForm("lab_id")
+	labIdStr, _ := c.GetPostForm("lab_id")
+	labId, _ := strconv.ParseInt(labIdStr, 10, 64)
 	testcaseDesc, _ := c.GetPostForm("testcase_desc")
 	testcaseCode, _ := c.GetPostForm("testcase_code")
 	input, _ := c.GetPostForm("input")
@@ -25,33 +26,39 @@ func Add(c *gin.Context) {
 	timeLimit, _ := strconv.Atoi(timeLimitStr)
 	memLimitStr, _ := c.GetPostForm("memlimit")
 	memLimit, _ := strconv.Atoi(memLimitStr)
+	waitBeforeStr, _ := c.GetPostForm("wait_before")
+	waitBefore, _ := strconv.Atoi(waitBeforeStr)
 	creator := "CaveJohson"
 	createTime := time.Now().UnixNano() / 1e6
 
 	tx, err := models.DB.Begin()
 
-	stmt, err := tx.Prepare("INSERT INTO lab_testcase (testcase_desc, testcase_code, input, output, time_limit, mem_limit,  creator, create_time) VALUES (?,?,?,?,?,?,?,?)")
-	result, err := stmt.Exec(
-		&testcaseDesc,
-		&testcaseCode,
-		&input,
-		&output,
-		&timeLimit,
-		&memLimit,
-		&creator,
-		&createTime,
-	)
+	labTestCase := models.LabTestcase{
+		Model: models.Model{
+			Creator:    creator,
+			CreateTime: createTime,
+		},
+		TestcaseDesc: testcaseDesc,
+		TestcaseCode: testcaseCode,
+		Input:        input,
+		Output:       output,
+		TimeLimit:    timeLimit,
+		MemLimit:     memLimit,
+		WaitBefore:   waitBefore,
+	}
 
-	labTestCaseLastId, err := result.LastInsertId()
+	labTestCaseLastId, err := models.InsertLabTestCase(tx, &labTestCase)
 
-	stmt, err = tx.Prepare("INSERT INTO lab_testcase_map (lab_id, testcase_id, creator, create_time) VALUES (?,?,?,?)")
-	result, err = stmt.Exec(
-		&labId,
-		&labTestCaseLastId,
-		&creator,
-		&createTime,
-	)
-	defer stmt.Close()
+	labTestCaseMap := models.LabTestcaseMap{
+		Model: models.Model{
+			Creator:    creator,
+			CreateTime: createTime,
+		},
+		LabID:      labId,
+		TestcaseID: labTestCaseLastId,
+	}
+
+	_, err = models.InsertLabTestCaseMap(tx, &labTestCaseMap)
 
 	err = tx.Commit()
 	if err != nil {
