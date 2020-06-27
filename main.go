@@ -36,7 +36,7 @@ func main() {
 		return
 	}
 
-	log.Printf("[SUCCESS] Project Caroline")
+	log.Printf("[SUCCESS] Project Caroline Started 🎂")
 
 	server.ListenAndServe()
 }
