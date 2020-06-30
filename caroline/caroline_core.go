@@ -24,7 +24,10 @@ func ExecCaroline(testChamber string, testcases []models.LabTestcase) {
 		} else {
 			fmt.Println("FAIL")
 		}
+		fmt.Println(testcase.Output)
+		fmt.Println("###########")
 		fmt.Println(output)
+		fmt.Println("-----------")
 
 	}
 
@@ -35,7 +38,11 @@ func runTests(url string, labTestcase *models.LabTestcase, output *interface{}) 
 		chromedp.Navigate(url),
 	}
 	if labTestcase.WaitBefore != 0 {
-		task = append(task, chromedp.Sleep(time.Duration(labTestcase.WaitBefore)*time.Microsecond))
+		var temp *interface{}
+		// 在sleep之前执行一下，需要注意两次执行代码一样，但结果不同，为了保持核心代码和数据表整洁
+		task = append(task, chromedp.EvaluateAsDevTools(strings.ReplaceAll(labTestcase.TestcaseCode, "\n", ""), &temp))
+		task = append(task, chromedp.Sleep(time.Duration(labTestcase.WaitBefore)*time.Millisecond))
+		fmt.Println(labTestcase.WaitBefore)
 	}
 	task = append(task, chromedp.EvaluateAsDevTools(strings.ReplaceAll(labTestcase.TestcaseCode, "\n", ""), &output))
 	return task
