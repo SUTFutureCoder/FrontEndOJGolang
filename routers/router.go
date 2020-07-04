@@ -29,6 +29,9 @@ func InitRouter() *gin.Engine {
 	judgerGroup := r.Group("/judger")
 	judgerGroup.POST("/judge", judger.Judge)
 
+	userGroup := r.Group("/user")
+	userGroup.POST("/reg", )
+
 	// 测试区
 	test := r.Group("/test")
 	test.POST("/screenshot", testfield.ScreenShot)

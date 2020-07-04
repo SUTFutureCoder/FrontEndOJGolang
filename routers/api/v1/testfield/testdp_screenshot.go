@@ -4,12 +4,12 @@ import (
 	"FrontEndOJGolang/pkg/app"
 	"FrontEndOJGolang/pkg/e"
 	"context"
-	"flock/util/logs"
 	"github.com/chromedp/cdproto/emulation"
 	"github.com/chromedp/cdproto/page"
 	"github.com/chromedp/chromedp"
 	"github.com/gin-gonic/gin"
 	"io/ioutil"
+	"log"
 	"math"
 	"net/http"
 	"strconv"
@@ -27,24 +27,24 @@ func ScreenShot(c *gin.Context) {
 
 	var buf []byte
 	if err := chromedp.Run(ctx, elementScreenShot(url, "#app", &buf)); err != nil {
-		logs.Fatalf("chromedp run error:%v", err)
+		log.Fatalf("chromedp run error:%v", err)
 	}
 	if err := ioutil.WriteFile("elementScreenShot.png", buf, 0777); err != nil {
-		logs.Fatalf("chrome dp save file error:%v", err)
+		log.Fatalf("chrome dp save file error:%v", err)
 	}
 
 	int64, _ := strconv.ParseInt(quantility, 10, 64)
 	if err := chromedp.Run(ctx, elementFullScreenShot(url, int64, &buf)); err != nil {
-		logs.Fatalf("chromedp run error:%v", err)
+		log.Fatalf("chromedp run error:%v", err)
 	}
 	if err := ioutil.WriteFile("elementScreenShotFullScreen.png", buf, 0777); err != nil {
-		logs.Fatalf("chrome dp save file error:%v", err)
+		log.Fatalf("chrome dp save file error:%v", err)
 	}
 
 	var executed interface{}
 	err := chromedp.Run(ctx, checkTextColor(url, &executed))
 	if err != nil {
-		logs.Fatal(err)
+		log.Fatal(err)
 	}
 
 	appG.Response(http.StatusOK, e.SUCCESS, executed)
