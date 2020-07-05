@@ -47,7 +47,7 @@ func Add(c *gin.Context) {
 		WaitBefore:   waitBefore,
 	}
 
-	labTestCaseLastId, err := models.InsertLabTestCase(tx, &labTestCase)
+	labTestCaseLastId, err := labTestCase.Insert(tx)
 
 	labTestCaseMap := models.LabTestcaseMap{
 		Model: models.Model{
@@ -58,7 +58,7 @@ func Add(c *gin.Context) {
 		TestcaseID: labTestCaseLastId,
 	}
 
-	_, err = models.InsertLabTestCaseMap(tx, &labTestCaseMap)
+	_, err = labTestCaseMap.Insert(tx)
 
 	err = tx.Commit()
 	if err != nil {

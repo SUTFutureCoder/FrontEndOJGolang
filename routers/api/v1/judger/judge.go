@@ -28,12 +28,14 @@ func Judge(c *gin.Context) {
 
 	if labSubmit == nil || labSubmit.LabID == 0 {
 		appG.Response(http.StatusBadRequest, e.INVALID_PARAMS, "实验室id未找到")
+		return
 	}
 
 	// 获取case信息
 	testcaseIds, err := models.GetLabTestcaseMapByLabId(labSubmit.LabID)
 	if len(testcaseIds) == 0 {
 		appG.Response(http.StatusBadRequest, e.INVALID_PARAMS, "实验室测试列表为空")
+		return
 	}
 
 	// 获取testcase详情

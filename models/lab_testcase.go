@@ -38,7 +38,7 @@ func GetTestcaseByIds(testcaseIds []interface{}) ([]LabTestcase, error) {
 
 }
 
-func InsertLabTestCase(tx *sql.Tx, labTestCase *LabTestcase) (int64, error) {
+func (labTestCase *LabTestcase) Insert(tx *sql.Tx) (int64, error) {
 	stmt, err := tx.Prepare("INSERT INTO lab_testcase (testcase_desc, testcase_code, input, output, time_limit, mem_limit, wait_before, creator, create_time) VALUES (?,?,?,?,?,?,?,?,?)")
 	result, err := stmt.Exec(
 		labTestCase.TestcaseDesc,

@@ -33,7 +33,7 @@ func AddLab(c *gin.Context) {
 		LabSample: labSample,
 	}
 
-	err := models.InsertLab(&lab)
+	err := lab.Insert()
 	if err != nil {
 		log.Printf("[ERROR] database exec error input[%v] err[%v]", lab, err)
 		appG.Response(http.StatusInternalServerError, e.ERROR, nil)

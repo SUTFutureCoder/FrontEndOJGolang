@@ -5,6 +5,7 @@ import (
 	"FrontEndOJGolang/routers/api/v1/lab"
 	"FrontEndOJGolang/routers/api/v1/lab_submit"
 	"FrontEndOJGolang/routers/api/v1/lab_testcase"
+	"FrontEndOJGolang/routers/api/v1/user"
 	"github.com/gin-gonic/gin"
 
 	"FrontEndOJGolang/routers/api/v1/testfield"
@@ -30,7 +31,8 @@ func InitRouter() *gin.Engine {
 	judgerGroup.POST("/judge", judger.Judge)
 
 	userGroup := r.Group("/user")
-	userGroup.POST("/reg", )
+	userGroup.POST("/reg", user.Reg)
+	userGroup.POST("/login", user.Login)
 
 	// 测试区
 	test := r.Group("/test")
