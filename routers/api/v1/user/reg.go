@@ -25,8 +25,8 @@ func Reg(c *gin.Context) {
 	}
 
 	user := models.User{
-		Model: models.Model {
-			Creator: userName,
+		Model: models.Model{
+			Creator:    userName,
 			CreateTime: time.Now().UnixNano() / 1e6,
 		},
 		UserPassword: string(passByte),

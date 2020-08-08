@@ -26,7 +26,7 @@ func (u *User) GetByName() error {
 	}
 	row := stmt.QueryRow(
 		&u.Creator,
-		)
+	)
 	err = row.Scan(
 		&u.ID,
 		&u.UserPassword,
