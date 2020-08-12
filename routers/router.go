@@ -26,6 +26,7 @@ func InitRouter() *gin.Engine {
 
 	labSubmitGroup := r.Group("/lab_submit")
 	labSubmitGroup.POST("/submit", lab_submit.Submit)
+	labSubmitGroup.POST("/submit_list", lab_submit.SubmitList)
 
 	judgerGroup := r.Group("/judger")
 	judgerGroup.POST("/judge", judger.Judge)
@@ -33,6 +34,7 @@ func InitRouter() *gin.Engine {
 	userGroup := r.Group("/user")
 	userGroup.POST("/reg", user.Reg)
 	userGroup.POST("/login", user.Login)
+	userGroup.POST("/logout", user.Logout)
 
 	// 测试区
 	test := r.Group("/test")

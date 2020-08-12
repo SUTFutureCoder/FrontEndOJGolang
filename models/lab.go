@@ -25,11 +25,12 @@ const (
 	LABTYPE_COMPLEX
 	LABTYPE_PRD
 	LABTYPE_IMITATE
+	LABTYPE_SECURITY
 	LABTYPE_OTHER
 )
 
 func (lab *Lab) Insert() error {
-	stmt, err := DB.Prepare("INSERT INTO lab (lab_name, lab_desc, lab_type, lab_sample, creator, create_time) VALUES(?,?,?,?,?,?)")
+	stmt, err := DB.Prepare("INSERT INTO lab (lab_name, lab_desc, lab_type, lab_sample, creator_id, creator, create_time) VALUES(?,?,?,?,?,?,?)")
 	defer stmt.Close()
 	if err != nil {
 		log.Printf("[ERROR] database exec error input[%v] err[%v]", lab, err)
@@ -40,6 +41,7 @@ func (lab *Lab) Insert() error {
 		lab.LabDesc,
 		lab.LabType,
 		lab.LabSample,
+		lab.CreatorId,
 		lab.Creator,
 		lab.CreateTime,
 	)

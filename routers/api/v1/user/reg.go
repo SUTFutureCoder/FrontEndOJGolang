@@ -8,30 +8,30 @@ import (
 	"golang.org/x/crypto/bcrypt"
 	"log"
 	"net/http"
-	"time"
 )
 
 func Reg(c *gin.Context) {
 	appG := app.Gin{
 		C: c,
 	}
-	userName, _ := c.GetPostForm("user_name")
-	userPassword, _ := c.GetPostForm("user_password")
-	passByte, err := bcrypt.GenerateFromPassword([]byte(userPassword), bcrypt.DefaultCost)
-	if err != nil {
-		log.Printf("[ERROR] password gen error: %v", err)
-		appG.Response(http.StatusBadRequest, e.INVALID_PARAMS, nil)
+
+	// check if login
+	userSession, err := app.GetUserFromSession(c.Request)
+	if userSession.Id != 0 {
+		appG.Response(http.StatusForbidden, e.INVALID_PARAMS, "You have been login")
 		return
 	}
 
-	user := models.User{
-		Model: models.Model{
-			Creator:    userName,
-			CreateTime: time.Now().UnixNano() / 1e6,
-		},
-		UserPassword: string(passByte),
-		UserType:     models.USERTYPE_NORMAL,
+	user := models.User{}
+	prepare(&user, c)
+
+	// check if user have exist
+	exist, err := user.CheckExist()
+	if err != nil || exist {
+		appG.Response(http.StatusBadRequest, e.INVALID_PARAMS, "username exist")
+		return
 	}
+
 	err = user.Insert()
 	if err != nil {
 		log.Printf("[ERROR] insert to user table user[%v] error [%v]", user, err)
@@ -39,4 +39,13 @@ func Reg(c *gin.Context) {
 		return
 	}
 	appG.Response(http.StatusOK, e.SUCCESS, nil)
+}
+
+
+func prepare(user *models.User, c *gin.Context) {
+	user.Creator, _ = c.GetPostForm("user_name")
+	userPassword, _ := c.GetPostForm("user_password")
+	passByte, _ := bcrypt.GenerateFromPassword([]byte(userPassword), bcrypt.DefaultCost)
+	user.UserPassword = string(passByte)
+	user.UserType = models.USERTYPE_NORMAL
 }

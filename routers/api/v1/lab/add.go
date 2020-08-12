@@ -16,24 +16,18 @@ func AddLab(c *gin.Context) {
 		C: c,
 	}
 
-	labName, _ := c.GetPostForm("lab_name")
-	labDesc, _ := c.GetPostForm("lab_desc")
-	labSample, _ := c.GetPostForm("lab_sample")
-	labTypeStr, _ := c.GetPostForm("lab_type")
-	labType, _ := strconv.ParseInt(labTypeStr, 10, 8)
-
-	lab := models.Lab{
-		Model: models.Model{
-			Creator:    "CaveJohson",
-			CreateTime: time.Now().UnixNano() / 1e6,
-		},
-		LabName:   labName,
-		LabDesc:   labDesc,
-		LabType:   int8(labType),
-		LabSample: labSample,
+	userSession, err := app.GetUserFromSession(c.Request)
+	if err != nil {
+		log.Printf("[ERROR] get user session error[%v]\n", err)
+		appG.Response(http.StatusBadRequest, e.INVALID_PARAMS, nil)
+		return
 	}
 
-	err := lab.Insert()
+	lab := models.Lab{}
+
+	prepare(lab, c, userSession)
+
+	err = lab.Insert()
 	if err != nil {
 		log.Printf("[ERROR] database exec error input[%v] err[%v]", lab, err)
 		appG.Response(http.StatusInternalServerError, e.ERROR, nil)
@@ -41,4 +35,15 @@ func AddLab(c *gin.Context) {
 	}
 
 	appG.Response(http.StatusOK, e.SUCCESS, nil)
+}
+
+func prepare(lab models.Lab, c *gin.Context, userSession app.UserSession) {
+	lab.LabName, _ = c.GetPostForm("lab_name")
+	lab.LabDesc, _ = c.GetPostForm("lab_desc")
+	lab.LabSample, _ = c.GetPostForm("lab_sample")
+	labTypeStr, _ := c.GetPostForm("lab_type")
+	labType, _ := strconv.ParseInt(labTypeStr, 10, 8)
+	lab.LabType = int8(labType)
+	lab.CreatorId, lab.Creator = userSession.Id, userSession.Name
+	lab.CreateTime = time.Now().UnixNano() / 1e6
 }

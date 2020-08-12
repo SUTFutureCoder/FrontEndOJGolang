@@ -39,7 +39,7 @@ func GetTestcaseByIds(testcaseIds []interface{}) ([]LabTestcase, error) {
 }
 
 func (labTestCase *LabTestcase) Insert(tx *sql.Tx) (int64, error) {
-	stmt, err := tx.Prepare("INSERT INTO lab_testcase (testcase_desc, testcase_code, input, output, time_limit, mem_limit, wait_before, creator, create_time) VALUES (?,?,?,?,?,?,?,?,?)")
+	stmt, err := tx.Prepare("INSERT INTO lab_testcase (testcase_desc, testcase_code, input, output, time_limit, mem_limit, wait_before, creator_id, creator, create_time) VALUES (?,?,?,?,?,?,?,?,?,?)")
 	result, err := stmt.Exec(
 		labTestCase.TestcaseDesc,
 		labTestCase.TestcaseCode,
@@ -48,6 +48,7 @@ func (labTestCase *LabTestcase) Insert(tx *sql.Tx) (int64, error) {
 		labTestCase.TimeLimit,
 		labTestCase.MemLimit,
 		labTestCase.WaitBefore,
+		labTestCase.CreatorId,
 		labTestCase.Creator,
 		labTestCase.CreateTime,
 	)

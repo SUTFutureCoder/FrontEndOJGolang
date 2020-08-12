@@ -43,6 +43,13 @@ type Database struct {
 
 var DatabaseSetting = &Database{}
 
+type Session struct {
+	Token string
+	SessionUser string
+}
+
+var SessionSetting = &Session{}
+
 var cfg *ini.File
 
 func Setup() {
@@ -56,6 +63,7 @@ func Setup() {
 	mapTo("server", ServerSetting)
 	mapTo("database", DatabaseSetting)
 	mapTo("judger", JudgerSetting)
+	mapTo("session", SessionSetting)
 
 	ServerSetting.ReadTimeout = ServerSetting.ReadTimeout * time.Second
 	ServerSetting.WriteTimeout = ServerSetting.WriteTimeout * time.Second

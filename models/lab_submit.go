@@ -1,5 +1,10 @@
 package models
 
+import (
+	"database/sql"
+	"log"
+)
+
 // LabSubmit 提交表
 type LabSubmit struct {
 	Model
@@ -9,6 +14,8 @@ type LabSubmit struct {
 	SubmitData string `json:"submit_data"`
 	// SubmitResult 提交结果
 	SubmitResult string `json:"submit_result"`
+	// SubmitTimeUsage 消耗时间
+	SubmitTimeUsage int64 `json:"submit_time_usage"`
 }
 
 /**
@@ -50,10 +57,57 @@ const (
 	LABSUBMITSTATUS_SYSTEM_ERROR
 )
 
-func GetSubmitById(submitId int) (*LabSubmit, error) {
-	stmt, err := DB.Prepare("SELECT id, lab_id, submit_data, submit_result, status, creator, create_time, update_time FROM lab_submit WHERE id = ? AND status = 1")
-	row := stmt.QueryRow(&submitId)
-	labSubmit := new(LabSubmit)
-	row.Scan(&labSubmit.ID, &labSubmit.LabID, &labSubmit.SubmitData, &labSubmit.SubmitResult, &labSubmit.Status, &labSubmit.Creator, &labSubmit.CreateTime, &labSubmit.UpdateTime)
-	return labSubmit, err
+func (labSubmit *LabSubmit) Insert() error {
+	stmt, err := DB.Prepare("INSERT INTO lab_submit (lab_id, submit_data, submit_result, creator_id, creator, create_time) VALUES (?,?,?,?,?,?)")
+	defer stmt.Close()
+	_, err = stmt.Exec(
+		labSubmit.LabID,
+		labSubmit.SubmitData,
+		labSubmit.SubmitResult,
+		labSubmit.CreatorId,
+		labSubmit.Creator,
+		labSubmit.CreateTime,
+	)
+
+	if err != nil {
+		log.Printf("[ERROR] insert lab submit error[%v]", err)
+		return err
+	}
+	return nil
+}
+
+func GetUserLabSubmits(creatorId uint64, pager Pager) ([]LabSubmit, error) {
+	var stmt *sql.Stmt
+	var err error
+	if creatorId == 0 {
+		stmt, err = DB.Prepare("SELECT id, lab_id, submit_data, submit_result, submit_time_usage, status, creator_id, creator, create_time, update_time FROM lab_submit WHERE creator_id != ? ORDER BY id desc LIMIT ? OFFSET ? ")
+	} else {
+		stmt, err = DB.Prepare("SELECT id, lab_id, submit_data, submit_result, submit_time_usage, status, creator_id, creator, create_time, update_time FROM lab_submit WHERE creator_id = ? ORDER BY id desc LIMIT ? OFFSET ? ")
+	}
+	rows, err := stmt.Query(
+		creatorId,
+		pager.PageSize,
+		(pager.Page - 1) * pager.PageSize,
+		)
+	defer rows.Close()
+
+	var labSubmits []LabSubmit
+	for rows.Next() {
+		var labSubmitRow LabSubmit
+		err = rows.Scan(
+			&labSubmitRow.ID,
+			&labSubmitRow.LabID,
+			&labSubmitRow.SubmitData,
+			&labSubmitRow.SubmitResult,
+			&labSubmitRow.SubmitTimeUsage,
+			&labSubmitRow.Status,
+			&labSubmitRow.CreatorId,
+			&labSubmitRow.Creator,
+			&labSubmitRow.CreateTime,
+			&labSubmitRow.UpdateTime,
+			)
+		labSubmits = append(labSubmits, labSubmitRow)
+	}
+
+	return labSubmits, err
 }

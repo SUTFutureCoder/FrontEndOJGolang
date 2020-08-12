@@ -18,25 +18,23 @@ func Submit(c *gin.Context) {
 	}
 
 	labIdStr, _ := c.GetPostForm("lab_id")
-	labId, _ := strconv.Atoi(labIdStr)
-	submitData, _ := c.GetPostForm("submit_data")
-	submitResult := ""
-	creator := "Chell01"
-	createTime := time.Now().UnixNano() / 1e6
 
-	stmt, err := models.DB.Prepare("INSERT INTO lab_submit (lab_id, submit_data, submit_result, creator, create_time) VALUES (?,?,?,?,?)")
-	_, err = stmt.Exec(
-		&labId,
-		&submitData,
-		&submitResult,
-		&creator,
-		&createTime,
-	)
-	defer stmt.Close()
+	labSubmit := models.LabSubmit{}
 
+	labSubmit.LabID, _ = strconv.ParseUint(labIdStr, 10, 64)
+	labSubmit.SubmitData, _ = c.GetPostForm("submit_data")
+
+	userSession, err := app.GetUserFromSession(c.Request)
+	if err != nil {
+		appG.Response(http.StatusUnauthorized, e.UNAUTHORIZED, nil)
+		return
+	}
+	labSubmit.CreatorId, labSubmit.Creator = userSession.Id, userSession.Name
+	labSubmit.CreateTime = time.Now().UnixNano() / 1e6
+	err = labSubmit.Insert()
 	if err != nil {
 		log.Printf("[ERROR] lab submit error[%v]\n", err)
-		appG.Response(http.StatusInternalServerError, e.ERROR, nil)
+		appG.Response(http.StatusBadRequest, e.INVALID_PARAMS, nil)
 		return
 	}
 

@@ -22,7 +22,6 @@ func Login(c *gin.Context) {
 	user.Creator = userName
 	err := user.GetByName()
 	if err != nil {
-		log.Printf("[ERROR] prepare sql error user[%v] err[%v]", user, err)
 		appG.Response(http.StatusBadRequest, e.INVALID_PARAMS, nil)
 		return
 	}
@@ -33,5 +32,12 @@ func Login(c *gin.Context) {
 		appG.Response(http.StatusBadRequest, e.INVALID_PARAMS, err)
 		return
 	}
+
+	// save session
+	err = app.SetSession(c.Request, c.Writer, user)
+	if err != nil {
+		appG.Response(http.StatusInternalServerError, e.ERROR, err)
+	}
+
 	appG.Response(http.StatusOK, e.SUCCESS, nil)
 }

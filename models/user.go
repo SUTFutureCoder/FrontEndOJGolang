@@ -55,3 +55,18 @@ func (u *User) Insert() error {
 	)
 	return nil
 }
+
+func (u *User) CheckExist() (bool, error) {
+	stmt, err := DB.Prepare("SELECT COUNT(1) FROM user WHERE creator=?")
+	defer stmt.Close()
+	if err != nil {
+		log.Printf("[ERROR] database exec error input[%v] err[%v]", u, err)
+		return false, err
+	}
+	row := stmt.QueryRow(
+		u.Creator,
+		)
+	i := 0
+	err = row.Scan(&i)
+	return i > 0, err
+}
