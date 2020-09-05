@@ -7,6 +7,7 @@ import (
 	"FrontEndOJGolang/routers/api/v1/lab_testcase"
 	"FrontEndOJGolang/routers/api/v1/user"
 	"github.com/gin-gonic/gin"
+	"github.com/gin-contrib/cors"
 
 	"FrontEndOJGolang/routers/api/v1/testfield"
 )
@@ -16,10 +17,13 @@ func InitRouter() *gin.Engine {
 	r := gin.New()
 	r.Use(gin.Logger())
 	r.Use(gin.Recovery())
+	r.Use(cors.Default())
 
 	// 实验区
 	labGroup := r.Group("/lab")
 	labGroup.POST("/add", lab.AddLab)
+	labGroup.POST("/list", lab.LabList)
+	labGroup.POST("/info", lab.LabInfo)
 
 	labTestcaseGroup := r.Group("/lab_testcase")
 	labTestcaseGroup.POST("/add", lab_testcase.Add)
