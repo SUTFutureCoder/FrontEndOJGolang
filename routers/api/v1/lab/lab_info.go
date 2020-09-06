@@ -5,6 +5,7 @@ import (
 	"FrontEndOJGolang/pkg/app"
 	"FrontEndOJGolang/pkg/e"
 	"github.com/gin-gonic/gin"
+	"log"
 	"net/http"
 )
 
@@ -24,6 +25,7 @@ func LabInfo(c *gin.Context) {
 	var req ReqLabInfo
 	var err error
 	err = c.BindJSON(&req)
+	log.Printf("########## req[%v]", req)
 	if err != nil {
 		appGin.Response(http.StatusInternalServerError, e.ERROR, err)
 		return

@@ -57,10 +57,10 @@ const (
 	LABSUBMITSTATUS_SYSTEM_ERROR
 )
 
-func (labSubmit *LabSubmit) Insert() error {
+func (labSubmit *LabSubmit) Insert() (int64, error) {
 	stmt, err := DB.Prepare("INSERT INTO lab_submit (lab_id, submit_data, submit_result, creator_id, creator, create_time) VALUES (?,?,?,?,?,?)")
 	defer stmt.Close()
-	_, err = stmt.Exec(
+	insertRet, err := stmt.Exec(
 		labSubmit.LabID,
 		labSubmit.SubmitData,
 		labSubmit.SubmitResult,
@@ -68,12 +68,11 @@ func (labSubmit *LabSubmit) Insert() error {
 		labSubmit.Creator,
 		labSubmit.CreateTime,
 	)
-
 	if err != nil {
 		log.Printf("[ERROR] insert lab submit error[%v]", err)
-		return err
+		return 0, err
 	}
-	return nil
+	return insertRet.LastInsertId()
 }
 
 func GetUserLabSubmits(creatorId uint64, pager Pager) ([]LabSubmit, error) {
@@ -109,5 +108,33 @@ func GetUserLabSubmits(creatorId uint64, pager Pager) ([]LabSubmit, error) {
 		labSubmits = append(labSubmits, labSubmitRow)
 	}
 
+	return labSubmits, err
+}
+
+
+func GetUserLabSubmitsByLabId(creatorId uint64, labId string) ([]LabSubmit, error) {
+	var err error
+	stmt, err := DB.Prepare("SELECT id, lab_id, submit_result, submit_time_usage, status, creator_id, creator, create_time, update_time FROM lab_submit WHERE creator_id = ? AND lab_id = ? ORDER BY id desc")
+	defer stmt.Close()
+	rows, err := stmt.Query(
+			creatorId,
+			labId,
+		)
+	var labSubmits []LabSubmit
+	for rows.Next() {
+		var labSubmitRow LabSubmit
+		err = rows.Scan(
+			&labSubmitRow.ID,
+			&labSubmitRow.LabID,
+			&labSubmitRow.SubmitResult,
+			&labSubmitRow.SubmitTimeUsage,
+			&labSubmitRow.Status,
+			&labSubmitRow.CreatorId,
+			&labSubmitRow.Creator,
+			&labSubmitRow.CreateTime,
+			&labSubmitRow.UpdateTime,
+		)
+		labSubmits = append(labSubmits, labSubmitRow)
+	}
 	return labSubmits, err
 }

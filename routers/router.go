@@ -1,13 +1,13 @@
 package routers
 
 import (
+	"FrontEndOJGolang/pkg/app"
 	"FrontEndOJGolang/routers/api/v1/judger"
 	"FrontEndOJGolang/routers/api/v1/lab"
 	"FrontEndOJGolang/routers/api/v1/lab_submit"
 	"FrontEndOJGolang/routers/api/v1/lab_testcase"
 	"FrontEndOJGolang/routers/api/v1/user"
 	"github.com/gin-gonic/gin"
-	"github.com/gin-contrib/cors"
 
 	"FrontEndOJGolang/routers/api/v1/testfield"
 )
@@ -17,7 +17,8 @@ func InitRouter() *gin.Engine {
 	r := gin.New()
 	r.Use(gin.Logger())
 	r.Use(gin.Recovery())
-	r.Use(cors.Default())
+	r.Use(app.CORSMiddleware())
+
 
 	// 实验区
 	labGroup := r.Group("/lab")
@@ -31,6 +32,7 @@ func InitRouter() *gin.Engine {
 	labSubmitGroup := r.Group("/lab_submit")
 	labSubmitGroup.POST("/submit", lab_submit.Submit)
 	labSubmitGroup.POST("/submit_list", lab_submit.SubmitList)
+	labSubmitGroup.POST("/submit_list_by_lab_id", lab_submit.SubmitListByLabId)
 
 	judgerGroup := r.Group("/judger")
 	judgerGroup.POST("/judge", judger.Judge)

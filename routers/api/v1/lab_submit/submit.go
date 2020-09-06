@@ -31,13 +31,13 @@ func Submit(c *gin.Context) {
 	}
 	labSubmit.CreatorId, labSubmit.Creator = userSession.Id, userSession.Name
 	labSubmit.CreateTime = time.Now().UnixNano() / 1e6
-	err = labSubmit.Insert()
+	lastId, err := labSubmit.Insert()
 	if err != nil {
 		log.Printf("[ERROR] lab submit error[%v]\n", err)
 		appG.Response(http.StatusBadRequest, e.INVALID_PARAMS, nil)
 		return
 	}
 
-	appG.Response(http.StatusOK, e.SUCCESS, nil)
+	appG.Response(http.StatusOK, e.SUCCESS, lastId)
 
 }
