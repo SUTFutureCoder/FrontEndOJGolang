@@ -41,7 +41,6 @@ func Reg(c *gin.Context) {
 	appG.Response(http.StatusOK, e.SUCCESS, nil)
 }
 
-
 func prepare(user *models.User, c *gin.Context) {
 	user.Creator, _ = c.GetPostForm("user_name")
 	userPassword, _ := c.GetPostForm("user_password")

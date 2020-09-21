@@ -19,7 +19,7 @@ type ReqLabInfo struct {
 
 func LabInfo(c *gin.Context) {
 	appGin := app.Gin{
-		C : c,
+		C: c,
 	}
 	var resp RespLabInfo
 	var req ReqLabInfo
@@ -31,12 +31,10 @@ func LabInfo(c *gin.Context) {
 		return
 	}
 	resp.LabInfo.ID = req.Id
-	resp.LabInfo, err = models.GetLabInfo(resp.LabInfo.ID)
+	resp.LabInfo, err = models.GetLabFullInfo(resp.LabInfo.ID)
 	if err != nil {
 		appGin.Response(http.StatusInternalServerError, e.ERROR, err)
 		return
 	}
 	appGin.Response(http.StatusOK, e.SUCCESS, resp)
 }
-
-

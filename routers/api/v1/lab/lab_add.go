@@ -41,6 +41,7 @@ func prepare(lab models.Lab, c *gin.Context, userSession app.UserSession) {
 	lab.LabName, _ = c.GetPostForm("lab_name")
 	lab.LabDesc, _ = c.GetPostForm("lab_desc")
 	lab.LabSample, _ = c.GetPostForm("lab_sample")
+	lab.LabTemplate, _ = c.GetPostForm("lab_template")
 	labTypeStr, _ := c.GetPostForm("lab_type")
 	labType, _ := strconv.ParseInt(labTypeStr, 10, 8)
 	lab.LabType = int8(labType)

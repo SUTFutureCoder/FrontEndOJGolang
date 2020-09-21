@@ -16,6 +16,8 @@ type Lab struct {
 	LabType int8 `json:"lab_type"`
 	// LabSample 实验室样例或地址
 	LabSample string `json:"lab_sample"`
+	// LabTemplate 实验室模板代码
+	LabTemplate string `json:"lab_template"`
 }
 
 const (
@@ -27,11 +29,10 @@ const (
 	LABTYPE_PRD
 	LABTYPE_IMITATE
 	LABTYPE_SECURITY
-	LABTYPE_OTHER
 )
 
 func (lab *Lab) Insert() error {
-	stmt, err := DB.Prepare("INSERT INTO lab (lab_name, lab_desc, lab_type, lab_sample, creator_id, creator, create_time) VALUES(?,?,?,?,?,?,?)")
+	stmt, err := DB.Prepare("INSERT INTO lab (lab_name, lab_desc, lab_type, lab_sample, lab_template, creator_id, creator, create_time) VALUES(?,?,?,?,?,?,?,?)")
 	defer stmt.Close()
 	if err != nil {
 		log.Printf("[ERROR] database exec error input[%v] err[%v]", lab, err)
@@ -42,6 +43,7 @@ func (lab *Lab) Insert() error {
 		lab.LabDesc,
 		lab.LabType,
 		lab.LabSample,
+		lab.LabTemplate,
 		lab.CreatorId,
 		lab.Creator,
 		lab.CreateTime,
@@ -61,15 +63,15 @@ func GetLabList(page, pageSize int) ([]Lab, error) {
 	}
 	offset := (page - 1) * pageSize
 	rows, err := stmt.Query(
-			&pageSize,
-			&offset,
-		)
+		&pageSize,
+		&offset,
+	)
 	var labList []Lab
 	for rows.Next() {
 		var lab Lab
 		err = rows.Scan(
-				&lab.ID, &lab.LabName, &lab.LabType, &lab.CreatorId, &lab.Creator, &lab.CreateTime, &lab.UpdateTime,
-			)
+			&lab.ID, &lab.LabName, &lab.LabType, &lab.CreatorId, &lab.Creator, &lab.CreateTime, &lab.UpdateTime,
+		)
 		labList = append(labList, lab)
 	}
 	return labList, err
@@ -88,16 +90,16 @@ func GetLabListCount() (int, error) {
 	return cnt, err
 }
 
-func GetLabInfo(id uint64) (Lab, error) {
+func GetLabFullInfo(id uint64) (Lab, error) {
 	var lab Lab
-	stmt, err := DB.Prepare("SELECT id, lab_name, lab_desc, lab_type, lab_sample, status, creator_id, creator, create_time, update_time FROM lab WHERE id=?")
+	stmt, err := DB.Prepare("SELECT id, lab_name, lab_desc, lab_type, lab_sample, lab_template, status, creator_id, creator, create_time, update_time FROM lab WHERE id=?")
 	if err != nil {
 		return lab, err
 	}
 	row := stmt.QueryRow(&id)
 	err = row.Scan(
-		&lab.ID, &lab.LabName, &lab.LabDesc, &lab.LabType, &lab.LabSample, &lab.Status, &lab.CreatorId, &lab.Creator, &lab.CreateTime, &lab.UpdateTime,
-		)
+		&lab.ID, &lab.LabName, &lab.LabDesc, &lab.LabType, &lab.LabSample, &lab.LabTemplate, &lab.Status, &lab.CreatorId, &lab.Creator, &lab.CreateTime, &lab.UpdateTime,
+	)
 	if err != nil {
 		log.Printf("get lab info error [%v]\n", err)
 		return lab, err

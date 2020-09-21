@@ -65,7 +65,7 @@ func (u *User) CheckExist() (bool, error) {
 	}
 	row := stmt.QueryRow(
 		u.Creator,
-		)
+	)
 	i := 0
 	err = row.Scan(&i)
 	return i > 0, err

@@ -13,8 +13,9 @@ import (
 var store = sessions.NewCookieStore([]byte(setting.SessionSetting.Token))
 
 type UserSession struct {
-	Id uint64
-	Name string
+	Id       uint64
+	Name     string
+	UserType int8
 }
 
 const SESSIONKEY = "data"
@@ -37,8 +38,9 @@ func SetSession(c *http.Request, w http.ResponseWriter, user *models.User) error
 		return err
 	}
 	userSession := UserSession{
-		Id: user.ID,
-		Name: user.Creator,
+		Id:       user.ID,
+		Name:     user.Creator,
+		UserType: user.UserType,
 	}
 	session.Values[SESSIONKEY] = userSession
 	err = session.Save(c, w)

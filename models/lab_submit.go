@@ -86,8 +86,8 @@ func GetUserLabSubmits(creatorId uint64, pager Pager) ([]LabSubmit, error) {
 	rows, err := stmt.Query(
 		creatorId,
 		pager.PageSize,
-		(pager.Page - 1) * pager.PageSize,
-		)
+		(pager.Page-1)*pager.PageSize,
+	)
 	defer rows.Close()
 
 	var labSubmits []LabSubmit
@@ -104,22 +104,21 @@ func GetUserLabSubmits(creatorId uint64, pager Pager) ([]LabSubmit, error) {
 			&labSubmitRow.Creator,
 			&labSubmitRow.CreateTime,
 			&labSubmitRow.UpdateTime,
-			)
+		)
 		labSubmits = append(labSubmits, labSubmitRow)
 	}
 
 	return labSubmits, err
 }
 
-
 func GetUserLabSubmitsByLabId(creatorId uint64, labId string) ([]LabSubmit, error) {
 	var err error
 	stmt, err := DB.Prepare("SELECT id, lab_id, submit_result, submit_time_usage, status, creator_id, creator, create_time, update_time FROM lab_submit WHERE creator_id = ? AND lab_id = ? ORDER BY id desc")
 	defer stmt.Close()
 	rows, err := stmt.Query(
-			creatorId,
-			labId,
-		)
+		creatorId,
+		labId,
+	)
 	var labSubmits []LabSubmit
 	for rows.Next() {
 		var labSubmitRow LabSubmit
@@ -137,4 +136,27 @@ func GetUserLabSubmitsByLabId(creatorId uint64, labId string) ([]LabSubmit, erro
 		labSubmits = append(labSubmits, labSubmitRow)
 	}
 	return labSubmits, err
+}
+
+func GetUserLastSubmit(userId uint64) (LabSubmit, error) {
+	var err error
+	stmt, err := DB.Prepare("SELECT id, lab_id, submit_result, submit_time_usage, status, creator_id, creator, create_time, update_time FROM lab_submit WHERE creator_id = ? ORDER BY id desc LIMIT 1")
+	defer stmt.Close()
+	row := stmt.QueryRow(
+		userId,
+	)
+	var labSubmitRow LabSubmit
+	err = row.Scan(
+		&labSubmitRow.ID,
+		&labSubmitRow.LabID,
+		&labSubmitRow.SubmitResult,
+		&labSubmitRow.SubmitTimeUsage,
+		&labSubmitRow.Status,
+		&labSubmitRow.CreatorId,
+		&labSubmitRow.Creator,
+		&labSubmitRow.CreateTime,
+		&labSubmitRow.UpdateTime,
+	)
+	return labSubmitRow, err
+
 }

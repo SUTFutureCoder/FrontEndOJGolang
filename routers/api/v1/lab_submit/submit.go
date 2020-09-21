@@ -29,6 +29,12 @@ func Submit(c *gin.Context) {
 		appG.Response(http.StatusUnauthorized, e.UNAUTHORIZED, nil)
 		return
 	}
+
+	if app.LimitUserSubmitFluency(userSession.Id) {
+		appG.Response(http.StatusTooManyRequests, e.TOO_MANY_REQUESTS, nil)
+		return
+	}
+
 	labSubmit.CreatorId, labSubmit.Creator = userSession.Id, userSession.Name
 	labSubmit.CreateTime = time.Now().UnixNano() / 1e6
 	lastId, err := labSubmit.Insert()
