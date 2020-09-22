@@ -1,4 +1,4 @@
 .idea/
+#./static/
 .DS_Store
 FrontEndOJGolang
-./static/*
