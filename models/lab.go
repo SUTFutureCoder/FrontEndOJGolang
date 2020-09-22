@@ -31,14 +31,14 @@ const (
 	LABTYPE_SECURITY
 )
 
-func (lab *Lab) Insert() error {
+func (lab *Lab) Insert() (int64, error) {
 	stmt, err := DB.Prepare("INSERT INTO lab (lab_name, lab_desc, lab_type, lab_sample, lab_template, creator_id, creator, create_time) VALUES(?,?,?,?,?,?,?,?)")
-	defer stmt.Close()
 	if err != nil {
 		log.Printf("[ERROR] database exec error input[%v] err[%v]", lab, err)
-		return err
+		return 0, err
 	}
-	_, err = stmt.Exec(
+	defer stmt.Close()
+	ret, err := stmt.Exec(
 		lab.LabName,
 		lab.LabDesc,
 		lab.LabType,
@@ -48,7 +48,10 @@ func (lab *Lab) Insert() error {
 		lab.Creator,
 		lab.CreateTime,
 	)
-	return nil
+	if err != nil || ret == nil{
+		return 0, err
+	}
+	return ret.LastInsertId()
 }
 
 func GetLabList(page, pageSize int) ([]Lab, error) {

@@ -27,14 +27,14 @@ func AddLab(c *gin.Context) {
 
 	prepare(lab, c, userSession)
 
-	err = lab.Insert()
+	labId, err := lab.Insert()
 	if err != nil {
 		log.Printf("[ERROR] database exec error input[%v] err[%v]", lab, err)
 		appG.Response(http.StatusInternalServerError, e.ERROR, nil)
 		return
 	}
 
-	appG.Response(http.StatusOK, e.SUCCESS, nil)
+	appG.Response(http.StatusOK, e.SUCCESS, labId)
 }
 
 func prepare(lab models.Lab, c *gin.Context, userSession app.UserSession) {

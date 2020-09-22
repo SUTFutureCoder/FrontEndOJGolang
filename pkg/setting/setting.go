@@ -51,7 +51,7 @@ type Session struct {
 var SessionSetting = &Session{}
 
 type Tool struct {
-	PicBaseDir string
+	FileBaseDir string
 }
 
 var ToolSetting = &Tool{}
