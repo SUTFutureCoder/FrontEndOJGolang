@@ -49,8 +49,8 @@ func InitRouter() *gin.Engine {
 
 	// 工具
 	tool := r.Group("/tool")
-	tool.GET("/getpic", tools.GetPic)
-	tool.POST("/uploadpic", tools.UploadPic)
+	tool.GET("/getfile", tools.GetFile)
+	tool.POST("/uploadfile", tools.UploadFile)
 
 	return r
 }

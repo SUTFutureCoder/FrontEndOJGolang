@@ -11,33 +11,33 @@ import (
 )
 
 // be ware of backup upload files
-func UploadPic(c *gin.Context) {
+func UploadFile(c *gin.Context) {
 	appG := app.Gin{
 		C: c,
 	}
-	picFileReader, err := c.FormFile("img")
+	fileReader, err := c.FormFile("file")
 	if err != nil {
 		log.Printf("[ERROR] upload file error:[%v]", err)
 		appG.Response(http.StatusOK, e.INVALID_PARAMS, "upload file error")
 		return
 	}
-	err = c.SaveUploadedFile(picFileReader, setting.ToolSetting.PicBaseDir+"/"+picFileReader.Filename)
+	err = c.SaveUploadedFile(fileReader, setting.ToolSetting.FileBaseDir+"/"+fileReader.Filename)
 	if err != nil {
 		log.Printf("[ERROR] save upload file error:[%v]", err)
 		appG.Response(http.StatusOK, e.INVALID_PARAMS, "save upload file error")
 		return
 	}
-	appG.Response(http.StatusOK, e.SUCCESS, picFileReader.Filename)
+	appG.Response(http.StatusOK, e.SUCCESS, fileReader.Filename)
 }
 
-func GetPic(c *gin.Context) {
+func GetFile(c *gin.Context) {
 	appG := app.Gin{
 		C: c,
 	}
-	pic := c.Query("pic")
-	if pic == "" || strings.Contains(pic, "..") || strings.Contains(pic, "/") {
-		appG.Response(http.StatusOK, e.INVALID_PARAMS, "invalid pic url")
+	file := c.Query("file")
+	if file == "" || strings.Contains(file, "..") || strings.Contains(file, "/") {
+		appG.Response(http.StatusOK, e.INVALID_PARAMS, "invalid file url")
 		return
 	}
-	c.File(setting.ToolSetting.PicBaseDir + "/" + pic)
+	c.File(setting.ToolSetting.FileBaseDir + "/" + file)
 }
