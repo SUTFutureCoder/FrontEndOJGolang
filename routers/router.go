@@ -28,6 +28,7 @@ func InitRouter() *gin.Engine {
 
 	labTestcaseGroup := r.Group("/lab_testcase")
 	labTestcaseGroup.POST("/add", lab_testcase.Add)
+	labTestcaseGroup.POST("/list", lab_testcase.List)
 
 	labSubmitGroup := r.Group("/lab_submit")
 	labSubmitGroup.POST("/submit", lab_submit.Submit)

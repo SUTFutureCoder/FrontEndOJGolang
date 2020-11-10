@@ -2,7 +2,6 @@ package models
 
 import (
 	"database/sql"
-	"strconv"
 )
 
 // LabTestcaseMap 实验室、测试用例关联表
@@ -24,7 +23,7 @@ func GetLabTestcaseMapByLabId(labId uint64) ([]interface{}, error) {
 	for rows.Next() {
 		var testcaseId int
 		rows.Scan(&testcaseId)
-		testcaseIds = append(testcaseIds, strconv.Itoa(testcaseId))
+		testcaseIds = append(testcaseIds, testcaseId)
 	}
 	return testcaseIds, err
 }

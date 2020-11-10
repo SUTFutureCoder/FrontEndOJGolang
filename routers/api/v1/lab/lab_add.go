@@ -25,7 +25,7 @@ func AddLab(c *gin.Context) {
 
 	lab := models.Lab{}
 
-	prepare(lab, c, userSession)
+	prepare(&lab, c, userSession)
 
 	labId, err := lab.Insert()
 	if err != nil {
@@ -37,7 +37,7 @@ func AddLab(c *gin.Context) {
 	appG.Response(http.StatusOK, e.SUCCESS, labId)
 }
 
-func prepare(lab models.Lab, c *gin.Context, userSession app.UserSession) {
+func prepare(lab *models.Lab, c *gin.Context, userSession app.UserSession) {
 	lab.LabName, _ = c.GetPostForm("lab_name")
 	lab.LabDesc, _ = c.GetPostForm("lab_desc")
 	lab.LabSample, _ = c.GetPostForm("lab_sample")

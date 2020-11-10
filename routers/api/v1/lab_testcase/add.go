@@ -25,7 +25,7 @@ func Add(c *gin.Context) {
 	labTestCase := models.LabTestcase{}
 	labTestCaseMap := models.LabTestcaseMap{}
 
-	prepare(labTestCase, labTestCaseMap, c, userSession)
+	prepare(&labTestCase, labTestCaseMap, c, userSession)
 
 	tx, err := models.DB.Begin()
 	labTestCaseMap.TestcaseID, err = labTestCase.Insert(tx)
@@ -39,7 +39,7 @@ func Add(c *gin.Context) {
 	appG.Response(http.StatusOK, e.SUCCESS, nil)
 }
 
-func prepare(labTestCase models.LabTestcase, labTestCaseMap models.LabTestcaseMap, c *gin.Context, session app.UserSession) {
+func prepare(labTestCase *models.LabTestcase, labTestCaseMap models.LabTestcaseMap, c *gin.Context, session app.UserSession) {
 	labIdStr, _ := c.GetPostForm("lab_id")
 	labTestCaseMap.LabID, _ = strconv.ParseInt(labIdStr, 10, 64)
 	labTestCase.TestcaseDesc, _ = c.GetPostForm("testcase_desc")
