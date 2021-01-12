@@ -2,15 +2,17 @@ package routers
 
 import (
 	"FrontEndOJGolang/pkg/app"
+	"FrontEndOJGolang/pkg/setting"
 	"FrontEndOJGolang/routers/api/v1/judger"
 	"FrontEndOJGolang/routers/api/v1/lab"
 	"FrontEndOJGolang/routers/api/v1/lab_submit"
 	"FrontEndOJGolang/routers/api/v1/lab_testcase"
+	"FrontEndOJGolang/routers/api/v1/testfield"
 	"FrontEndOJGolang/routers/api/v1/tools"
 	"FrontEndOJGolang/routers/api/v1/user"
+	"github.com/gin-contrib/sessions"
+	"github.com/gin-contrib/sessions/cookie"
 	"github.com/gin-gonic/gin"
-
-	"FrontEndOJGolang/routers/api/v1/testfield"
 )
 
 func InitRouter() *gin.Engine {
@@ -18,6 +20,7 @@ func InitRouter() *gin.Engine {
 	r := gin.New()
 	r.Use(gin.Logger())
 	r.Use(gin.Recovery())
+	r.Use(sessions.Sessions(setting.SessionSetting.SessionUser, cookie.NewStore([]byte(setting.SessionSetting.Token))))
 	r.Use(app.CORSMiddleware())
 
 	// 实验区

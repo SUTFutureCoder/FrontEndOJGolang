@@ -16,7 +16,7 @@ func Reg(c *gin.Context) {
 	}
 
 	// check if login
-	userSession, err := app.GetUserFromSession(c.Request)
+	userSession, err := app.GetUserFromSession(c)
 	if userSession.Id != 0 {
 		appG.Response(http.StatusForbidden, e.INVALID_PARAMS, "You have been login")
 		return

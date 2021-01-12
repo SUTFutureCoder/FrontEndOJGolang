@@ -15,7 +15,7 @@ func SubmitList(c *gin.Context) {
 	}
 
 	// get user info from session
-	userSession, err := app.GetUserFromSession(c.Request)
+	userSession, err := app.GetUserFromSession(c)
 	if err != nil || userSession.Id == 0 {
 		appG.Response(http.StatusUnauthorized, e.UNAUTHORIZED, "please login")
 		return
@@ -37,7 +37,7 @@ func SubmitListByLabId(c *gin.Context) {
 	}
 
 	// get user info from session
-	userSession, err := app.GetUserFromSession(c.Request)
+	userSession, err := app.GetUserFromSession(c)
 	if err != nil || userSession.Id == 0 {
 		appG.Response(http.StatusUnauthorized, e.UNAUTHORIZED, "please login")
 		return

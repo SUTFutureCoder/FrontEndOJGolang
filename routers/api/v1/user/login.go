@@ -34,7 +34,7 @@ func Login(c *gin.Context) {
 	}
 
 	// save session
-	err = app.SetSession(c.Request, c.Writer, user)
+	err = app.SetSession(c, user)
 	if err != nil {
 		appG.Response(http.StatusInternalServerError, e.ERROR, err)
 	}

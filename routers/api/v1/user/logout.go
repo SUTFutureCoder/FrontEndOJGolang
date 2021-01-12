@@ -11,7 +11,7 @@ func Logout(c *gin.Context) {
 	appG := app.Gin{
 		C: c,
 	}
-	err := app.ExpireSession(c.Request, c.Writer)
+	err := app.ExpireSession(c)
 	if err != nil {
 		appG.Response(http.StatusInternalServerError, e.ERROR, nil)
 	}

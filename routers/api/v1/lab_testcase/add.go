@@ -16,7 +16,7 @@ func Add(c *gin.Context) {
 		C: c,
 	}
 
-	userSession, err := app.GetUserFromSession(c.Request)
+	userSession, err := app.GetUserFromSession(c)
 	if err != nil {
 		appG.Response(http.StatusUnauthorized, e.UNAUTHORIZED, nil)
 		return

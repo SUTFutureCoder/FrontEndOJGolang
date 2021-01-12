@@ -16,7 +16,7 @@ func AddLab(c *gin.Context) {
 		C: c,
 	}
 
-	userSession, err := app.GetUserFromSession(c.Request)
+	userSession, err := app.GetUserFromSession(c)
 	if err != nil {
 		log.Printf("[ERROR] get user session error[%v]\n", err)
 		appG.Response(http.StatusBadRequest, e.INVALID_PARAMS, nil)

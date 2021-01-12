@@ -24,7 +24,7 @@ func List(c *gin.Context) {
 		return
 	}
 
-	_, err = app.GetUserFromSession(c.Request)
+	_, err = app.GetUserFromSession(c)
 	if err != nil {
 		appG.Response(http.StatusUnauthorized, e.UNAUTHORIZED, nil)
 		return

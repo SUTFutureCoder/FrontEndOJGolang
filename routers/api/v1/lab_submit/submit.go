@@ -24,7 +24,7 @@ func Submit(c *gin.Context) {
 	labSubmit.LabID, _ = strconv.ParseUint(labIdStr, 10, 64)
 	labSubmit.SubmitData, _ = c.GetPostForm("submit_data")
 
-	userSession, err := app.GetUserFromSession(c.Request)
+	userSession, err := app.GetUserFromSession(c)
 	if err != nil {
 		appG.Response(http.StatusUnauthorized, e.UNAUTHORIZED, nil)
 		return

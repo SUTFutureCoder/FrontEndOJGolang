@@ -20,7 +20,7 @@ func TestRun(c *gin.Context) {
 		return
 	}
 
-	userSession, err := app.GetUserFromSession(c.Request)
+	userSession, err := app.GetUserFromSession(c)
 	if err != nil {
 		log.Printf("[ERROR] get user session error[%v]\n", err)
 		appG.Response(http.StatusOK, e.INVALID_PARAMS, "get user session failed")

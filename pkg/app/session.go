@@ -1,16 +1,15 @@
 package app
-
+// 废弃
 import (
 	"FrontEndOJGolang/models"
 	"FrontEndOJGolang/pkg/setting"
 	"encoding/gob"
 	"errors"
-	"github.com/gorilla/sessions"
+	"fmt"
+	"github.com/gin-contrib/sessions"
+	"github.com/gin-gonic/gin"
 	"log"
-	"net/http"
 )
-
-var store = sessions.NewCookieStore([]byte(setting.SessionSetting.Token))
 
 type UserSession struct {
 	Id       uint64
@@ -18,47 +17,35 @@ type UserSession struct {
 	UserType int8
 }
 
-const SESSIONKEY = "data"
-
-func GetSession(c *http.Request) (*sessions.Session, error) {
-	// record to session
+func SetSession(c *gin.Context, user *models.User) error {
 	gob.Register(UserSession{})
-	session, err := store.Get(c, setting.SessionSetting.SessionUser)
-	if err != nil {
-		log.Printf("[ERROR] get session store error err[%v] ", err)
-		return nil, err
-	}
-	return session, nil
-}
-
-func SetSession(c *http.Request, w http.ResponseWriter, user *models.User) error {
-	gob.Register(UserSession{})
-	session, err := GetSession(c)
-	if err != nil {
-		return err
+	session := sessions.Default(c)
+	option := sessions.Options{
+		MaxAge: 86400 * 7,
+		Path: "/",
+		HttpOnly: true,
 	}
 	userSession := UserSession{
 		Id:       user.ID,
 		Name:     user.Creator,
 		UserType: user.UserType,
 	}
-	session.Values[SESSIONKEY] = userSession
-	err = session.Save(c, w)
+	session.Options(option)
+	session.Set(setting.SessionSetting.SessionUser, userSession)
+	err := session.Save()
 	if err != nil {
 		log.Printf("[ERROR] save session store error user[%v] err[%v] ", user, err)
 		return err
 	}
+	fmt.Println(session.Get(setting.SessionSetting.SessionUser))
 	return nil
 }
 
-func ExpireSession(c *http.Request, w http.ResponseWriter) error {
-	session, err := GetSession(c)
-	if err != nil {
-		log.Printf("[ERROR] expire session when get session error err[%v] ", err)
-		return err
-	}
-	session.Options.MaxAge = -1
-	err = session.Save(c, w)
+func ExpireSession(c *gin.Context) error {
+	gob.Register(UserSession{})
+	session := sessions.Default(c)
+	session.Set(setting.SessionSetting.SessionUser, UserSession{})
+	err := session.Save()
 	if err != nil {
 		log.Printf("[ERROR] expire session when exec session error err[%v] ", err)
 		return err
@@ -66,13 +53,14 @@ func ExpireSession(c *http.Request, w http.ResponseWriter) error {
 	return nil
 }
 
-func GetUserFromSession(c *http.Request) (UserSession, error) {
-	session, err := GetSession(c)
-	if err != nil {
-		return UserSession{}, err
+func GetUserFromSession(c *gin.Context) (UserSession, error) {
+	gob.Register(UserSession{})
+	session := sessions.Default(c).Get(setting.SessionSetting.SessionUser)
+	if session == nil {
+		return UserSession{}, nil
 	}
 
-	userSession, parseOk := session.Values[SESSIONKEY].(UserSession)
+	userSession, parseOk := session.(UserSession)
 	if !parseOk {
 		//log.Printf("[ERROR] parse user info error err[%v]", err)
 		return UserSession{}, errors.New("parse user info error")
