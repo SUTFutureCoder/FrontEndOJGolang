@@ -1,9 +1,9 @@
 package app
+
 // 废弃
 import (
 	"FrontEndOJGolang/models"
 	"FrontEndOJGolang/pkg/setting"
-	"encoding/gob"
 	"errors"
 	"fmt"
 	"github.com/gin-contrib/sessions"
@@ -17,12 +17,17 @@ type UserSession struct {
 	UserType int8
 }
 
+func UserInfo() gin.HandlerFunc {
+	return func(c *gin.Context) {
+
+	}
+}
+
 func SetSession(c *gin.Context, user *models.User) error {
-	gob.Register(UserSession{})
 	session := sessions.Default(c)
 	option := sessions.Options{
-		MaxAge: 86400 * 7,
-		Path: "/",
+		MaxAge:   86400 * 7,
+		Path:     "/",
 		HttpOnly: true,
 	}
 	userSession := UserSession{
@@ -30,8 +35,9 @@ func SetSession(c *gin.Context, user *models.User) error {
 		Name:     user.Creator,
 		UserType: user.UserType,
 	}
-	session.Options(option)
 	session.Set(setting.SessionSetting.SessionUser, userSession)
+	session.Options(option)
+	log.Println("test")
 	err := session.Save()
 	if err != nil {
 		log.Printf("[ERROR] save session store error user[%v] err[%v] ", user, err)
@@ -42,9 +48,12 @@ func SetSession(c *gin.Context, user *models.User) error {
 }
 
 func ExpireSession(c *gin.Context) error {
-	gob.Register(UserSession{})
 	session := sessions.Default(c)
-	session.Set(setting.SessionSetting.SessionUser, UserSession{})
+	session.Options(sessions.Options{
+		MaxAge:   0,
+		Path:     "/",
+		HttpOnly: true,
+	})
 	err := session.Save()
 	if err != nil {
 		log.Printf("[ERROR] expire session when exec session error err[%v] ", err)
@@ -54,7 +63,6 @@ func ExpireSession(c *gin.Context) error {
 }
 
 func GetUserFromSession(c *gin.Context) (UserSession, error) {
-	gob.Register(UserSession{})
 	session := sessions.Default(c).Get(setting.SessionSetting.SessionUser)
 	if session == nil {
 		return UserSession{}, nil

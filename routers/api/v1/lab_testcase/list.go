@@ -5,7 +5,6 @@ import (
 	"FrontEndOJGolang/pkg/app"
 	"FrontEndOJGolang/pkg/e"
 	"github.com/gin-gonic/gin"
-	"net/http"
 )
 
 type ReqLabTestCaseList struct {
@@ -17,26 +16,19 @@ func List(c *gin.Context) {
 		C: c,
 	}
 	var req ReqLabTestCaseList
-	var err error
-	err = c.BindJSON(&req)
-	if req.LabId == 0 {
-		appG.Response(http.StatusBadRequest, e.INVALID_PARAMS, "param error")
-		return
-	}
-
-	_, err = app.GetUserFromSession(c)
-	if err != nil {
-		appG.Response(http.StatusUnauthorized, e.UNAUTHORIZED, nil)
+	err := c.BindJSON(&req)
+	if err != nil || req.LabId == 0 {
+		appG.RespErr(e.INVALID_PARAMS, "param error")
 		return
 	}
 
 	testcaseIds, err := models.GetLabTestcaseMapByLabId(req.LabId)
 	if len(testcaseIds) == 0 {
-		appG.Response(http.StatusOK, e.SUCCESS, nil)
+		appG.RespSucc(nil)
 		return
 	}
 	labTestCases, err := models.GetTestcaseByIds(testcaseIds)
 
-	appG.Response(http.StatusOK, e.SUCCESS, labTestCases)
+	appG.RespSucc(labTestCases)
 	return
 }

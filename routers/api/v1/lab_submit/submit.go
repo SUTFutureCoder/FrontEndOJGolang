@@ -6,7 +6,6 @@ import (
 	"FrontEndOJGolang/pkg/e"
 	"github.com/gin-gonic/gin"
 	"log"
-	"net/http"
 	"strconv"
 	"time"
 )
@@ -25,13 +24,13 @@ func Submit(c *gin.Context) {
 	labSubmit.SubmitData, _ = c.GetPostForm("submit_data")
 
 	userSession, err := app.GetUserFromSession(c)
-	if err != nil {
-		appG.Response(http.StatusUnauthorized, e.UNAUTHORIZED, nil)
+	if err != nil || userSession.Id == 0 {
+		appG.RespErr(e.NOT_LOGINED, nil)
 		return
 	}
 
 	if app.LimitUserSubmitFluency(userSession.Id) {
-		appG.Response(http.StatusTooManyRequests, e.TOO_MANY_REQUESTS, nil)
+		appG.RespErr(e.TOO_MANY_REQUESTS, nil)
 		return
 	}
 
@@ -40,10 +39,10 @@ func Submit(c *gin.Context) {
 	lastId, err := labSubmit.Insert()
 	if err != nil {
 		log.Printf("[ERROR] lab submit error[%v]\n", err)
-		appG.Response(http.StatusBadRequest, e.INVALID_PARAMS, nil)
+		appG.RespErr(e.INVALID_PARAMS, nil)
 		return
 	}
 
-	appG.Response(http.StatusOK, e.SUCCESS, lastId)
+	appG.RespSucc(lastId)
 
 }

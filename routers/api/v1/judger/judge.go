@@ -2,10 +2,8 @@ package judger
 
 import (
 	"FrontEndOJGolang/pkg/app"
-	"FrontEndOJGolang/pkg/e"
 	"FrontEndOJudger/caroline"
 	"github.com/gin-gonic/gin"
-	"net/http"
 	"strconv"
 )
 
@@ -20,6 +18,6 @@ func Judge(c *gin.Context) {
 
 	// 获取judge
 	_ = caroline.JudgeSubmit(submitId)
-	appG.Response(http.StatusOK, e.SUCCESS, nil)
+	appG.RespSucc(nil)
 
 }

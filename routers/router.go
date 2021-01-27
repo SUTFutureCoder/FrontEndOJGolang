@@ -10,6 +10,8 @@ import (
 	"FrontEndOJGolang/routers/api/v1/testfield"
 	"FrontEndOJGolang/routers/api/v1/tools"
 	"FrontEndOJGolang/routers/api/v1/user"
+	"FrontEndOJGolang/routers/api/v1/ws"
+	"encoding/gob"
 	"github.com/gin-contrib/sessions"
 	"github.com/gin-contrib/sessions/cookie"
 	"github.com/gin-gonic/gin"
@@ -17,21 +19,15 @@ import (
 
 func InitRouter() *gin.Engine {
 
-	r := gin.New()
-	r.Use(gin.Logger())
-	r.Use(gin.Recovery())
+	r := gin.Default()
+	gob.Register(app.UserSession{})
 	r.Use(sessions.Sessions(setting.SessionSetting.SessionUser, cookie.NewStore([]byte(setting.SessionSetting.Token))))
 	r.Use(app.CORSMiddleware())
 
 	// 实验区
 	labGroup := r.Group("/lab")
-	labGroup.POST("/add", lab.AddLab)
 	labGroup.POST("/list", lab.LabList)
 	labGroup.POST("/info", lab.LabInfo)
-
-	labTestcaseGroup := r.Group("/lab_testcase")
-	labTestcaseGroup.POST("/add", lab_testcase.Add)
-	labTestcaseGroup.POST("/list", lab_testcase.List)
 
 	labSubmitGroup := r.Group("/lab_submit")
 	labSubmitGroup.POST("/submit", lab_submit.Submit)
@@ -46,6 +42,7 @@ func InitRouter() *gin.Engine {
 	userGroup.POST("/reg", user.Reg)
 	userGroup.POST("/login", user.Login)
 	userGroup.POST("/logout", user.Logout)
+	userGroup.POST("/whoami", user.WhoAmI)
 
 	// 测试区
 	test := r.Group("/test")
@@ -55,6 +52,18 @@ func InitRouter() *gin.Engine {
 	tool := r.Group("/tool")
 	tool.GET("/getfile", tools.GetFile)
 	tool.POST("/uploadfile", tools.UploadFile)
+
+	// admin管理区
+	admin := r.Group("/admin")
+	adminLab := admin.Group("/lab")
+	adminLab.POST("/add", lab.AddLab)
+
+	labTestcaseGroup := admin.Group("/lab_testcase")
+	labTestcaseGroup.POST("/add", lab_testcase.Add)
+	labTestcaseGroup.POST("/list", lab_testcase.List)
+
+	// websocket
+	r.GET("/ws", ws.Ws)
 
 	return r
 }

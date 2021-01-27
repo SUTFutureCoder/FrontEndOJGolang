@@ -5,8 +5,6 @@ import (
 	"FrontEndOJGolang/pkg/app"
 	"FrontEndOJGolang/pkg/e"
 	"github.com/gin-gonic/gin"
-	"log"
-	"net/http"
 )
 
 type RespLabInfo struct {
@@ -25,16 +23,15 @@ func LabInfo(c *gin.Context) {
 	var req ReqLabInfo
 	var err error
 	err = c.BindJSON(&req)
-	log.Printf("########## req[%v]", req)
 	if err != nil {
-		appGin.Response(http.StatusInternalServerError, e.ERROR, err)
+		appGin.RespErr(e.INVALID_PARAMS, err)
 		return
 	}
 	resp.LabInfo.ID = req.Id
 	resp.LabInfo, err = models.GetLabFullInfo(resp.LabInfo.ID)
 	if err != nil {
-		appGin.Response(http.StatusInternalServerError, e.ERROR, err)
+		appGin.RespErr(e.ERROR, err)
 		return
 	}
-	appGin.Response(http.StatusOK, e.SUCCESS, resp)
+	appGin.RespSucc(resp)
 }

@@ -6,7 +6,6 @@ import (
 	"FrontEndOJGolang/pkg/e"
 	"github.com/gin-gonic/gin"
 	"log"
-	"net/http"
 )
 
 func TestRun(c *gin.Context) {
@@ -16,20 +15,20 @@ func TestRun(c *gin.Context) {
 	code, _ := c.GetPostForm("code")
 
 	if code == "" {
-		appG.Response(http.StatusOK, e.INVALID_PARAMS, "empty field code")
+		appG.RespErr(e.INVALID_PARAMS, "empty field code")
 		return
 	}
 
 	userSession, err := app.GetUserFromSession(c)
 	if err != nil {
 		log.Printf("[ERROR] get user session error[%v]\n", err)
-		appG.Response(http.StatusOK, e.INVALID_PARAMS, "get user session failed")
+		appG.RespErr(e.INVALID_PARAMS, "get user session failed")
 		return
 	}
 
 	// Only > normal user can run test code
 	if userSession.UserType <= models.USERTYPE_NORMAL {
-		appG.Response(http.StatusOK, e.UNAUTHORIZED, "user can not run test code")
+		appG.RespErr(e.UNAUTHORIZED, "user can not run test code")
 		return
 	}
 

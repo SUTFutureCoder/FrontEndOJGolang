@@ -48,7 +48,7 @@ func (lab *Lab) Insert() (int64, error) {
 		lab.Creator,
 		lab.CreateTime,
 	)
-	if err != nil || ret == nil{
+	if err != nil || ret == nil {
 		return 0, err
 	}
 	return ret.LastInsertId()

@@ -6,7 +6,6 @@ import (
 	"FrontEndOJGolang/pkg/e"
 	"github.com/gin-gonic/gin"
 	"log"
-	"net/http"
 )
 
 func SubmitList(c *gin.Context) {
@@ -17,7 +16,7 @@ func SubmitList(c *gin.Context) {
 	// get user info from session
 	userSession, err := app.GetUserFromSession(c)
 	if err != nil || userSession.Id == 0 {
-		appG.Response(http.StatusUnauthorized, e.UNAUTHORIZED, "please login")
+		appG.RespErr(e.NOT_LOGINED, "please login")
 		return
 	}
 
@@ -25,10 +24,14 @@ func SubmitList(c *gin.Context) {
 	labSubmits, err := models.GetUserLabSubmits(userSession.Id, pager)
 	if err != nil {
 		log.Printf("[ERROR] get user lab submits err[%v] userId[%d]", err, userSession.Id)
-		appG.Response(http.StatusInternalServerError, e.ERROR, nil)
+		appG.RespErr(e.ERROR, nil)
 		return
 	}
-	appG.Response(http.StatusOK, e.SUCCESS, labSubmits)
+	appG.RespSucc(labSubmits)
+}
+
+type SubmitlistByLabIdReq struct {
+	LabId uint64 `json:"lab_id"`
 }
 
 func SubmitListByLabId(c *gin.Context) {
@@ -39,21 +42,22 @@ func SubmitListByLabId(c *gin.Context) {
 	// get user info from session
 	userSession, err := app.GetUserFromSession(c)
 	if err != nil || userSession.Id == 0 {
-		appG.Response(http.StatusUnauthorized, e.UNAUTHORIZED, "please login")
+		appG.RespErr(e.NOT_LOGINED, "please login")
 		return
 	}
 
-	labId, _ := c.GetPostForm("lab_id")
-	if labId == "" {
-		appG.Response(http.StatusBadRequest, e.INVALID_PARAMS, nil)
+	var req SubmitlistByLabIdReq
+	err = c.BindJSON(&req)
+	if err != nil || req.LabId == 0 {
+		appG.RespErr(e.INVALID_PARAMS, "invalid params")
 		return
 	}
 
-	labSubmits, err := models.GetUserLabSubmitsByLabId(userSession.Id, labId)
+	labSubmits, err := models.GetUserLabSubmitsByLabId(userSession.Id, req.LabId)
 	if err != nil {
-		log.Printf("[ERROR] get user lab submits by lab ids err[%v] userId[%d] labId[%s]", err, userSession.Id, labId)
-		appG.Response(http.StatusInternalServerError, e.ERROR, nil)
+		log.Printf("[ERROR] get user lab submits by lab ids err[%v] userId[%d] labId[%s]", err, userSession.Id, req.LabId)
+		appG.RespErr(e.ERROR, nil)
 		return
 	}
-	appG.Response(http.StatusOK, e.SUCCESS, labSubmits)
+	appG.RespSucc(labSubmits)
 }

@@ -15,12 +15,6 @@ type App struct {
 
 var AppSetting = &App{}
 
-type Judger struct {
-	TestChamberBaseDir string
-}
-
-var JudgerSetting = &Judger{}
-
 type Server struct {
 	RunMode      string
 	HttpPort     int
@@ -68,7 +62,6 @@ func Setup() {
 	mapTo("app", AppSetting)
 	mapTo("server", ServerSetting)
 	mapTo("database", DatabaseSetting)
-	mapTo("judger", JudgerSetting)
 	mapTo("session", SessionSetting)
 	mapTo("tool", ToolSetting)
 

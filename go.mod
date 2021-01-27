@@ -10,7 +10,8 @@ require (
 	github.com/gin-gonic/gin v1.6.3
 	github.com/go-ini/ini v1.57.0
 	github.com/go-sql-driver/mysql v1.5.0
-	github.com/gorilla/sessions v1.2.0
+	github.com/gorilla/sessions v1.2.0 // indirect
+	github.com/gorilla/websocket v1.4.2
 	github.com/kr/pretty v0.1.0 // indirect
 	golang.org/x/crypto v0.0.0-20201217014255-9d1352758620
 	golang.org/x/sys v0.0.0-20201218084310-7d0127a74742 // indirect

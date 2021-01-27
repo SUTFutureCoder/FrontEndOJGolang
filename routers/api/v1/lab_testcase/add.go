@@ -6,7 +6,6 @@ import (
 	"FrontEndOJGolang/pkg/e"
 	"github.com/gin-gonic/gin"
 	"log"
-	"net/http"
 	"strconv"
 	"time"
 )
@@ -18,7 +17,7 @@ func Add(c *gin.Context) {
 
 	userSession, err := app.GetUserFromSession(c)
 	if err != nil {
-		appG.Response(http.StatusUnauthorized, e.UNAUTHORIZED, nil)
+		appG.RespErr(e.NOT_LOGINED, nil)
 		return
 	}
 
@@ -36,7 +35,7 @@ func Add(c *gin.Context) {
 		return
 	}
 
-	appG.Response(http.StatusOK, e.SUCCESS, nil)
+	appG.RespSucc(nil)
 }
 
 func prepare(labTestCase *models.LabTestcase, labTestCaseMap models.LabTestcaseMap, c *gin.Context, session app.UserSession) {

@@ -111,7 +111,7 @@ func GetUserLabSubmits(creatorId uint64, pager Pager) ([]LabSubmit, error) {
 	return labSubmits, err
 }
 
-func GetUserLabSubmitsByLabId(creatorId uint64, labId string) ([]LabSubmit, error) {
+func GetUserLabSubmitsByLabId(creatorId uint64, labId uint64) ([]LabSubmit, error) {
 	var err error
 	stmt, err := DB.Prepare("SELECT id, lab_id, submit_result, submit_time_usage, status, creator_id, creator, create_time, update_time FROM lab_submit WHERE creator_id = ? AND lab_id = ? ORDER BY id desc")
 	defer stmt.Close()

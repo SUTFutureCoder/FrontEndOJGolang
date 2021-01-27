@@ -3,6 +3,8 @@ package main
 import (
 	"FrontEndOJGolang/models"
 	"FrontEndOJGolang/pkg/setting"
+	"FrontEndOJGolang/pkg/strategy"
+	"FrontEndOJGolang/pkg/websocket"
 	"FrontEndOJGolang/routers"
 	"fmt"
 	"github.com/gin-gonic/gin"
@@ -13,6 +15,8 @@ import (
 func init() {
 	setting.Setup()
 	models.Setup()
+	go websocket.NewWsHub().Setup()
+	strategy.Setup()
 }
 
 func main() {

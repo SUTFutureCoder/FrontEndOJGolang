@@ -4,7 +4,6 @@ import (
 	"FrontEndOJGolang/pkg/app"
 	"FrontEndOJGolang/pkg/e"
 	"github.com/gin-gonic/gin"
-	"net/http"
 )
 
 func Logout(c *gin.Context) {
@@ -13,7 +12,7 @@ func Logout(c *gin.Context) {
 	}
 	err := app.ExpireSession(c)
 	if err != nil {
-		appG.Response(http.StatusInternalServerError, e.ERROR, nil)
+		appG.RespErr(e.ERROR, nil)
 	}
-	appG.Response(http.StatusOK, e.SUCCESS, nil)
+	appG.RespSucc(nil)
 }

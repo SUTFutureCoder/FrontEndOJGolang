@@ -4,13 +4,12 @@ import (
 	"FrontEndOJGolang/pkg/app"
 	"FrontEndOJGolang/pkg/e"
 	"FrontEndOJGolang/pkg/setting"
+	"crypto/sha1"
 	"encoding/hex"
 	"github.com/gin-gonic/gin"
 	"log"
-	"net/http"
 	"os"
 	"path"
-	"crypto/sha1"
 	"strconv"
 	"strings"
 )
@@ -24,14 +23,14 @@ func UploadFile(c *gin.Context) {
 	userSession, err := app.GetUserFromSession(c)
 	if err != nil {
 		log.Printf("[ERROR] get user session error[%v]\n", err)
-		appG.Response(http.StatusBadRequest, e.INVALID_PARAMS, nil)
+		appG.RespErr(e.INVALID_PARAMS, nil)
 		return
 	}
 
 	fileReader, err := c.FormFile("file")
 	if err != nil {
 		log.Printf("[ERROR] upload file error:[%v]", err)
-		appG.Response(http.StatusOK, e.INVALID_PARAMS, "upload file error")
+		appG.RespErr(e.INVALID_PARAMS, "upload file error")
 		return
 	}
 
@@ -40,17 +39,17 @@ func UploadFile(c *gin.Context) {
 	h.Write([]byte(fileReader.Filename))
 	fileName := hex.EncodeToString(h.Sum(nil)) + path.Ext(fileReader.Filename)
 
-	filePath := setting.ToolSetting.FileBaseDir+"/"+strconv.FormatUint(userSession.Id, 10)
+	filePath := setting.ToolSetting.FileBaseDir + "/" + strconv.FormatUint(userSession.Id, 10)
 	os.MkdirAll(filePath, os.ModePerm)
-	filePath += "/"+fileName
+	filePath += "/" + fileName
 
 	err = c.SaveUploadedFile(fileReader, filePath)
 	if err != nil {
 		log.Printf("[ERROR] save upload file error:[%v]", err)
-		appG.Response(http.StatusOK, e.INVALID_PARAMS, "save upload file error")
+		appG.RespErr(e.INVALID_PARAMS, "save upload file error")
 		return
 	}
-	appG.Response(http.StatusOK, e.SUCCESS, fileName)
+	appG.RespSucc(fileName)
 }
 
 func GetFile(c *gin.Context) {
@@ -61,17 +60,16 @@ func GetFile(c *gin.Context) {
 	userSession, err := app.GetUserFromSession(c)
 	if err != nil {
 		log.Printf("[ERROR] get user session error[%v]\n", err)
-		appG.Response(http.StatusBadRequest, e.INVALID_PARAMS, nil)
+		appG.RespErr(e.INVALID_PARAMS, nil)
 		return
 	}
-
 
 	file := c.Query("file")
 	if file == "" || strings.Contains(file, "..") || strings.Contains(file, "/") {
-		appG.Response(http.StatusOK, e.INVALID_PARAMS, "invalid file url")
+		appG.RespErr(e.INVALID_PARAMS, "invalid file url")
 		return
 	}
 
-	filePath := setting.ToolSetting.FileBaseDir+"/"+strconv.FormatUint(userSession.Id, 10)+"/"+file
+	filePath := setting.ToolSetting.FileBaseDir + "/" + strconv.FormatUint(userSession.Id, 10) + "/" + file
 	c.File(filePath)
 }

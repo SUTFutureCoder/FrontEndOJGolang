@@ -6,10 +6,16 @@ import (
 	"FrontEndOJGolang/pkg/e"
 	"github.com/gin-gonic/gin"
 	"log"
-	"net/http"
-	"strconv"
 	"time"
 )
+
+type AddLabReq struct {
+	LabName     string `json:"lab_name"`
+	LabDesc     string `json:"lab_desc"`
+	LabSample   string `json:"lab_sample"`
+	LabTemplate string `json:"lab_template"`
+	LabType     int8   `json:"lab_type"`
+}
 
 func AddLab(c *gin.Context) {
 	appG := app.Gin{
@@ -19,32 +25,38 @@ func AddLab(c *gin.Context) {
 	userSession, err := app.GetUserFromSession(c)
 	if err != nil {
 		log.Printf("[ERROR] get user session error[%v]\n", err)
-		appG.Response(http.StatusBadRequest, e.INVALID_PARAMS, nil)
+		appG.RespErr(e.INVALID_PARAMS, nil)
 		return
 	}
 
-	lab := models.Lab{}
+	addLabReq := AddLabReq{}
+	err = c.BindJSON(&addLabReq)
+	if err != nil {
+		appG.RespErr(e.INVALID_PARAMS, err.Error())
+		return
+	}
 
-	prepare(&lab, c, userSession)
+	lab := prepare(&addLabReq, &userSession)
 
 	labId, err := lab.Insert()
 	if err != nil {
 		log.Printf("[ERROR] database exec error input[%v] err[%v]", lab, err)
-		appG.Response(http.StatusInternalServerError, e.ERROR, nil)
+		appG.RespErr(e.ERROR, nil)
 		return
 	}
 
-	appG.Response(http.StatusOK, e.SUCCESS, labId)
+	appG.RespSucc(labId)
 }
 
-func prepare(lab *models.Lab, c *gin.Context, userSession app.UserSession) {
-	lab.LabName, _ = c.GetPostForm("lab_name")
-	lab.LabDesc, _ = c.GetPostForm("lab_desc")
-	lab.LabSample, _ = c.GetPostForm("lab_sample")
-	lab.LabTemplate, _ = c.GetPostForm("lab_template")
-	labTypeStr, _ := c.GetPostForm("lab_type")
-	labType, _ := strconv.ParseInt(labTypeStr, 10, 8)
-	lab.LabType = int8(labType)
+func prepare(addLabReq *AddLabReq, userSession *app.UserSession) *models.Lab {
+	lab := &models.Lab{
+		LabName:     addLabReq.LabName,
+		LabDesc:     addLabReq.LabDesc,
+		LabSample:   addLabReq.LabSample,
+		LabTemplate: addLabReq.LabTemplate,
+		LabType:     addLabReq.LabType,
+	}
 	lab.CreatorId, lab.Creator = userSession.Id, userSession.Name
 	lab.CreateTime = time.Now().UnixNano() / 1e6
+	return lab
 }

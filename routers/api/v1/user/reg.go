@@ -7,7 +7,6 @@ import (
 	"github.com/gin-gonic/gin"
 	"golang.org/x/crypto/bcrypt"
 	"log"
-	"net/http"
 )
 
 func Reg(c *gin.Context) {
@@ -18,7 +17,7 @@ func Reg(c *gin.Context) {
 	// check if login
 	userSession, err := app.GetUserFromSession(c)
 	if userSession.Id != 0 {
-		appG.Response(http.StatusForbidden, e.INVALID_PARAMS, "You have been login")
+		appG.RespErr(e.INVALID_PARAMS, "You have been login")
 		return
 	}
 
@@ -28,17 +27,17 @@ func Reg(c *gin.Context) {
 	// check if user have exist
 	exist, err := user.CheckExist()
 	if err != nil || exist {
-		appG.Response(http.StatusBadRequest, e.INVALID_PARAMS, "username exist")
+		appG.RespErr(e.INVALID_PARAMS, "username exist")
 		return
 	}
 
 	err = user.Insert()
 	if err != nil {
 		log.Printf("[ERROR] insert to user table user[%v] error [%v]", user, err)
-		appG.Response(http.StatusBadRequest, e.INVALID_PARAMS, nil)
+		appG.RespErr(e.INVALID_PARAMS, nil)
 		return
 	}
-	appG.Response(http.StatusOK, e.SUCCESS, nil)
+	appG.RespSucc(nil)
 }
 
 func prepare(user *models.User, c *gin.Context) {

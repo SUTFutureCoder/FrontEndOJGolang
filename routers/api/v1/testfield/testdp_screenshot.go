@@ -2,7 +2,6 @@ package testfield
 
 import (
 	"FrontEndOJGolang/pkg/app"
-	"FrontEndOJGolang/pkg/e"
 	"context"
 	"github.com/chromedp/cdproto/emulation"
 	"github.com/chromedp/cdproto/page"
@@ -11,7 +10,6 @@ import (
 	"io/ioutil"
 	"log"
 	"math"
-	"net/http"
 	"strconv"
 )
 
@@ -47,7 +45,7 @@ func ScreenShot(c *gin.Context) {
 		log.Fatal(err)
 	}
 
-	appG.Response(http.StatusOK, e.SUCCESS, executed)
+	appG.RespSucc(executed)
 
 }
 
