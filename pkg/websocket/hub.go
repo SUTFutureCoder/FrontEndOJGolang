@@ -115,3 +115,20 @@ func (h *WsHub) removeClientFromWsClient(wsClient *WsClient, targetConn *WsClien
 		}
 	}
 }
+
+
+/**
+ * SEND SAMPLE
+	// send to one client of one User
+	c.Send <- []byte("yooooo")
+
+	// send to all connections of one User
+	clientMsg := &ws.ClientMsg{
+		ClientId: USERID,
+		Msg:      []byte("client"),
+	}
+	ws.Wshub.ClientMsg <- clientMsg
+
+	// brocast to all Users
+	ws.Wshub.Broadcast <- []byte("broadcast")
+ */

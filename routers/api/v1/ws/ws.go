@@ -84,17 +84,6 @@ func readData(c *ws.WsClientConn) {
 		// exec
 		strategy.ExecStrategy(wsJsonReq.Cmd)
 
-		c.Send <- []byte("yooooo")
-
-		// all USE Wshub
-		clientMsg := &ws.ClientMsg{
-			ClientId: 0,
-			Msg:      []byte("client"),
-		}
-		ws.Wshub.ClientMsg <- clientMsg
-
-		// brocast
-		ws.Wshub.Broadcast <- []byte("broadcast")
 		log.Println(*c)
 		log.Println(*wsJsonReq)
 	}
