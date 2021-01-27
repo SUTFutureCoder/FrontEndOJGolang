@@ -33,9 +33,9 @@ func Ws(c *gin.Context) {
 	}
 
 	// init single conn
-	client := &ws.WsClientConn {
+	client := &ws.WsClientConn{
 		User: user,
-		Hub: ws.Wshub,
+		Hub:  ws.Wshub,
 		Conn: conn,
 		Send: make(chan []byte, 10240),
 	}
@@ -58,7 +58,7 @@ func Ws(c *gin.Context) {
 }
 
 type WsJsonReq struct {
-	Cmd string `json:"cmd"`
+	Cmd  string `json:"cmd"`
 	Data string `json:"data"`
 }
 
@@ -84,13 +84,12 @@ func readData(c *ws.WsClientConn) {
 		// exec
 		strategy.ExecStrategy(wsJsonReq.Cmd)
 
-
 		c.Send <- []byte("yooooo")
 
 		// all USE Wshub
 		clientMsg := &ws.ClientMsg{
 			ClientId: 0,
-			Msg: []byte("client"),
+			Msg:      []byte("client"),
 		}
 		ws.Wshub.ClientMsg <- clientMsg
 
@@ -105,7 +104,7 @@ func writeData(c *ws.WsClientConn) {
 	defer c.Conn.Close()
 	for {
 		select {
-		case message, ok := <- c.Send:
+		case message, ok := <-c.Send:
 			if !ok {
 				c.Conn.WriteMessage(websocket.CloseMessage, []byte{})
 				return
@@ -123,4 +122,3 @@ func writeData(c *ws.WsClientConn) {
 		}
 	}
 }
-

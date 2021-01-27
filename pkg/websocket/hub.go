@@ -22,15 +22,15 @@ type WsClient struct {
 // 消息总线
 type WsHub struct {
 	// 用户集合总线
-	clients    map[uint64]*WsClient
+	clients map[uint64]*WsClient
 
 	// 单用户消息通道
-	ClientMsg  chan *ClientMsg
+	ClientMsg chan *ClientMsg
 	// 广播消息通道
-	Broadcast  chan []byte
+	Broadcast chan []byte
 
 	// 注册
-	Register   chan *WsClientConn
+	Register chan *WsClientConn
 	// 注销
 	Unregister chan *WsClientConn
 }
@@ -61,7 +61,7 @@ func (h *WsHub) Setup() {
 			if _, ok := h.clients[clientConn.User.Id]; !ok {
 				// init clients
 				wsClient := &WsClient{
-					User: clientConn.User,
+					User:  clientConn.User,
 					Conns: make([]*WsClientConn, 0),
 				}
 				h.clients[clientConn.User.Id] = wsClient

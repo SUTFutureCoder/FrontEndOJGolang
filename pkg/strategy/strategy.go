@@ -26,4 +26,3 @@ func ExecStrategy(s string) {
 	}
 	strategy[s]()
 }
-
