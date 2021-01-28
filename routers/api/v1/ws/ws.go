@@ -43,18 +43,6 @@ func Ws(c *gin.Context) {
 
 	go writeData(client)
 	go readData(client)
-	//for {
-	//	// read from ws
-	//	mt, message, err := ws.ReadMessage()
-	//	if err != nil {
-	//		log.Println(err.Error())
-	//		break
-	//	}
-	//	log.Println(mt)
-	//	log.Println(message)
-	//	log.Println(userSession)
-	//	ws.WriteMessage(mt, []byte("TEST"))
-	//}
 }
 
 type WsJsonReq struct {
@@ -75,6 +63,9 @@ func readData(c *ws.WsClientConn) {
 				log.Printf("ws error:%v", err)
 				break
 			}
+			if websocket.IsCloseError(err, websocket.CloseGoingAway) {
+				break
+			}
 			if wsJsonReq.Cmd == "" {
 				log.Printf("parse json error:%v", err)
 				continue
@@ -83,9 +74,6 @@ func readData(c *ws.WsClientConn) {
 
 		// exec
 		strategy.ExecStrategy(wsJsonReq.Cmd)
-
-		log.Println(*c)
-		log.Println(*wsJsonReq)
 	}
 }
 
@@ -93,7 +81,7 @@ func writeData(c *ws.WsClientConn) {
 	defer c.Conn.Close()
 	for {
 		select {
-		case message, ok := <-c.Send:
+		case message, ok := <- c.Send:
 			if !ok {
 				c.Conn.WriteMessage(websocket.CloseMessage, []byte{})
 				return
