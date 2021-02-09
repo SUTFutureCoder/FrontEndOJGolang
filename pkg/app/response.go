@@ -31,4 +31,5 @@ func (g *Gin) RespSucc(data interface{}) {
 
 func (g *Gin) RespErr(errCode int, data interface{}) {
 	g.resp(errCode, data)
+	g.C.Abort()
 }

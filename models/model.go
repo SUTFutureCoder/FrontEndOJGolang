@@ -7,7 +7,12 @@ import (
 	"github.com/gin-gonic/gin"
 	_ "github.com/go-sql-driver/mysql"
 	"log"
-	"strconv"
+)
+
+const (
+	STATUS_ALL = -1
+	STATUS_DISABLE = 0
+	STATUS_ENABLE = 1
 )
 
 type Model struct {
@@ -27,9 +32,9 @@ type Model struct {
 
 type Pager struct {
 	// 页数
-	Page int
+	Page int `json:"page"`
 	// 页面大小
-	PageSize int
+	PageSize int `json:"page_size"`
 }
 
 var DB *sql.DB
@@ -56,9 +61,22 @@ func Setup() {
 
 func ToPager(c *gin.Context) Pager {
 	var pager Pager
-	page := c.DefaultPostForm("page", "1")
-	pageSize := c.DefaultPostForm("page_size", "20")
-	pager.Page, _ = strconv.Atoi(page)
-	pager.PageSize, _ = strconv.Atoi(pageSize)
+	err := c.BindJSON(&pager)
+	if err != nil || pager.Page == 0 || pager.PageSize == 0 {
+		pager = Pager{
+			Page:     1,
+			PageSize: 20,
+		}
+	}
 	return pager
+}
+
+func DefaultPage(page, pageSize *int) {
+	// 处理默认
+	if *page <= 0 {
+		*page = 1
+	}
+	if *pageSize <= 0 {
+		*pageSize = 20
+	}
 }

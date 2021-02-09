@@ -14,11 +14,8 @@ func SubmitList(c *gin.Context) {
 	}
 
 	// get user info from session
-	userSession, err := app.GetUserFromSession(c)
-	if err != nil || userSession.Id == 0 {
-		appG.RespErr(e.NOT_LOGINED, "please login")
-		return
-	}
+	userSession := app.GetUserFromSession(appG)
+	if userSession.Id == 0 {return}
 
 	pager := models.ToPager(c)
 	labSubmits, err := models.GetUserLabSubmits(userSession.Id, pager)
@@ -40,14 +37,11 @@ func SubmitListByLabId(c *gin.Context) {
 	}
 
 	// get user info from session
-	userSession, err := app.GetUserFromSession(c)
-	if err != nil || userSession.Id == 0 {
-		appG.RespErr(e.NOT_LOGINED, "please login")
-		return
-	}
+	userSession := app.GetUserFromSession(appG)
+	if userSession.Id == 0 {return}
 
 	var req SubmitlistByLabIdReq
-	err = c.BindJSON(&req)
+	err := c.BindJSON(&req)
 	if err != nil || req.LabId == 0 {
 		appG.RespErr(e.INVALID_PARAMS, "invalid params")
 		return

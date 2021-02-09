@@ -14,6 +14,7 @@ import (
 
 func init() {
 	setting.Setup()
+	setting.Check()
 	models.Setup()
 	go websocket.NewWsHub().Setup()
 	strategy.Setup()

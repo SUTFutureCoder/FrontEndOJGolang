@@ -2,6 +2,8 @@ package models
 
 import (
 	"database/sql"
+	"log"
+	"strings"
 )
 
 // LabTestcaseMap 实验室、测试用例关联表
@@ -39,4 +41,23 @@ func (labTestCaseMap *LabTestcaseMap) Insert(tx *sql.Tx) (sql.Result, error) {
 	)
 	return result, err
 
+}
+
+func GetLabTestcaseCntByLabIds(labIds []interface{}) map[uint64]int {
+	testcaseCntMap := make(map[uint64]int)
+	rows, err := DB.Query("SELECT lab_id, count(*) as cnt FROM lab_testcase_map WHERE lab_id IN (?"+strings.Repeat(",?", len(labIds)-1)+")" + " GROUP BY lab_id", labIds...)
+	if err != nil {
+		log.Printf("get lab testcase cnt from db error [%#v]", err)
+		return nil
+	}
+	defer rows.Close()
+	for rows.Next() {
+		var (
+			id uint64
+			count int
+		)
+		err = rows.Scan(&id, &count)
+		testcaseCntMap[id] = count
+	}
+	return testcaseCntMap
 }

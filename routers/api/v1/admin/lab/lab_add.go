@@ -4,9 +4,9 @@ import (
 	"FrontEndOJGolang/models"
 	"FrontEndOJGolang/pkg/app"
 	"FrontEndOJGolang/pkg/e"
+	"FrontEndOJGolang/pkg/utils"
 	"github.com/gin-gonic/gin"
 	"log"
-	"time"
 )
 
 type AddLabReq struct {
@@ -22,21 +22,17 @@ func AddLab(c *gin.Context) {
 		C: c,
 	}
 
-	userSession, err := app.GetUserFromSession(c)
-	if err != nil {
-		log.Printf("[ERROR] get user session error[%v]\n", err)
-		appG.RespErr(e.INVALID_PARAMS, nil)
-		return
-	}
+	userSession := app.GetUserFromSession(appG)
+	if userSession.Id == 0 {return}
 
 	addLabReq := AddLabReq{}
-	err = c.BindJSON(&addLabReq)
+	err := c.BindJSON(&addLabReq)
 	if err != nil {
 		appG.RespErr(e.INVALID_PARAMS, err.Error())
 		return
 	}
 
-	lab := prepare(&addLabReq, &userSession)
+	lab := prepareAdd(&addLabReq, &userSession)
 
 	labId, err := lab.Insert()
 	if err != nil {
@@ -48,7 +44,7 @@ func AddLab(c *gin.Context) {
 	appG.RespSucc(labId)
 }
 
-func prepare(addLabReq *AddLabReq, userSession *app.UserSession) *models.Lab {
+func prepareAdd(addLabReq *AddLabReq, userSession *app.UserSession) *models.Lab {
 	lab := &models.Lab{
 		LabName:     addLabReq.LabName,
 		LabDesc:     addLabReq.LabDesc,
@@ -57,6 +53,6 @@ func prepare(addLabReq *AddLabReq, userSession *app.UserSession) *models.Lab {
 		LabType:     addLabReq.LabType,
 	}
 	lab.CreatorId, lab.Creator = userSession.Id, userSession.Name
-	lab.CreateTime = time.Now().UnixNano() / 1e6
+	lab.CreateTime = utils.GetMillTime()
 	return lab
 }

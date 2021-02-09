@@ -8,7 +8,7 @@ import (
 var strategy map[string]func(v ...interface{})
 
 func Setup() {
-	strategy = make(map[string]func(v ...interface{}))
+	strategy = make(map[string]func(v ...interface{}), 64)
 	strategy[consts.HelloWorld] = func(v ...interface{}) {
 		log.Println(v)
 		log.Println(consts.HelloWorld)

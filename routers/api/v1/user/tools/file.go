@@ -20,12 +20,8 @@ func UploadFile(c *gin.Context) {
 		C: c,
 	}
 
-	userSession, err := app.GetUserFromSession(c)
-	if err != nil {
-		log.Printf("[ERROR] get user session error[%v]\n", err)
-		appG.RespErr(e.INVALID_PARAMS, nil)
-		return
-	}
+	userSession := app.GetUserFromSession(appG)
+	if userSession.Id == 0 {return}
 
 	fileReader, err := c.FormFile("file")
 	if err != nil {
@@ -57,12 +53,8 @@ func GetFile(c *gin.Context) {
 		C: c,
 	}
 
-	userSession, err := app.GetUserFromSession(c)
-	if err != nil {
-		log.Printf("[ERROR] get user session error[%v]\n", err)
-		appG.RespErr(e.INVALID_PARAMS, nil)
-		return
-	}
+	userSession := app.GetUserFromSession(appG)
+	if userSession.Id == 0 {return}
 
 	file := c.Query("file")
 	if file == "" || strings.Contains(file, "..") || strings.Contains(file, "/") {

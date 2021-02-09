@@ -20,11 +20,8 @@ func Ws(c *gin.Context) {
 		C: c,
 	}
 
-	user, err := app.GetUserFromSession(c)
-	if err != nil {
-		appG.RespErr(e.NOT_LOGINED, "plese login first")
-		return
-	}
+	user := app.GetUserFromSession(appG)
+	if user.Id == 0 {return}
 
 	conn, err := upGrader.Upgrade(c.Writer, c.Request, nil)
 	if err != nil {
@@ -63,7 +60,7 @@ func readData(c *ws.WsClientConn) {
 				log.Printf("ws error:%v", err)
 				break
 			}
-			if websocket.IsCloseError(err, websocket.CloseGoingAway) {
+			if websocket.IsCloseError(err, websocket.CloseGoingAway, websocket.CloseAbnormalClosure) {
 				break
 			}
 			if wsJsonReq.Cmd == "" {

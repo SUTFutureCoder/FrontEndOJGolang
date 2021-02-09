@@ -14,13 +14,6 @@ func Reg(c *gin.Context) {
 		C: c,
 	}
 
-	// check if login
-	userSession, err := app.GetUserFromSession(c)
-	if userSession.Id != 0 {
-		appG.RespErr(e.INVALID_PARAMS, "You have been login")
-		return
-	}
-
 	user := models.User{}
 	prepare(&user, c)
 

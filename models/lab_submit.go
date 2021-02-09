@@ -3,6 +3,7 @@ package models
 import (
 	"database/sql"
 	"log"
+	"strings"
 )
 
 // LabSubmit 提交表
@@ -139,7 +140,6 @@ func GetUserLabSubmitsByLabId(creatorId uint64, labId uint64) ([]LabSubmit, erro
 }
 
 func GetUserLastSubmit(userId uint64) (LabSubmit, error) {
-	var err error
 	stmt, err := DB.Prepare("SELECT id, lab_id, submit_result, submit_time_usage, status, creator_id, creator, create_time, update_time FROM lab_submit WHERE creator_id = ? ORDER BY id desc LIMIT 1")
 	defer stmt.Close()
 	row := stmt.QueryRow(
@@ -159,4 +159,48 @@ func GetUserLastSubmit(userId uint64) (LabSubmit, error) {
 	)
 	return labSubmitRow, err
 
+}
+
+type SubmitSummary struct {
+	LabId uint64
+	CountSum int
+	CountAc int
+	CountFail int
+	CountJuding int
+}
+
+func GetLabSubmitSummary(labIds []interface{}) map[uint64]*SubmitSummary {
+	submitSummaryMap := make(map[uint64]*SubmitSummary)
+	rows, err := DB.Query("SELECT lab_id, count(*) as cnt, status FROM lab_submit WHERE lab_id IN (?"+strings.Repeat(",?", len(labIds)-1)+")" + " GROUP BY lab_id, status", labIds...)
+	if err != nil {
+		log.Printf("get lab submit summary from db error [%#v]", err)
+		return submitSummaryMap
+	}
+	defer rows.Close()
+	for rows.Next() {
+		var (
+			id uint64
+			count int
+			status int8
+		)
+		err = rows.Scan(&id, &count, &status)
+		// analysis
+		if _, ok := submitSummaryMap[id]; !ok {
+			submitSummaryMap[id] = &SubmitSummary{}
+		}
+		submitSummaryMap[id].LabId = id
+		submitSummaryMap[id].CountSum++
+		switch status {
+		case LABSUBMITSTATUS_ACCEPTED:
+			submitSummaryMap[id].CountAc += count
+		case LABSUBMITSTATUS_JUDING:
+			fallthrough
+		case LABSUBMITSTATUS_COMPILING:
+			submitSummaryMap[id].CountJuding += count
+		default:
+			submitSummaryMap[id].CountFail += count
+		}
+	}
+
+	return submitSummaryMap
 }

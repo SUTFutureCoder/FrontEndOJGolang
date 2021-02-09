@@ -3,11 +3,10 @@ package lab_testcase
 import (
 	"FrontEndOJGolang/models"
 	"FrontEndOJGolang/pkg/app"
-	"FrontEndOJGolang/pkg/e"
+	"FrontEndOJGolang/pkg/utils"
 	"github.com/gin-gonic/gin"
 	"log"
 	"strconv"
-	"time"
 )
 
 func Add(c *gin.Context) {
@@ -15,16 +14,13 @@ func Add(c *gin.Context) {
 		C: c,
 	}
 
-	userSession, err := app.GetUserFromSession(c)
-	if err != nil {
-		appG.RespErr(e.NOT_LOGINED, nil)
-		return
-	}
+	userSession := app.GetUserFromSession(appG)
+	if userSession.Id == 0 {return}
 
 	labTestCase := models.LabTestcase{}
 	labTestCaseMap := models.LabTestcaseMap{}
 
-	prepare(&labTestCase, labTestCaseMap, c, userSession)
+	prepare(&labTestCase, &labTestCaseMap, c, userSession)
 
 	tx, err := models.DB.Begin()
 	labTestCaseMap.TestcaseID, err = labTestCase.Insert(tx)
@@ -38,7 +34,7 @@ func Add(c *gin.Context) {
 	appG.RespSucc(nil)
 }
 
-func prepare(labTestCase *models.LabTestcase, labTestCaseMap models.LabTestcaseMap, c *gin.Context, session app.UserSession) {
+func prepare(labTestCase *models.LabTestcase, labTestCaseMap *models.LabTestcaseMap, c *gin.Context, session app.UserSession) {
 	labIdStr, _ := c.GetPostForm("lab_id")
 	labTestCaseMap.LabID, _ = strconv.ParseInt(labIdStr, 10, 64)
 	labTestCase.TestcaseDesc, _ = c.GetPostForm("testcase_desc")
@@ -53,5 +49,5 @@ func prepare(labTestCase *models.LabTestcase, labTestCaseMap models.LabTestcaseM
 	labTestCase.WaitBefore, _ = strconv.Atoi(waitBeforeStr)
 	labTestCase.CreatorId, labTestCaseMap.CreatorId = session.Id, session.Id
 	labTestCase.Creator, labTestCaseMap.Creator = session.Name, session.Name
-	labTestCase.CreateTime = time.Now().UnixNano() / 1e6
+	labTestCase.CreateTime = utils.GetMillTime()
 }

@@ -3,6 +3,7 @@ package websocket
 import (
 	"FrontEndOJGolang/pkg/app"
 	"github.com/gorilla/websocket"
+	"sync"
 )
 
 // 用户下单个连接
@@ -22,7 +23,8 @@ type WsClient struct {
 // 消息总线
 type WsHub struct {
 	// 用户集合总线
-	clients map[uint64]*WsClient
+	//clients map[uint64]*WsClient
+	clients sync.Map
 
 	// 单用户消息通道
 	ClientMsg chan *ClientMsg
@@ -43,13 +45,16 @@ type ClientMsg struct {
 
 var Wshub *WsHub
 
+// todo solve concurrent issue
+var locker sync.RWMutex
+
 func NewWsHub() *WsHub {
 	Wshub = &WsHub{
-		clients:    make(map[uint64]*WsClient),
-		ClientMsg:  make(chan *ClientMsg),
-		Broadcast:  make(chan []byte),
-		Register:   make(chan *WsClientConn),
-		Unregister: make(chan *WsClientConn),
+		clients:    sync.Map{},
+		ClientMsg:  make(chan *ClientMsg, 128),
+		Broadcast:  make(chan []byte, 128),
+		Register:   make(chan *WsClientConn, 128),
+		Unregister: make(chan *WsClientConn, 128),
 	}
 	return Wshub
 }
@@ -58,25 +63,22 @@ func (h *WsHub) Setup() {
 	for {
 		select {
 		case clientConn := <-h.Register:
-			if _, ok := h.clients[clientConn.User.Id]; !ok {
-				// init clients
-				wsClient := &WsClient{
-					User:  clientConn.User,
-					Conns: make([]*WsClientConn, 0),
-				}
-				h.clients[clientConn.User.Id] = wsClient
-			}
-			wsClient := h.clients[clientConn.User.Id]
+			wsClientValue, _ := h.clients.LoadOrStore(clientConn.User.Id, &WsClient{
+				User:  clientConn.User,
+				Conns: make([]*WsClientConn, 0),
+			})
+			wsClient := wsClientValue.(*WsClient)
 			wsClient.Conns = append(wsClient.Conns, clientConn)
 		case clientConn := <-h.Unregister:
-			if _, ok := h.clients[clientConn.User.Id]; ok {
+			if wsClientValue, ok := h.clients.Load(clientConn.User.Id); ok {
 				// find conn
-				wsClient := h.clients[clientConn.User.Id]
+				wsClient := wsClientValue.(*WsClient)
 				h.removeClientFromWsClient(wsClient, clientConn)
 			}
 		case message := <-h.Broadcast:
 			// 广播
-			for _, clients := range h.clients {
+			h.clients.Range(func(key, value interface{}) bool {
+				clients := value.(*WsClient)
 				for _, client := range clients.Conns {
 					select {
 					case client.Send <- message:
@@ -84,15 +86,17 @@ func (h *WsHub) Setup() {
 						h.removeClientFromWsClient(clients, client)
 					}
 				}
-			}
+				return false
+			})
 		case clientMsg := <-h.ClientMsg:
 			// 对用户
-			if _, ok := h.clients[clientMsg.ClientId]; ok {
-				for _, client := range h.clients[clientMsg.ClientId].Conns {
+			if wsClientValue, ok := h.clients.Load(clientMsg.ClientId); ok {
+				wsClient := wsClientValue.(*WsClient)
+				for _, client := range wsClient.Conns {
 					select {
 					case client.Send <- clientMsg.Msg:
 					default:
-						h.removeClientFromWsClient(h.clients[clientMsg.ClientId], client)
+						h.removeClientFromWsClient(wsClient, client)
 					}
 				}
 			}
@@ -109,7 +113,7 @@ func (h *WsHub) removeClientFromWsClient(wsClient *WsClient, targetConn *WsClien
 			wsClient.Conns = wsClient.Conns[:len(wsClient.Conns)-1]
 			// remove key if empty
 			if len(wsClient.Conns) == 0 {
-				delete(h.clients, wsClient.User.Id)
+				h.clients.Delete(wsClient.User.Id)
 			}
 			break
 		}

@@ -2,7 +2,7 @@ package app
 
 import (
 	"FrontEndOJGolang/models"
-	"time"
+	"FrontEndOJGolang/pkg/utils"
 )
 
 /**
@@ -14,7 +14,7 @@ func LimitUserSubmitFluency(userId uint64) bool {
 		return false
 	}
 
-	if time.Now().UnixNano()/1e6-labSubmit.CreateTime < 1000*5 {
+	if utils.GetMillTime()-labSubmit.CreateTime < 1000*5 {
 		return true
 	}
 	return false

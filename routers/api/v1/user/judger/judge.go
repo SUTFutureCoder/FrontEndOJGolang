@@ -2,9 +2,7 @@ package judger
 
 import (
 	"FrontEndOJGolang/pkg/app"
-	"FrontEndOJudger/caroline"
 	"github.com/gin-gonic/gin"
-	"strconv"
 )
 
 func Judge(c *gin.Context) {
@@ -13,11 +11,11 @@ func Judge(c *gin.Context) {
 		C: c,
 	}
 
-	submitIdStr, _ := c.GetPostForm("submit_id")
-	submitId, _ := strconv.ParseUint(submitIdStr, 10, 64)
+	//submitIdStr, _ := c.GetPostForm("submit_id")
+	//submitId, _ := strconv.ParseUint(submitIdStr, 10, 64)
 
 	// 获取judge
-	_ = caroline.JudgeSubmit(submitId)
+	//caroline.JudgeSubmit(submitId)
 	appG.RespSucc(nil)
 
 }

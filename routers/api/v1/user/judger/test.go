@@ -5,7 +5,6 @@ import (
 	"FrontEndOJGolang/pkg/app"
 	"FrontEndOJGolang/pkg/e"
 	"github.com/gin-gonic/gin"
-	"log"
 )
 
 func TestRun(c *gin.Context) {
@@ -19,12 +18,8 @@ func TestRun(c *gin.Context) {
 		return
 	}
 
-	userSession, err := app.GetUserFromSession(c)
-	if err != nil {
-		log.Printf("[ERROR] get user session error[%v]\n", err)
-		appG.RespErr(e.INVALID_PARAMS, "get user session failed")
-		return
-	}
+	userSession := app.GetUserFromSession(appG)
+	if userSession.Id == 0 {return}
 
 	// Only > normal user can run test code
 	if userSession.UserType <= models.USERTYPE_NORMAL {

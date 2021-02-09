@@ -3,24 +3,20 @@ package app
 // 废弃
 import (
 	"FrontEndOJGolang/models"
+	"FrontEndOJGolang/pkg/e"
 	"FrontEndOJGolang/pkg/setting"
-	"errors"
 	"fmt"
 	"github.com/gin-contrib/sessions"
 	"github.com/gin-gonic/gin"
 	"log"
 )
 
+const USERSESSION = "USERSESSION"
+
 type UserSession struct {
 	Id       uint64
 	Name     string
 	UserType int8
-}
-
-func UserInfo() gin.HandlerFunc {
-	return func(c *gin.Context) {
-
-	}
 }
 
 func SetSession(c *gin.Context, user *models.User) error {
@@ -37,7 +33,6 @@ func SetSession(c *gin.Context, user *models.User) error {
 	}
 	session.Set(setting.SessionSetting.SessionUser, userSession)
 	session.Options(option)
-	log.Println("test")
 	err := session.Save()
 	if err != nil {
 		log.Printf("[ERROR] save session store error user[%v] err[%v] ", user, err)
@@ -62,20 +57,41 @@ func ExpireSession(c *gin.Context) error {
 	return nil
 }
 
-func GetUserFromSession(c *gin.Context) (UserSession, error) {
-	session := sessions.Default(c).Get(setting.SessionSetting.SessionUser)
+func GetUserFromSession(appG Gin) UserSession {
+	session := sessions.Default(appG.C).Get(setting.SessionSetting.SessionUser)
 	if session == nil {
-		return UserSession{}, nil
+		log.Printf("get session nil")
+		appG.RespErr(e.NOT_LOGINED, nil)
+		appG.C.Abort()
+		return UserSession{}
 	}
 
 	userSession, parseOk := session.(UserSession)
 	if !parseOk {
-		//log.Printf("[ERROR] parse user info error err[%v]", err)
-		return UserSession{}, errors.New("parse user info error")
+		log.Printf("[ERROR] parse user info error err session[%#v]", session)
+		appG.RespErr(e.NOT_LOGINED, nil)
+		appG.C.Abort()
+		return UserSession{}
 	}
 
 	if userSession.Id == 0 {
-		return UserSession{}, errors.New("unlogin")
+		appG.RespErr(e.NOT_LOGINED, nil)
+		appG.C.Abort()
+		return UserSession{}
 	}
-	return userSession, nil
+	appG.C.Set(USERSESSION, userSession)
+	return userSession
+}
+
+func CheckUserAdmin(c *gin.Context) {
+	appG := Gin{
+		C: c,
+	}
+	session := GetUserFromSession(appG)
+	if session.Id == 0 || session.UserType != models.USERTYPE_ADMIN {
+		appG.RespErr(e.UNAUTHORIZED, nil)
+		return
+	}
+	c.Set(USERSESSION, session)
+	return
 }

@@ -1,8 +1,10 @@
 package models
 
 import (
-	"errors"
+	"FrontEndOJGolang/pkg/utils"
+	"database/sql"
 	"log"
+	"strconv"
 )
 
 // Lab 实验室表
@@ -54,34 +56,70 @@ func (lab *Lab) Insert() (int64, error) {
 	return ret.LastInsertId()
 }
 
-func GetLabList(page, pageSize int) ([]Lab, error) {
-	if pageSize <= 0 || page <= 0 {
-		return nil, errors.New("page or pagesize not available")
+func GetLabList(page, pageSize, status int) ([]Lab, error) {
+	DefaultPage(&page, &pageSize)
+	offset := (page - 1) * pageSize
+
+	var stmt *sql.Stmt
+	var rows *sql.Rows
+	var err error
+	if status != STATUS_ALL {
+		stmt, err = DB.Prepare("SELECT id, lab_name, lab_type, status, creator_id, creator, create_time, update_time FROM lab WHERE status=? ORDER BY id desc LIMIT ? OFFSET ? ")
+		rows, err = stmt.Query(
+			&status,
+			&pageSize,
+			&offset,
+		)
+	} else {
+		stmt, err = DB.Prepare("SELECT id, lab_name, lab_type, status, creator_id, creator, create_time, update_time FROM lab ORDER BY id desc LIMIT ? OFFSET ? ")
+		rows, err = stmt.Query(
+			&pageSize,
+			&offset,
+		)
 	}
-	stmt, err := DB.Prepare("SELECT id, lab_name, lab_type, creator_id, creator, create_time, update_time FROM lab WHERE status = 1 ORDER BY id desc LIMIT ? OFFSET ? ")
+
 	defer stmt.Close()
 	if err != nil {
 		log.Printf("get lab list from db error [%v]", err)
 		return nil, err
 	}
-	offset := (page - 1) * pageSize
-	rows, err := stmt.Query(
-		&pageSize,
-		&offset,
-	)
+
+	if rows == nil {
+		return nil, err
+	}
 	var labList []Lab
 	for rows.Next() {
 		var lab Lab
 		err = rows.Scan(
-			&lab.ID, &lab.LabName, &lab.LabType, &lab.CreatorId, &lab.Creator, &lab.CreateTime, &lab.UpdateTime,
+			&lab.ID, &lab.LabName, &lab.LabType, &lab.Status, &lab.CreatorId, &lab.Creator, &lab.CreateTime, &lab.UpdateTime,
 		)
 		labList = append(labList, lab)
 	}
 	return labList, err
 }
 
-func GetLabListCount() (int, error) {
-	stmt, err := DB.Prepare("SELECT count(1) as cnt FROM lab WHERE status = 1")
+func GetLabListCount(status int) (int, error) {
+	var stmt *sql.Stmt
+	var err error
+	if status != STATUS_ALL {
+		stmt, err = DB.Prepare("SELECT count(1) as cnt FROM lab WHERE status="+ strconv.Itoa(status))
+	} else {
+		stmt, err = DB.Prepare("SELECT count(1) as cnt FROM lab")
+	}
+
+	defer stmt.Close()
+	if err != nil {
+		log.Printf("get lab list count error [%v]\n", err)
+		return 0, err
+	}
+	var cnt int
+	row := stmt.QueryRow()
+	err = row.Scan(&cnt)
+	return cnt, err
+}
+
+func GetLabFullCount() (int, error) {
+	stmt, err := DB.Prepare("SELECT count(1) as cnt FROM lab")
 	defer stmt.Close()
 	if err != nil {
 		log.Printf("get lab list count error [%v]\n", err)
@@ -99,6 +137,7 @@ func GetLabFullInfo(id uint64) (Lab, error) {
 	if err != nil {
 		return lab, err
 	}
+	defer stmt.Close()
 	row := stmt.QueryRow(&id)
 	err = row.Scan(
 		&lab.ID, &lab.LabName, &lab.LabDesc, &lab.LabType, &lab.LabSample, &lab.LabTemplate, &lab.Status, &lab.CreatorId, &lab.Creator, &lab.CreateTime, &lab.UpdateTime,
@@ -108,4 +147,20 @@ func GetLabFullInfo(id uint64) (Lab, error) {
 		return lab, err
 	}
 	return lab, err
+}
+
+
+func ModifyStatus(id uint64, status int) bool {
+	stmt, err := DB.Prepare("UPDATE lab SET status=?, update_time=? WHERE id=?")
+	if err != nil {
+		log.Printf("update lab status error [%#v]", err)
+		return false
+	}
+	defer stmt.Close()
+	_, err = stmt.Exec(status, utils.GetMillTime(), id)
+	if err != nil {
+		log.Printf("update modify status error[%#v]", err)
+		return false
+	}
+	return true
 }

@@ -13,8 +13,7 @@ type LabListResp struct {
 }
 
 type LabListReq struct {
-	Page     int `json:"page"`
-	PageSize int `json:"pageSize"`
+	models.Pager
 }
 
 func LabList(c *gin.Context) {
@@ -29,17 +28,9 @@ func LabList(c *gin.Context) {
 		return
 	}
 
-	// 默认值
-	if req.Page == 0 {
-		req.Page = 1
-	}
-	if req.PageSize == 0 {
-		req.PageSize = 20
-	}
-
 	var resp LabListResp
-	resp.LabList, err = models.GetLabList(req.Page, req.PageSize)
-	resp.Count, err = models.GetLabListCount()
+	resp.LabList, err = models.GetLabList(req.Page, req.PageSize, models.STATUS_ENABLE)
+	resp.Count, err = models.GetLabListCount(models.STATUS_ENABLE)
 	if err != nil {
 		appGin.RespErr(e.ERROR, err)
 		return

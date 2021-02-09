@@ -1,11 +1,15 @@
 package setting
 
 import (
+	"fmt"
 	"log"
+	"os"
 	"time"
 
 	"github.com/go-ini/ini"
 )
+
+const FRONTENDOJ = "FrontEndOJGolang"
 
 type App struct {
 	LogSavePath string
@@ -74,4 +78,38 @@ func mapTo(s string, v interface{}) {
 	if err != nil {
 		log.Fatalf("Cfg.MapTo %s err: %v", s, err)
 	}
+}
+
+func Check() {
+	checkStaticFileDir()
+}
+
+func checkStaticFileDir() {
+	ToolSetting.FileBaseDir = checkAndFixDirExists(ToolSetting.FileBaseDir, "static/file")
+}
+
+func checkAndFixDirExists(targetDir string, suffix string) string {
+	_, err := os.Stat(targetDir)
+	if err == nil || os.IsExist(err) {
+		return targetDir
+	}
+	// try create dir if not exist
+	err = os.MkdirAll(targetDir, 0777)
+	if err == nil {
+		return targetDir
+	}
+
+	// failed to create dir but try user home dir
+	homeDir, err := os.UserHomeDir()
+	if err != nil {
+		log.Fatalf("Can not create target dir and your home dir, please check your config in conf/*.ini was set correctly.")
+	}
+	newDir := fmt.Sprintf("%s/%s", homeDir, suffix)
+	// try create dir if not exist
+	err = os.MkdirAll(newDir, 0777)
+	if err == nil {
+		return newDir
+	}
+	log.Fatalf("Can not create home dir, please check your config in conf/*.ini was set correctly.")
+	return ""
 }
