@@ -8,19 +8,19 @@ import (
 	"log"
 )
 
-type ListAdminReq struct {
+type listAdminReq struct {
 	LabId uint64 `json:"lab_id"`
-	models.Pager
+	Pager models.Pager
 }
 
-type LabListWithSummary struct {
+type labListWithSummary struct {
 	LabInfo models.Lab
 	Summary models.SubmitSummary
 	TeseCaseCnt int
 }
 
-type ListAdminResp struct {
-	LabList []LabListWithSummary
+type listAdminResp struct {
+	LabList []labListWithSummary
 	Count int
 }
 
@@ -32,25 +32,17 @@ func LabListForAdmin(c *gin.Context) {
 		C: c,
 	}
 
-	var req ListAdminReq
-	var resp ListAdminResp
+	var req listAdminReq
+	var resp listAdminResp
 	err := c.BindJSON(&req)
-
-
-	// 默认值
-	if req.Page == 0 {
-		req.Page = 1
-	}
-	if req.PageSize == 0 {
-		req.PageSize = 20
-	}
 
 	if err != nil {
 		log.Printf("bind json error while get lab list[%#v]", err)
 		appG.RespErr(e.INVALID_PARAMS, nil)
 		return
 	}
-	labs, err := models.GetLabList(req.Page, req.PageSize, models.STATUS_ALL)
+
+	labs, err := models.GetLabList(req.Pager, models.STATUS_ALL)
 	resp.Count, err = models.GetLabFullCount()
 
 	if err != nil {
@@ -68,15 +60,15 @@ func LabListForAdmin(c *gin.Context) {
 	labTestcaseCnt := models.GetLabTestcaseCntByLabIds(labIds)
 	// summary
 	for _, lab := range labs {
-		var labListWithSummary LabListWithSummary
-		labListWithSummary.LabInfo = lab
+		var tmpLabListwithsummary labListWithSummary
+		tmpLabListwithsummary.LabInfo = lab
 		if s, ok := labSubmitSummary[lab.ID]; ok {
-			labListWithSummary.Summary = *s
+			tmpLabListwithsummary.Summary = *s
 		}
 		if s, ok := labTestcaseCnt[lab.ID]; ok {
-			labListWithSummary.TeseCaseCnt = s
+			tmpLabListwithsummary.TeseCaseCnt = s
 		}
-		resp.LabList = append(resp.LabList, labListWithSummary)
+		resp.LabList = append(resp.LabList, tmpLabListwithsummary)
 	}
 	appG.RespSucc(resp)
 }

@@ -7,8 +7,12 @@ import (
 	"FrontEndOJGolang/pkg/utils"
 	"github.com/gin-gonic/gin"
 	"log"
-	"strconv"
 )
+
+type submitReq struct {
+	LabId uint64 `json:"lab_id"`
+	SubmitData string `json:"submit_data"`
+}
 
 func Submit(c *gin.Context) {
 
@@ -16,12 +20,9 @@ func Submit(c *gin.Context) {
 		C: c,
 	}
 
-	labIdStr, _ := c.GetPostForm("lab_id")
+	var req submitReq
+	c.BindJSON(&req)
 
-	labSubmit := models.LabSubmit{}
-
-	labSubmit.LabID, _ = strconv.ParseUint(labIdStr, 10, 64)
-	labSubmit.SubmitData, _ = c.GetPostForm("submit_data")
 
 	userSession := app.GetUserFromSession(appG)
 	if userSession.Id == 0 {return}
@@ -31,6 +32,9 @@ func Submit(c *gin.Context) {
 		return
 	}
 
+	var labSubmit models.LabSubmit
+	labSubmit.LabID = req.LabId
+	labSubmit.SubmitData = req.SubmitData
 	labSubmit.CreatorId, labSubmit.Creator = userSession.Id, userSession.Name
 	labSubmit.CreateTime = utils.GetMillTime()
 	lastId, err := labSubmit.Insert()

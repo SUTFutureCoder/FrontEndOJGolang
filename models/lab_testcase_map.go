@@ -10,9 +10,9 @@ import (
 type LabTestcaseMap struct {
 	Model
 	// LabID 实验室id
-	LabID int64 `json:"lab_id"`
+	LabID uint64 `json:"lab_id"`
 	// TestcaseID 测试用例id
-	TestcaseID int64 `json:"testcase_id"`
+	TestcaseID uint64 `json:"testcase_id"`
 }
 
 func GetLabTestcaseMapByLabId(labId uint64) ([]interface{}, error) {
@@ -60,4 +60,18 @@ func GetLabTestcaseCntByLabIds(labIds []interface{}) map[uint64]int {
 		testcaseCntMap[id] = count
 	}
 	return testcaseCntMap
+}
+
+func (labTestCaseMap *LabTestcaseMap)InvalidLabAllTestcases(tx *sql.Tx) {
+	stmt, err := tx.Prepare("UPDATE lab_testcase_map SET status=? WHERE lab_id=?")
+	if err != nil {
+		tx.Rollback()
+		return
+	}
+	defer stmt.Close()
+	stmt.Exec(
+			labTestCaseMap.Status,
+			labTestCaseMap.LabID,
+		)
+	return
 }

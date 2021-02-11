@@ -27,7 +27,7 @@ func SubmitList(c *gin.Context) {
 	appG.RespSucc(labSubmits)
 }
 
-type SubmitlistByLabIdReq struct {
+type submitlistByLabIdReq struct {
 	LabId uint64 `json:"lab_id"`
 }
 
@@ -40,7 +40,7 @@ func SubmitListByLabId(c *gin.Context) {
 	userSession := app.GetUserFromSession(appG)
 	if userSession.Id == 0 {return}
 
-	var req SubmitlistByLabIdReq
+	var req submitlistByLabIdReq
 	err := c.BindJSON(&req)
 	if err != nil || req.LabId == 0 {
 		appG.RespErr(e.INVALID_PARAMS, "invalid params")

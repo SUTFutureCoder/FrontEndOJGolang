@@ -36,7 +36,7 @@ func Add(c *gin.Context) {
 
 func prepare(labTestCase *models.LabTestcase, labTestCaseMap *models.LabTestcaseMap, c *gin.Context, session app.UserSession) {
 	labIdStr, _ := c.GetPostForm("lab_id")
-	labTestCaseMap.LabID, _ = strconv.ParseInt(labIdStr, 10, 64)
+	labTestCaseMap.LabID, _ = strconv.ParseUint(labIdStr, 10, 64)
 	labTestCase.TestcaseDesc, _ = c.GetPostForm("testcase_desc")
 	labTestCase.TestcaseCode, _ = c.GetPostForm("testcase_code")
 	labTestCase.Input, _ = c.GetPostForm("input")

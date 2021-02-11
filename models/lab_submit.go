@@ -204,3 +204,60 @@ func GetLabSubmitSummary(labIds []interface{}) map[uint64]*SubmitSummary {
 
 	return submitSummaryMap
 }
+
+type UserSubmitSummary struct {
+	UserSubmitSummary *UserLabSubmitSummary
+	UserLabSubmitSummaryMap map[uint64]*UserLabSubmitSummary
+}
+
+type UserLabSubmitSummary struct {
+	CountSum int
+	CountAc int
+	CountFail int
+	CountJuding int
+}
+
+func SummaryUserSubmits(userIds []interface{}) map[uint64]*UserSubmitSummary {
+	userSummary := make(map[uint64]*UserSubmitSummary)
+	rows, err := DB.Query("SELECT creator_id, count(*) as cnt, lab_id, status FROM lab_submit WHERE creator_id IN (?"+strings.Repeat(",?", len(userIds)-1)+")" + " GROUP BY creator_id, lab_id, status", userIds...)
+	if err != nil {
+		log.Printf("get user submit summary from db error [%#v]", err)
+		return userSummary
+	}
+	defer rows.Close()
+	for rows.Next() {
+		var (
+			userId uint64
+			count int
+			labId uint64
+			status int8
+		)
+		err = rows.Scan(&userId, &count, &labId, &status)
+		// init
+		if _, ok := userSummary[userId]; !ok {
+			userSummary[userId] = &UserSubmitSummary{}
+			userSummary[userId].UserSubmitSummary = &UserLabSubmitSummary{}
+			userSummary[userId].UserLabSubmitSummaryMap = make(map[uint64]*UserLabSubmitSummary)
+		}
+		if _, ok := userSummary[userId].UserLabSubmitSummaryMap[labId]; !ok {
+			userSummary[userId].UserLabSubmitSummaryMap[labId] = &UserLabSubmitSummary{}
+		}
+		// analysis
+		userSummary[userId].UserSubmitSummary.CountSum += count
+		userSummary[userId].UserLabSubmitSummaryMap[labId].CountSum += count
+		switch status {
+		case LABSUBMITSTATUS_ACCEPTED:
+			userSummary[userId].UserSubmitSummary.CountAc += count
+			userSummary[userId].UserLabSubmitSummaryMap[labId].CountAc += count
+		case LABSUBMITSTATUS_JUDING:
+			fallthrough
+		case LABSUBMITSTATUS_COMPILING:
+			userSummary[userId].UserSubmitSummary.CountJuding += count
+			userSummary[userId].UserLabSubmitSummaryMap[labId].CountJuding += count
+		default:
+			userSummary[userId].UserSubmitSummary.CountFail += count
+			userSummary[userId].UserLabSubmitSummaryMap[labId].CountFail += count
+		}
+	}
+	return userSummary
+}

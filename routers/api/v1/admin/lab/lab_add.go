@@ -9,7 +9,7 @@ import (
 	"log"
 )
 
-type AddLabReq struct {
+type addLabReq struct {
 	LabName     string `json:"lab_name"`
 	LabDesc     string `json:"lab_desc"`
 	LabSample   string `json:"lab_sample"`
@@ -25,14 +25,14 @@ func AddLab(c *gin.Context) {
 	userSession := app.GetUserFromSession(appG)
 	if userSession.Id == 0 {return}
 
-	addLabReq := AddLabReq{}
-	err := c.BindJSON(&addLabReq)
+	req := addLabReq{}
+	err := c.BindJSON(&req)
 	if err != nil {
 		appG.RespErr(e.INVALID_PARAMS, err.Error())
 		return
 	}
 
-	lab := prepareAdd(&addLabReq, &userSession)
+	lab := prepareAdd(&req, &userSession)
 
 	labId, err := lab.Insert()
 	if err != nil {
@@ -44,7 +44,7 @@ func AddLab(c *gin.Context) {
 	appG.RespSucc(labId)
 }
 
-func prepareAdd(addLabReq *AddLabReq, userSession *app.UserSession) *models.Lab {
+func prepareAdd(addLabReq *addLabReq, userSession *app.UserSession) *models.Lab {
 	lab := &models.Lab{
 		LabName:     addLabReq.LabName,
 		LabDesc:     addLabReq.LabDesc,
@@ -52,6 +52,8 @@ func prepareAdd(addLabReq *AddLabReq, userSession *app.UserSession) *models.Lab 
 		LabTemplate: addLabReq.LabTemplate,
 		LabType:     addLabReq.LabType,
 	}
+	// default constructing status
+	lab.Status = models.STATUS_CONSTRUCTING
 	lab.CreatorId, lab.Creator = userSession.Id, userSession.Name
 	lab.CreateTime = utils.GetMillTime()
 	return lab

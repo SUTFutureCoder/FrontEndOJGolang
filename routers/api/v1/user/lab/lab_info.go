@@ -7,11 +7,11 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-type RespLabInfo struct {
+type respLabInfo struct {
 	LabInfo models.Lab
 }
 
-type ReqLabInfo struct {
+type reqLabInfo struct {
 	Id uint64 `json:"id" from:"id"`
 }
 
@@ -19,8 +19,8 @@ func LabInfo(c *gin.Context) {
 	appGin := app.Gin{
 		C: c,
 	}
-	var resp RespLabInfo
-	var req ReqLabInfo
+	var resp respLabInfo
+	var req reqLabInfo
 	var err error
 	err = c.BindJSON(&req)
 	if err != nil {

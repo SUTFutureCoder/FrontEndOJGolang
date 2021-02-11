@@ -7,7 +7,7 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-type ReqLabTestCaseList struct {
+type reqLabTestCaseList struct {
 	LabId uint64 `json:"lab_id" from:"lab_id"`
 }
 
@@ -15,7 +15,7 @@ func List(c *gin.Context) {
 	appG := app.Gin{
 		C: c,
 	}
-	var req ReqLabTestCaseList
+	var req reqLabTestCaseList
 	err := c.BindJSON(&req)
 	if err != nil || req.LabId == 0 {
 		appG.RespErr(e.INVALID_PARAMS, "param error")

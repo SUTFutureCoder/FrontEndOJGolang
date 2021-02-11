@@ -32,7 +32,7 @@ func InitUserRouter(r *gin.Engine) {
 	userGroup.POST("/logout", user.Logout)
 	userGroup.POST("/whoami", user.WhoAmI)
 	userGroup.POST("/summary", user.Summary)
-
+	userGroup.POST("/change_pwd", user.ChangePwd)
 
 	// 工具
 	tool := r.Group("/tool")

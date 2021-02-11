@@ -1,7 +1,10 @@
 // Package main Auto generated.
 package models
 
-import "log"
+import (
+	"FrontEndOJGolang/pkg/utils"
+	"log"
+)
 
 // User ...
 type User struct {
@@ -24,6 +27,7 @@ func (u *User) GetByName() error {
 		log.Printf("[ERROR] prepare sql error user[%v] err[%v]", u, err)
 		return err
 	}
+	defer stmt.Close()
 	row := stmt.QueryRow(
 		&u.Creator,
 	)
@@ -69,4 +73,16 @@ func (u *User) CheckExist() (bool, error) {
 	i := 0
 	err = row.Scan(&i)
 	return i > 0, err
+}
+
+func (u *User) UpdatePwd() (bool, error) {
+	stmt, err := DB.Prepare("UPDATE user SET user_password=?, update_time=? WHERE id=?")
+	if err != nil {
+		log.Printf("update lab status error [%#v]", err)
+		return false, err
+	}
+	defer stmt.Close()
+	res, err := stmt.Exec(u.UserPassword, utils.GetMillTime(), u.ID)
+	row, err := res.RowsAffected()
+	return row > 0, err
 }

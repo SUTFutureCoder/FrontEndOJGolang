@@ -9,10 +9,7 @@ import (
 	"log"
 )
 
-type LoginResp struct {
-}
-
-type LoginReq struct {
+type loginReq struct {
 	UserName     string `json:"user_name"`
 	UserPassword string `json:"user_password"`
 }
@@ -22,25 +19,28 @@ func Login(c *gin.Context) {
 		C: c,
 	}
 
-	var loginReq LoginReq
-	if err := c.BindJSON(&loginReq); err != nil {
+	var req loginReq
+	if err := c.BindJSON(&req); err != nil {
 		log.Println(err)
 	}
 
 	user := new(models.User)
-	user.Creator = loginReq.UserName
+	user.Creator = req.UserName
 	err := user.GetByName()
 	if err != nil {
 		appG.RespErr(e.INVALID_PARAMS, nil)
 		return
 	}
 
-	err = bcrypt.CompareHashAndPassword([]byte(user.UserPassword), []byte(loginReq.UserPassword))
+	err = bcrypt.CompareHashAndPassword([]byte(user.UserPassword), []byte(req.UserPassword))
 	if err != nil {
 		log.Printf("[ERROR] check password error user[%v] err[%v] ", user, err)
 		appG.RespErr(e.INVALID_PARAMS, "please check your password")
 		return
 	}
+
+	// 脱敏
+	user.UserPassword = ""
 
 	// save session
 	err = app.SetSession(c, user)

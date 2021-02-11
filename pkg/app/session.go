@@ -44,8 +44,9 @@ func SetSession(c *gin.Context, user *models.User) error {
 
 func ExpireSession(c *gin.Context) error {
 	session := sessions.Default(c)
+	session.Set(setting.SessionSetting.SessionUser, "")
 	session.Options(sessions.Options{
-		MaxAge:   0,
+		MaxAge:   200,
 		Path:     "/",
 		HttpOnly: true,
 	})
@@ -88,8 +89,9 @@ func CheckUserAdmin(c *gin.Context) {
 		C: c,
 	}
 	session := GetUserFromSession(appG)
-	if session.Id == 0 || session.UserType != models.USERTYPE_ADMIN {
+	if !appG.C.IsAborted() && (session.Id == 0 || session.UserType != models.USERTYPE_ADMIN) {
 		appG.RespErr(e.UNAUTHORIZED, nil)
+		appG.C.Abort()
 		return
 	}
 	c.Set(USERSESSION, session)

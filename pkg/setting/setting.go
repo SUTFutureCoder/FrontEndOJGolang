@@ -54,6 +54,13 @@ type Tool struct {
 
 var ToolSetting = &Tool{}
 
+type Judger struct {
+	JudgerAddr string
+	HttpPort string
+}
+
+var JudgerSetting = &Judger{}
+
 var cfg *ini.File
 
 func Setup() {
@@ -68,6 +75,7 @@ func Setup() {
 	mapTo("database", DatabaseSetting)
 	mapTo("session", SessionSetting)
 	mapTo("tool", ToolSetting)
+	mapTo("judger", JudgerSetting)
 
 	ServerSetting.ReadTimeout = ServerSetting.ReadTimeout * time.Second
 	ServerSetting.WriteTimeout = ServerSetting.WriteTimeout * time.Second

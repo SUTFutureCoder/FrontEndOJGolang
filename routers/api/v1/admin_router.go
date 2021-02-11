@@ -24,13 +24,16 @@ func InitAdminRouter(r *gin.Engine) {
 	adminLab := admin.Group("/lab")
 	adminLab.POST("/add", lab.AddLab)
 	adminLab.GET("/list", lab.LabListForAdmin)
+	adminLab.POST("/modify", lab.ModifyLab)
 	adminLab.POST("/enable", lab.EnableLab)
 	adminLab.POST("/disable", lab.DisableLab)
 
 	labTestcaseGroup := admin.Group("/lab_testcase")
+	labTestcaseGroup.POST("/set", lab_testcase.Set)
 	labTestcaseGroup.POST("/add", lab_testcase.Add)
 	labTestcaseGroup.POST("/list", lab_testcase.List)
 	labTestcaseGroup.POST("/modify", lab_testcase.Modify)
+	labTestcaseGroup.POST("/run", lab_testcase.Run)
 
 
 	// user管理区
