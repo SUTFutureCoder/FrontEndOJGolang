@@ -162,11 +162,11 @@ func GetUserLastSubmit(userId uint64) (LabSubmit, error) {
 }
 
 type SubmitSummary struct {
-	LabId uint64
-	CountSum int
-	CountAc int
-	CountFail int
-	CountJuding int
+	LabId uint64 `json:"lab_id"`
+	CountSum int `json:"count_sum"`
+	CountAc int `json:"count_ac"`
+	CountFail int `json:"count_fail"`
+	CountJuding int `json:"count_juding"`
 }
 
 func GetLabSubmitSummary(labIds []interface{}) map[uint64]*SubmitSummary {
@@ -189,7 +189,7 @@ func GetLabSubmitSummary(labIds []interface{}) map[uint64]*SubmitSummary {
 			submitSummaryMap[id] = &SubmitSummary{}
 		}
 		submitSummaryMap[id].LabId = id
-		submitSummaryMap[id].CountSum++
+		submitSummaryMap[id].CountSum += count
 		switch status {
 		case LABSUBMITSTATUS_ACCEPTED:
 			submitSummaryMap[id].CountAc += count

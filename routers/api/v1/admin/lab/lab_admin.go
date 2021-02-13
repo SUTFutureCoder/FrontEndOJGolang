@@ -41,3 +41,14 @@ func EnableLab(c *gin.Context) {
 	models.ModifyStatus(req.LabId, models.STATUS_ENABLE)
 	appG.RespSucc(nil)
 }
+
+func ConstructingLab(c *gin.Context) {
+	appG := app.Gin{
+		C: c,
+	}
+
+	req := prepareAdmin(&appG)
+	if req.LabId == 0 {return}
+	models.ModifyStatus(req.LabId, models.STATUS_CONSTRUCTING)
+	appG.RespSucc(nil)
+}

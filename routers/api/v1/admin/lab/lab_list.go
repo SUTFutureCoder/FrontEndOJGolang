@@ -10,18 +10,18 @@ import (
 
 type listAdminReq struct {
 	LabId uint64 `json:"lab_id"`
-	Pager models.Pager
+	models.Pager
 }
 
 type labListWithSummary struct {
-	LabInfo models.Lab
-	Summary models.SubmitSummary
-	TeseCaseCnt int
+	LabInfo models.Lab `json:"lab_info"`
+	Summary models.SubmitSummary `json:"summary"`
+	TeseCaseCnt int `json:"testcase_count"`
 }
 
 type listAdminResp struct {
-	LabList []labListWithSummary
-	Count int
+	LabList []labListWithSummary `json:"lab_list"`
+	Count int `json:"count"`
 }
 
 /**

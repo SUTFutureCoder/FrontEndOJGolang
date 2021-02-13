@@ -4,6 +4,7 @@ import (
 	"FrontEndOJGolang/models"
 	"FrontEndOJGolang/pkg/app"
 	"FrontEndOJGolang/pkg/e"
+	"FrontEndOJGolang/pkg/utils"
 	"github.com/gin-gonic/gin"
 )
 
@@ -36,11 +37,31 @@ func Set(c *gin.Context) {
 	// invalid all formal testcases
 	formalLabTestcaseMap.InvalidLabAllTestcases(tx)
 	// set all new testcases
+	var labTestCaseMap models.LabTestcaseMap
+	labTestCaseMap.LabID = req.LabId
+	labTestCaseMap.CreatorId = userSession.Id
+	labTestCaseMap.Creator = userSession.Name
+	labTestCaseMap.Status = models.STATUS_ENABLE
+
 	for _, v := range req.Testcases {
-		var labTestCaseMap models.LabTestcaseMap
+		v.CreateTime = utils.GetMillTime()
+		v.CreatorId = userSession.Id
+		v.Creator = userSession.Name
+		v.Status = models.STATUS_ENABLE
+
+		labTestCaseMap.CreateTime = utils.GetMillTime()
 		labTestCaseMap.TestcaseID, err = v.Insert(tx)
 		_, err = labTestCaseMap.Insert(tx)
+		if err != nil {
+			tx.Rollback()
+			break
+		}
+	}
+	if err != nil {
+		tx.Rollback()
+		appG.RespErr(e.ERROR, err.Error())
+		return
 	}
 	tx.Commit()
-	appG.RespSucc(nil)
+	appG.RespSucc(true)
 }

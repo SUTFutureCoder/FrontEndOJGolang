@@ -8,7 +8,7 @@ import (
 )
 
 type respLabInfo struct {
-	LabInfo models.Lab
+	LabInfo models.Lab `json:"lab_info"`
 }
 
 type reqLabInfo struct {
@@ -19,10 +19,15 @@ func LabInfo(c *gin.Context) {
 	appGin := app.Gin{
 		C: c,
 	}
+
+	userSession := app.GetUserFromSession(appGin)
+	if userSession.Id == 0 {
+		return
+	}
+
 	var resp respLabInfo
 	var req reqLabInfo
-	var err error
-	err = c.BindJSON(&req)
+	err := c.BindJSON(&req)
 	if err != nil {
 		appGin.RespErr(e.INVALID_PARAMS, err)
 		return
@@ -33,5 +38,10 @@ func LabInfo(c *gin.Context) {
 		appGin.RespErr(e.ERROR, err)
 		return
 	}
+
+	if userSession.UserType != models.USERTYPE_ADMIN {
+		resp.LabInfo.LabSample = ""
+	}
+
 	appGin.RespSucc(resp)
 }

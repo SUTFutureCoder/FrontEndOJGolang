@@ -58,7 +58,7 @@ func ExpireSession(c *gin.Context) error {
 	return nil
 }
 
-func GetUserFromSession(appG Gin) UserSession {
+func 	GetUserFromSession(appG Gin) UserSession {
 	session := sessions.Default(appG.C).Get(setting.SessionSetting.SessionUser)
 	if session == nil {
 		log.Printf("get session nil")

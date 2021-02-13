@@ -31,11 +31,12 @@ func GetLabTestcaseMapByLabId(labId uint64) ([]interface{}, error) {
 }
 
 func (labTestCaseMap *LabTestcaseMap) Insert(tx *sql.Tx) (sql.Result, error) {
-	stmt, err := tx.Prepare("INSERT INTO lab_testcase_map (lab_id, testcase_id, creator, create_time) VALUES (?,?,?,?)")
+	stmt, err := tx.Prepare("INSERT INTO lab_testcase_map (lab_id, testcase_id, creator_id, creator, create_time) VALUES (?,?,?,?,?)")
 	defer stmt.Close()
 	result, err := stmt.Exec(
 		labTestCaseMap.LabID,
 		labTestCaseMap.TestcaseID,
+		labTestCaseMap.CreatorId,
 		labTestCaseMap.Creator,
 		labTestCaseMap.CreateTime,
 	)
