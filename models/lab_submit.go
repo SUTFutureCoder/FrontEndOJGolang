@@ -171,6 +171,9 @@ type SubmitSummary struct {
 
 func GetLabSubmitSummary(labIds []interface{}) map[uint64]*SubmitSummary {
 	submitSummaryMap := make(map[uint64]*SubmitSummary)
+	if len(labIds) == 0 {
+		return submitSummaryMap
+	}
 	rows, err := DB.Query("SELECT lab_id, count(*) as cnt, status FROM lab_submit WHERE lab_id IN (?"+strings.Repeat(",?", len(labIds)-1)+")" + " GROUP BY lab_id, status", labIds...)
 	if err != nil {
 		log.Printf("get lab submit summary from db error [%#v]", err)

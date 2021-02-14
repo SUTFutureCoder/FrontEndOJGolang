@@ -42,8 +42,14 @@ func LabListForAdmin(c *gin.Context) {
 		return
 	}
 
-	labs, err := models.GetLabList(req.Pager, models.STATUS_ALL)
-	resp.Count, err = models.GetLabFullCount()
+	var labs []models.Lab
+	if req.LabId != 0 {
+		labs, err = models.GetLabListById(req.LabId, models.STATUS_ALL)
+		resp.Count = len(labs)
+	} else {
+		labs, err = models.GetLabList(req.Pager, models.STATUS_ALL)
+		resp.Count, err = models.GetLabFullCount()
+	}
 
 	if err != nil {
 		log.Printf("get db list error while get lab list[%#v]", err)

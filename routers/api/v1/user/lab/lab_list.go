@@ -13,6 +13,7 @@ type labListResp struct {
 }
 
 type labListReq struct {
+	LabId uint64 `json:"lab_id"`
 	Pager models.Pager
 }
 
@@ -29,8 +30,13 @@ func LabList(c *gin.Context) {
 	}
 
 	var resp labListResp
-	resp.LabList, err = models.GetLabList(req.Pager, models.STATUS_ENABLE)
-	resp.Count, err = models.GetLabListCount(models.STATUS_ENABLE)
+	if req.LabId != 0 {
+		resp.LabList, err = models.GetLabListById(req.LabId, models.STATUS_ENABLE)
+		resp.Count = len(resp.LabList)
+	} else {
+		resp.LabList, err = models.GetLabList(req.Pager, models.STATUS_ENABLE)
+		resp.Count, err = models.GetLabListCount(models.STATUS_ENABLE)
+	}
 	if err != nil {
 		appGin.RespErr(e.ERROR, err)
 		return

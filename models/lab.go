@@ -57,6 +57,43 @@ func (lab *Lab) Insert() (int64, error) {
 	return ret.LastInsertId()
 }
 
+func GetLabListById(labId uint64, status int) ([]Lab, error) {
+	var stmt *sql.Stmt
+	var rows *sql.Rows
+	var err error
+	if status != STATUS_ALL {
+		stmt, err = DB.Prepare("SELECT id, lab_name, lab_type, status, creator_id, creator, create_time, update_time FROM lab WHERE status=? AND id=?")
+		rows, err = stmt.Query(
+			&status,
+			&labId,
+		)
+	} else {
+		stmt, err = DB.Prepare("SELECT id, lab_name, lab_type, status, creator_id, creator, create_time, update_time FROM lab WHERE id=?")
+		rows, err = stmt.Query(
+			&labId,
+		)
+	}
+
+	defer stmt.Close()
+	if err != nil {
+		log.Printf("get lab list from db error [%v]", err)
+		return nil, err
+	}
+
+	if rows == nil {
+		return nil, err
+	}
+	var labList []Lab
+	for rows.Next() {
+		var lab Lab
+		err = rows.Scan(
+			&lab.ID, &lab.LabName, &lab.LabType, &lab.Status, &lab.CreatorId, &lab.Creator, &lab.CreateTime, &lab.UpdateTime,
+		)
+		labList = append(labList, lab)
+	}
+	return labList, err
+}
+
 func GetLabList(page Pager, status int) ([]Lab, error) {
 	DefaultPage(&page.Page, &page.PageSize)
 	offset := (page.Page - 1) * page.PageSize
