@@ -46,7 +46,7 @@ func (labTestCaseMap *LabTestcaseMap) Insert(tx *sql.Tx) (sql.Result, error) {
 
 func GetLabTestcaseCntByLabIds(labIds []interface{}) map[uint64]int {
 	testcaseCntMap := make(map[uint64]int)
-	rows, err := DB.Query("SELECT lab_id, count(*) as cnt FROM lab_testcase_map WHERE lab_id IN (?"+strings.Repeat(",?", len(labIds)-1)+")" + " GROUP BY lab_id", labIds...)
+	rows, err := DB.Query("SELECT lab_id, count(*) as cnt FROM lab_testcase_map WHERE lab_id IN (?"+strings.Repeat(",?", len(labIds)-1)+")"+" GROUP BY lab_id", labIds...)
 	if err != nil {
 		log.Printf("get lab testcase cnt from db error [%#v]", err)
 		return nil
@@ -54,7 +54,7 @@ func GetLabTestcaseCntByLabIds(labIds []interface{}) map[uint64]int {
 	defer rows.Close()
 	for rows.Next() {
 		var (
-			id uint64
+			id    uint64
 			count int
 		)
 		err = rows.Scan(&id, &count)
@@ -63,7 +63,7 @@ func GetLabTestcaseCntByLabIds(labIds []interface{}) map[uint64]int {
 	return testcaseCntMap
 }
 
-func (labTestCaseMap *LabTestcaseMap)InvalidLabAllTestcases(tx *sql.Tx) {
+func (labTestCaseMap *LabTestcaseMap) InvalidLabAllTestcases(tx *sql.Tx) {
 	stmt, err := tx.Prepare("UPDATE lab_testcase_map SET status=? WHERE lab_id=?")
 	if err != nil {
 		tx.Rollback()
@@ -71,8 +71,8 @@ func (labTestCaseMap *LabTestcaseMap)InvalidLabAllTestcases(tx *sql.Tx) {
 	}
 	defer stmt.Close()
 	stmt.Exec(
-			labTestCaseMap.Status,
-			labTestCaseMap.LabID,
-		)
+		labTestCaseMap.Status,
+		labTestCaseMap.LabID,
+	)
 	return
 }

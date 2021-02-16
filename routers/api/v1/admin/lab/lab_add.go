@@ -23,7 +23,9 @@ func AddLab(c *gin.Context) {
 	}
 
 	userSession := app.GetUserFromSession(appG)
-	if userSession.Id == 0 {return}
+	if userSession.Id == 0 {
+		return
+	}
 
 	req := addLabReq{}
 	err := c.BindJSON(&req)

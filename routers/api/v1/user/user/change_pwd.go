@@ -19,7 +19,9 @@ func ChangePwd(c *gin.Context) {
 	}
 
 	userSession := app.GetUserFromSession(appG)
-	if userSession.Id == 0 {return}
+	if userSession.Id == 0 {
+		return
+	}
 
 	var req changePwdReq
 	c.BindJSON(&req)

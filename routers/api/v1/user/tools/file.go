@@ -21,7 +21,9 @@ func UploadFile(c *gin.Context) {
 	}
 
 	userSession := app.GetUserFromSession(appG)
-	if userSession.Id == 0 {return}
+	if userSession.Id == 0 {
+		return
+	}
 
 	fileReader, err := c.FormFile("file")
 	if err != nil {
@@ -54,7 +56,9 @@ func GetFile(c *gin.Context) {
 	}
 
 	userSession := app.GetUserFromSession(appG)
-	if userSession.Id == 0 {return}
+	if userSession.Id == 0 {
+		return
+	}
 
 	file := c.Query("file")
 	if file == "" || strings.Contains(file, "..") || strings.Contains(file, "/") {

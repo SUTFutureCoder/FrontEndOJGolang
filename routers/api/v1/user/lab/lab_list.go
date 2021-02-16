@@ -9,7 +9,7 @@ import (
 
 type labListResp struct {
 	LabList []models.Lab `json:"lab_list"`
-	Count   int `json:"count"`
+	Count   int          `json:"count"`
 }
 
 type labListReq struct {

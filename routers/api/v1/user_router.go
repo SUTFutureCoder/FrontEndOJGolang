@@ -15,12 +15,12 @@ func InitUserRouter(r *gin.Engine) {
 	labGroup := r.Group("/lab")
 	labGroup.POST("/list", lab.LabList)
 	labGroup.POST("/info", lab.LabInfo)
+	labGroup.POST("/list_with_summary", lab.LabListAndSummary)
 
 	labSubmitGroup := r.Group("/lab_submit")
 	labSubmitGroup.POST("/submit", lab_submit.Submit)
 	labSubmitGroup.POST("/submit_list", lab_submit.SubmitList)
 	labSubmitGroup.POST("/submit_list_by_lab_id", lab_submit.SubmitListByLabId)
-
 
 	judgerGroup := r.Group("/judger")
 	judgerGroup.POST("/judge", judger.Judge)

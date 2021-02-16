@@ -15,7 +15,9 @@ func SubmitList(c *gin.Context) {
 
 	// get user info from session
 	userSession := app.GetUserFromSession(appG)
-	if userSession.Id == 0 {return}
+	if userSession.Id == 0 {
+		return
+	}
 
 	pager := models.ToPager(c)
 	labSubmits, err := models.GetUserLabSubmits(userSession.Id, pager)
@@ -38,7 +40,9 @@ func SubmitListByLabId(c *gin.Context) {
 
 	// get user info from session
 	userSession := app.GetUserFromSession(appG)
-	if userSession.Id == 0 {return}
+	if userSession.Id == 0 {
+		return
+	}
 
 	var req submitlistByLabIdReq
 	err := c.BindJSON(&req)

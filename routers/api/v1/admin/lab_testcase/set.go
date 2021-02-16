@@ -9,7 +9,7 @@ import (
 )
 
 type setTestcaseReq struct {
-	LabId	  uint64 `json:"lab_id"`
+	LabId     uint64               `json:"lab_id"`
 	Testcases []models.LabTestcase `json:"testcases"`
 }
 
@@ -19,7 +19,9 @@ func Set(c *gin.Context) {
 	}
 
 	userSession := app.GetUserFromSession(appG)
-	if userSession.Id == 0 {return}
+	if userSession.Id == 0 {
+		return
+	}
 
 	var req setTestcaseReq
 	err := c.BindJSON(&req)

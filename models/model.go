@@ -11,9 +11,9 @@ import (
 
 const (
 	STATUS_CONSTRUCTING = -2
-	STATUS_ALL = -1
-	STATUS_DISABLE = 0
-	STATUS_ENABLE = 1
+	STATUS_ALL          = -1
+	STATUS_DISABLE      = 0
+	STATUS_ENABLE       = 1
 )
 
 type Model struct {

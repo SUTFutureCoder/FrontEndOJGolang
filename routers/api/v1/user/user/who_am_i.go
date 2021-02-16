@@ -10,6 +10,8 @@ func WhoAmI(c *gin.Context) {
 		C: c,
 	}
 	user := app.GetUserFromSession(appG)
-	if user.Id == 0 {return}
+	if user.Id == 0 {
+		return
+	}
 	appG.RespSucc(user)
 }

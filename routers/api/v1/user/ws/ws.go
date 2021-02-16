@@ -21,7 +21,9 @@ func Ws(c *gin.Context) {
 	}
 
 	user := app.GetUserFromSession(appG)
-	if user.Id == 0 {return}
+	if user.Id == 0 {
+		return
+	}
 
 	conn, err := upGrader.Upgrade(c.Writer, c.Request, nil)
 	if err != nil {
@@ -78,7 +80,7 @@ func writeData(c *ws.WsClientConn) {
 	defer c.Conn.Close()
 	for {
 		select {
-		case message, ok := <- c.Send:
+		case message, ok := <-c.Send:
 			if !ok {
 				c.Conn.WriteMessage(websocket.CloseMessage, []byte{})
 				return

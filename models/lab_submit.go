@@ -162,10 +162,9 @@ func GetUserLastSubmit(userId uint64) (LabSubmit, error) {
 }
 
 type SubmitSummary struct {
-	LabId uint64 `json:"lab_id"`
-	CountSum int `json:"count_sum"`
-	CountAc int `json:"count_ac"`
-	CountFail int `json:"count_fail"`
+	CountSum    int `json:"count_sum"`
+	CountAc     int `json:"count_ac"`
+	CountFail   int `json:"count_fail"`
 	CountJuding int `json:"count_juding"`
 }
 
@@ -174,7 +173,7 @@ func GetLabSubmitSummary(labIds []interface{}) map[uint64]*SubmitSummary {
 	if len(labIds) == 0 {
 		return submitSummaryMap
 	}
-	rows, err := DB.Query("SELECT lab_id, count(*) as cnt, status FROM lab_submit WHERE lab_id IN (?"+strings.Repeat(",?", len(labIds)-1)+")" + " GROUP BY lab_id, status", labIds...)
+	rows, err := DB.Query("SELECT lab_id, count(*) as cnt, status FROM lab_submit WHERE lab_id IN (?"+strings.Repeat(",?", len(labIds)-1)+")"+" GROUP BY lab_id, status", labIds...)
 	if err != nil {
 		log.Printf("get lab submit summary from db error [%#v]", err)
 		return submitSummaryMap
@@ -182,8 +181,8 @@ func GetLabSubmitSummary(labIds []interface{}) map[uint64]*SubmitSummary {
 	defer rows.Close()
 	for rows.Next() {
 		var (
-			id uint64
-			count int
+			id     uint64
+			count  int
 			status int8
 		)
 		err = rows.Scan(&id, &count, &status)
@@ -191,7 +190,6 @@ func GetLabSubmitSummary(labIds []interface{}) map[uint64]*SubmitSummary {
 		if _, ok := submitSummaryMap[id]; !ok {
 			submitSummaryMap[id] = &SubmitSummary{}
 		}
-		submitSummaryMap[id].LabId = id
 		submitSummaryMap[id].CountSum += count
 		switch status {
 		case LABSUBMITSTATUS_ACCEPTED:
@@ -209,20 +207,13 @@ func GetLabSubmitSummary(labIds []interface{}) map[uint64]*SubmitSummary {
 }
 
 type UserSubmitSummary struct {
-	UserSubmitSummary *UserLabSubmitSummary
-	UserLabSubmitSummaryMap map[uint64]*UserLabSubmitSummary
-}
-
-type UserLabSubmitSummary struct {
-	CountSum int
-	CountAc int
-	CountFail int
-	CountJuding int
+	UserSubmitSummary       *SubmitSummary
+	UserLabSubmitSummaryMap map[uint64]*SubmitSummary
 }
 
 func SummaryUserSubmits(userIds []interface{}) map[uint64]*UserSubmitSummary {
 	userSummary := make(map[uint64]*UserSubmitSummary)
-	rows, err := DB.Query("SELECT creator_id, count(*) as cnt, lab_id, status FROM lab_submit WHERE creator_id IN (?"+strings.Repeat(",?", len(userIds)-1)+")" + " GROUP BY creator_id, lab_id, status", userIds...)
+	rows, err := DB.Query("SELECT creator_id, count(*) as cnt, lab_id, status FROM lab_submit WHERE creator_id IN (?"+strings.Repeat(",?", len(userIds)-1)+")"+" GROUP BY creator_id, lab_id, status", userIds...)
 	if err != nil {
 		log.Printf("get user submit summary from db error [%#v]", err)
 		return userSummary
@@ -231,19 +222,19 @@ func SummaryUserSubmits(userIds []interface{}) map[uint64]*UserSubmitSummary {
 	for rows.Next() {
 		var (
 			userId uint64
-			count int
-			labId uint64
+			count  int
+			labId  uint64
 			status int8
 		)
 		err = rows.Scan(&userId, &count, &labId, &status)
 		// init
 		if _, ok := userSummary[userId]; !ok {
 			userSummary[userId] = &UserSubmitSummary{}
-			userSummary[userId].UserSubmitSummary = &UserLabSubmitSummary{}
-			userSummary[userId].UserLabSubmitSummaryMap = make(map[uint64]*UserLabSubmitSummary)
+			userSummary[userId].UserSubmitSummary = &SubmitSummary{}
+			userSummary[userId].UserLabSubmitSummaryMap = make(map[uint64]*SubmitSummary)
 		}
 		if _, ok := userSummary[userId].UserLabSubmitSummaryMap[labId]; !ok {
-			userSummary[userId].UserLabSubmitSummaryMap[labId] = &UserLabSubmitSummary{}
+			userSummary[userId].UserLabSubmitSummaryMap[labId] = &SubmitSummary{}
 		}
 		// analysis
 		userSummary[userId].UserSubmitSummary.CountSum += count

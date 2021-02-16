@@ -5,7 +5,7 @@ import "errors"
 var MsgFlags = map[int]string{
 	SUCCESS:        "ok",
 	ERROR:          "fail",
-	NOT_LOGINED: 	"please login first",
+	NOT_LOGINED:    "please login first",
 	INVALID_PARAMS: "please check your request",
 	UNAUTHORIZED:   "please check your authorize",
 }

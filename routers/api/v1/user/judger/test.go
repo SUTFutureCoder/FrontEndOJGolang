@@ -19,7 +19,9 @@ func TestRun(c *gin.Context) {
 	}
 
 	userSession := app.GetUserFromSession(appG)
-	if userSession.Id == 0 {return}
+	if userSession.Id == 0 {
+		return
+	}
 
 	// Only > normal user can run test code
 	if userSession.UserType <= models.USERTYPE_NORMAL {

@@ -28,7 +28,7 @@ func SendToUser(userId uint64, errCode int, data interface{}) {
 	}
 	clientMsg := &ClientMsg{
 		ClientId: userId,
-		Msg: j,
+		Msg:      j,
 	}
 	Wshub.ClientMsg <- clientMsg
 }
@@ -46,7 +46,7 @@ func BroadCastToAllUsers(errCode int, data interface{}) {
 func marshalData(errCode int, data interface{}) ([]byte, error) {
 	return json.Marshal(WsResp{
 		Code: errCode,
-		Msg: e.GetMsg(errCode),
+		Msg:  e.GetMsg(errCode),
 		Data: data,
 	})
 }

@@ -140,7 +140,7 @@ func GetLabListCount(status int) (int, error) {
 	var stmt *sql.Stmt
 	var err error
 	if status != STATUS_ALL {
-		stmt, err = DB.Prepare("SELECT count(1) as cnt FROM lab WHERE status="+ strconv.Itoa(status))
+		stmt, err = DB.Prepare("SELECT count(1) as cnt FROM lab WHERE status=" + strconv.Itoa(status))
 	} else {
 		stmt, err = DB.Prepare("SELECT count(1) as cnt FROM lab")
 	}
@@ -187,8 +187,7 @@ func GetLabFullInfo(id uint64) (Lab, error) {
 	return lab, err
 }
 
-
-func ModifyStatus(id uint64, status int) bool {
+func ModifyLabStatus(id uint64, status int) bool {
 	stmt, err := DB.Prepare("UPDATE lab SET status=?, update_time=? WHERE id=?")
 	if err != nil {
 		log.Printf("update lab status error [%#v]", err)

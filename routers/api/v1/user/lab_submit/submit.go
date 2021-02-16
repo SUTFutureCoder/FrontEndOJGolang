@@ -10,7 +10,7 @@ import (
 )
 
 type submitReq struct {
-	LabId uint64 `json:"lab_id"`
+	LabId      uint64 `json:"lab_id"`
 	SubmitData string `json:"submit_data"`
 }
 
@@ -23,9 +23,10 @@ func Submit(c *gin.Context) {
 	var req submitReq
 	c.BindJSON(&req)
 
-
 	userSession := app.GetUserFromSession(appG)
-	if userSession.Id == 0 {return}
+	if userSession.Id == 0 {
+		return
+	}
 
 	if app.LimitUserSubmitFluency(userSession.Id) {
 		appG.RespErr(e.TOO_MANY_REQUESTS, nil)

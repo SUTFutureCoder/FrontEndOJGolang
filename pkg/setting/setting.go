@@ -56,7 +56,7 @@ var ToolSetting = &Tool{}
 
 type Judger struct {
 	JudgerAddr string
-	HttpPort string
+	HttpPort   string
 }
 
 var JudgerSetting = &Judger{}

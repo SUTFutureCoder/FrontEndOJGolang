@@ -27,7 +27,7 @@ func ModifyLab(c *gin.Context) {
 	}
 	var req modifyReq
 	err := c.BindJSON(&req)
-	if err != nil || req.Id == 0{
+	if err != nil || req.Id == 0 {
 		appG.RespErr(e.INVALID_PARAMS, nil)
 		return
 	}

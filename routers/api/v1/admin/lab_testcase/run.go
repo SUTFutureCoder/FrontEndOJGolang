@@ -13,7 +13,7 @@ import (
 )
 
 type testcaseRunReq struct {
-	LabId uint64 `json:"lab_id"`
+	LabId       uint64             `json:"lab_id"`
 	LabTestcase models.LabTestcase `json:"lab_testcase"`
 }
 
