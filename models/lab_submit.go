@@ -207,12 +207,15 @@ func GetLabSubmitSummary(labIds []interface{}) map[uint64]*SubmitSummary {
 }
 
 type UserSubmitSummary struct {
-	UserSubmitSummary       *SubmitSummary
-	UserLabSubmitSummaryMap map[uint64]*SubmitSummary
+	UserSubmitSummary       *SubmitSummary `json:"user_submit_summary"`
+	UserLabSubmitSummaryMap map[uint64]*SubmitSummary `json:"user_submit_summary_labmap"`
 }
 
 func SummaryUserSubmits(userIds []interface{}) map[uint64]*UserSubmitSummary {
 	userSummary := make(map[uint64]*UserSubmitSummary)
+	if len(userIds) == 0 {
+		return userSummary
+	}
 	rows, err := DB.Query("SELECT creator_id, count(*) as cnt, lab_id, status FROM lab_submit WHERE creator_id IN (?"+strings.Repeat(",?", len(userIds)-1)+")"+" GROUP BY creator_id, lab_id, status", userIds...)
 	if err != nil {
 		log.Printf("get user submit summary from db error [%#v]", err)
@@ -254,4 +257,70 @@ func SummaryUserSubmits(userIds []interface{}) map[uint64]*UserSubmitSummary {
 		}
 	}
 	return userSummary
+}
+
+type SummaryUserYearSubmit struct {
+	Date string `json:"date"`
+	Count int `json:"count"`
+}
+func SummaryUserYearSummary(userIds []interface{}) map[uint64][]SummaryUserYearSubmit {
+	summary := make(map[uint64][]SummaryUserYearSubmit)
+	if len(userIds) == 0 {
+		return summary
+	}
+	rows, err := DB.Query("SELECT creator_id, count(*) as count, DATE_FORMAT(FROM_UNIXTIME(create_time/1000),'%Y-%m-%d') as date FROM lab_submit WHERE creator_id IN (?"+strings.Repeat(",?", len(userIds)-1)+")"+" GROUP BY creator_id, DATE_FORMAT(FROM_UNIXTIME(create_time/1000),'%Y-%m-%d')", userIds...)
+	if err != nil {
+		log.Printf("get user year summary from db error [%#v]", err)
+		return summary
+	}
+	defer rows.Close()
+	for rows.Next() {
+		var (
+			userId uint64
+			tmpSummary SummaryUserYearSubmit
+		)
+		err = rows.Scan(&userId, &tmpSummary.Count, &tmpSummary.Date)
+		if _, ok := summary[userId]; !ok {
+			summary[userId] = make([]SummaryUserYearSubmit, 0)
+		}
+		summary[userId] = append(summary[userId], tmpSummary)
+	}
+	return summary
+}
+
+func GetUserDaySubmits(userId, time uint64) []LabSubmit {
+	var labSubmits []LabSubmit
+	stmt, err := DB.Prepare("SELECT id, lab_id, submit_data, submit_result, submit_time_usage, status, creator_id, creator, create_time, update_time FROM lab_submit WHERE creator_id=? AND create_time>=? AND create_time<=? ORDER BY id DESC")
+	if err != nil {
+		log.Printf("get user day submits from db error [%#v]", err)
+		return labSubmits
+	}
+	defer stmt.Close()
+	nextTime := time + 86400 * 1000
+	rows, err := stmt.Query(
+			&userId,
+			&time,
+			&nextTime,
+		)
+	if err != nil {
+		log.Printf("query user day submits from db error [%#v]", err)
+		return labSubmits
+	}
+	for rows.Next() {
+		var labSubmit LabSubmit
+		rows.Scan(
+			&labSubmit.ID,
+			&labSubmit.LabID,
+			&labSubmit.SubmitData,
+			&labSubmit.SubmitResult,
+			&labSubmit.SubmitTimeUsage,
+			&labSubmit.Status,
+			&labSubmit.CreatorId,
+			&labSubmit.Creator,
+			&labSubmit.CreateTime,
+			&labSubmit.UpdateTime,
+		)
+		labSubmits = append(labSubmits, labSubmit)
+	}
+	return labSubmits
 }

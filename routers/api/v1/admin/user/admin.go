@@ -72,12 +72,19 @@ func CreateUser(c *gin.Context) {
 		appG.RespErr(e.INVALID_PARAMS, err.Error())
 		return
 	}
-
 	passByte, _ := bcrypt.GenerateFromPassword([]byte(req.UserPasswd), bcrypt.DefaultCost)
 	user.Creator = req.UserName
 	user.UserPassword = string(passByte)
 	user.UserType = req.UserType
 	user.CreatorId = userSession.Id
+
+	// check if user have exist
+	exist, err := user.CheckExist()
+	if err != nil || exist {
+		appG.RespErr(e.INVALID_PARAMS, "username exist")
+		return
+	}
+
 	err = user.Insert()
 	if err != nil {
 		appG.RespErr(e.INVALID_PARAMS, nil)

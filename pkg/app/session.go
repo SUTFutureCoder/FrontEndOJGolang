@@ -46,7 +46,7 @@ func ExpireSession(c *gin.Context) error {
 	session := sessions.Default(c)
 	session.Set(setting.SessionSetting.SessionUser, "")
 	session.Options(sessions.Options{
-		MaxAge:   200,
+		MaxAge:   20,
 		Path:     "/",
 		HttpOnly: true,
 	})
@@ -59,25 +59,39 @@ func ExpireSession(c *gin.Context) error {
 }
 
 func GetUserFromSession(appG Gin) UserSession {
+	return getUserFromSession(appG, true)
+}
+
+func GetUserFromSessionNoRespErr(appG Gin) UserSession {
+	return getUserFromSession(appG, false)
+}
+
+func getUserFromSession(appG Gin, respErr bool) UserSession {
 	session := sessions.Default(appG.C).Get(setting.SessionSetting.SessionUser)
 	if session == nil {
 		log.Printf("get session nil")
-		appG.RespErr(e.NOT_LOGINED, nil)
-		appG.C.Abort()
+		if respErr {
+			appG.RespErr(e.NOT_LOGINED, nil)
+			appG.C.Abort()
+		}
 		return UserSession{}
 	}
 
 	userSession, parseOk := session.(UserSession)
 	if !parseOk {
 		log.Printf("[ERROR] parse user info error err session[%#v]", session)
-		appG.RespErr(e.NOT_LOGINED, nil)
-		appG.C.Abort()
+		if respErr {
+			appG.RespErr(e.NOT_LOGINED, nil)
+			appG.C.Abort()
+		}
 		return UserSession{}
 	}
 
 	if userSession.Id == 0 {
-		appG.RespErr(e.NOT_LOGINED, nil)
-		appG.C.Abort()
+		if respErr {
+			appG.RespErr(e.NOT_LOGINED, nil)
+			appG.C.Abort()
+		}
 		return UserSession{}
 	}
 	appG.C.Set(USERSESSION, userSession)
@@ -95,5 +109,5 @@ func CheckUserAdmin(c *gin.Context) {
 		return
 	}
 	c.Set(USERSESSION, session)
-	return
+	c.Next()
 }

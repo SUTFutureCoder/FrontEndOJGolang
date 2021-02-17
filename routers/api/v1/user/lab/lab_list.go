@@ -28,7 +28,7 @@ func LabList(c *gin.Context) {
 		appGin.RespErr(e.INVALID_PARAMS, err)
 		return
 	}
-
+	app.GetUserFromSession(appGin)
 	var resp labListResp
 	if req.LabId != 0 {
 		resp.LabList, err = models.GetLabListById(req.LabId, models.STATUS_ENABLE)

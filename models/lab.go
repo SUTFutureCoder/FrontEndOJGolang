@@ -5,6 +5,7 @@ import (
 	"database/sql"
 	"log"
 	"strconv"
+	"strings"
 )
 
 // Lab 实验室表
@@ -214,4 +215,30 @@ func (lab *Lab) Modify() {
 		return
 	}
 	return
+}
+
+// 无视status直接返回根据id检索内容
+func GetByLabIds(labIds []interface{}) []Lab {
+	var labs []Lab
+	if len(labIds) == 0 {
+		return labs
+	}
+	rows, err := DB.Query("SELECT id, lab_name, lab_desc, lab_type, lab_sample, lab_template, status, creator_id, creator, create_time, update_time FROM lab WHERE id IN (?"+strings.Repeat(",?", len(labIds)-1)+")", labIds...)
+	defer rows.Close()
+	if err != nil {
+		log.Printf("get lab list by ids error [%v]\n", err)
+		return labs
+	}
+	for rows.Next() {
+		var lab Lab
+		err = rows.Scan(
+			&lab.ID, &lab.LabName, &lab.LabDesc, &lab.LabType, &lab.LabSample, &lab.LabTemplate, &lab.Status, &lab.CreatorId, &lab.Creator, &lab.CreateTime, &lab.UpdateTime,
+			)
+		if err != nil {
+			log.Printf("scan lab list by ids ")
+			return labs
+		}
+		labs = append(labs, lab)
+	}
+	return labs
 }

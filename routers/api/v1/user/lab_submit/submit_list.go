@@ -59,3 +59,41 @@ func SubmitListByLabId(c *gin.Context) {
 	}
 	appG.RespSucc(labSubmits)
 }
+
+
+type daySubmitsReq struct {
+	Time uint64 `json:"time"`
+}
+type daySubmitsResp struct {
+	LabNameHash map[uint64]string `json:"lab_name_hash"`
+	Submits []models.LabSubmit `json:"submits"`
+}
+func DaySubmits(c *gin.Context) {
+	appG := app.Gin{
+		C: c,
+	}
+	var req daySubmitsReq
+	var resp daySubmitsResp
+	err := c.BindJSON(&req)
+	userSession := app.GetUserFromSession(appG)
+	if userSession.Id == 0 {
+		return
+	}
+	if err != nil {
+		appG.RespErr(e.INVALID_PARAMS, nil)
+		return
+	}
+	resp.Submits = models.GetUserDaySubmits(userSession.Id, req.Time)
+	// getLabIds
+	var labIds []interface{}
+	for _, v := range resp.Submits {
+		labIds = append(labIds, v.LabID)
+	}
+	labList := models.GetByLabIds(labIds)
+	// parsehash
+	resp.LabNameHash = make(map[uint64]string)
+	for _, v := range labList {
+		resp.LabNameHash[v.ID] = v.LabName
+	}
+	appG.RespSucc(resp)
+}

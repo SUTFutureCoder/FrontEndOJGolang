@@ -38,7 +38,7 @@ func LabListAndSummary(c *gin.Context) {
 	var resp listWithSummaryResp
 	err := c.BindJSON(&req)
 
-	userSession := app.GetUserFromSession(appG)
+	userSession := app.GetUserFromSessionNoRespErr(appG)
 
 	if err != nil {
 		log.Printf("bind json error while get lab list[%#v]", err)

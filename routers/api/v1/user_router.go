@@ -32,6 +32,8 @@ func InitUserRouter(r *gin.Engine) {
 	userGroup.POST("/logout", user.Logout)
 	userGroup.POST("/whoami", user.WhoAmI)
 	userGroup.POST("/summary", user.Summary)
+	userGroup.POST("/year_submit_summary", user.YearSubmitSummary)
+	userGroup.POST("/day_submits", lab_submit.DaySubmits)
 	userGroup.POST("/change_pwd", user.ChangePwd)
 
 	// 工具
