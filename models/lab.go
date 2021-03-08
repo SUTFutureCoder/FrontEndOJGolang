@@ -24,14 +24,8 @@ type Lab struct {
 }
 
 const (
-	LABTYPE_HTML = iota
-	LABTYPE_CSS
-	LABTYPE_JS
-	LABTYPE_VUE
-	LABTYPE_COMPLEX
-	LABTYPE_PRD
+	LABTYPE_NORMAL = iota
 	LABTYPE_IMITATE
-	LABTYPE_SECURITY
 )
 
 func (lab *Lab) Insert() (int64, error) {

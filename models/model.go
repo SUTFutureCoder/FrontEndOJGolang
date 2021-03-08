@@ -10,6 +10,7 @@ import (
 )
 
 const (
+	STATUS_HIDE 		= -3
 	STATUS_CONSTRUCTING = -2
 	STATUS_ALL          = -1
 	STATUS_DISABLE      = 0
@@ -20,7 +21,7 @@ type Model struct {
 	// ID 自增ID
 	ID uint64 `json:"id"`
 	// Status 实验室状态
-	Status int8 `json:"status"`
+	Status int `json:"status"`
 	// CreatorId 创建人Id
 	CreatorId uint64 `json:"creator_id"`
 	// Creator 创建人

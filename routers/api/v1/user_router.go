@@ -4,7 +4,7 @@ import (
 	"FrontEndOJGolang/routers/api/v1/user/judger"
 	"FrontEndOJGolang/routers/api/v1/user/lab"
 	"FrontEndOJGolang/routers/api/v1/user/lab_submit"
-	"FrontEndOJGolang/routers/api/v1/user/tools"
+	"FrontEndOJGolang/routers/api/v1/user/tools/file"
 	"FrontEndOJGolang/routers/api/v1/user/user"
 	"FrontEndOJGolang/routers/api/v1/user/ws"
 	"github.com/gin-gonic/gin"
@@ -38,9 +38,10 @@ func InitUserRouter(r *gin.Engine) {
 
 	// 工具
 	tool := r.Group("/tool")
-	tool.GET("/getfile", tools.GetFile)
-	tool.POST("/uploadfile", tools.UploadFile)
+	tool.GET("/getfile", file.GetFile)
+	tool.POST("/uploadfile", file.UploadFile)
 
 	// websocket
 	r.GET("/ws", ws.Ws)
+	r.GET("/ws_judger", ws.WsJudger)
 }

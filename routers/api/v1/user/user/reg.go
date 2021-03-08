@@ -9,13 +9,28 @@ import (
 	"log"
 )
 
+type regReq struct {
+	UserName string `json:"user_name"`
+	UserPassWord string `json:"user_password"`
+}
+
 func Reg(c *gin.Context) {
 	appG := app.Gin{
 		C: c,
 	}
 
+	var req regReq
+	err := c.BindJSON(&req)
+	if err != nil || req.UserName == "" || req.UserPassWord == ""{
+		appG.RespErr(e.INVALID_PARAMS, "please check your param")
+		return
+	}
+
 	user := models.User{}
-	prepare(&user, c)
+	user.Creator = req.UserName
+	passByte, _ := bcrypt.GenerateFromPassword([]byte(req.UserPassWord), bcrypt.DefaultCost)
+	user.UserPassword = string(passByte)
+	user.UserType = models.USERTYPE_NORMAL
 
 	// check if user have exist
 	exist, err := user.CheckExist()
@@ -31,12 +46,4 @@ func Reg(c *gin.Context) {
 		return
 	}
 	appG.RespSucc(nil)
-}
-
-func prepare(user *models.User, c *gin.Context) {
-	user.Creator, _ = c.GetPostForm("user_name")
-	userPassword, _ := c.GetPostForm("user_password")
-	passByte, _ := bcrypt.GenerateFromPassword([]byte(userPassword), bcrypt.DefaultCost)
-	user.UserPassword = string(passByte)
-	user.UserType = models.USERTYPE_NORMAL
 }

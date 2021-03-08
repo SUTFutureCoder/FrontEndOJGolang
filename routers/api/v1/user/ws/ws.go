@@ -3,6 +3,7 @@ package ws
 import (
 	"FrontEndOJGolang/pkg/app"
 	"FrontEndOJGolang/pkg/e"
+	"FrontEndOJGolang/pkg/setting"
 	"FrontEndOJGolang/pkg/strategy"
 	ws "FrontEndOJGolang/pkg/websocket"
 	"github.com/gin-gonic/gin"
@@ -10,10 +11,6 @@ import (
 	"log"
 	"net/http"
 )
-
-var upGrader = websocket.Upgrader{CheckOrigin: func(r *http.Request) bool {
-	return true
-}}
 
 func Ws(c *gin.Context) {
 	appG := app.Gin{
@@ -25,6 +22,38 @@ func Ws(c *gin.Context) {
 		return
 	}
 
+	handleWsConn(c, &appG, user)
+}
+
+// user id start from 10000
+var JudgerId uint64 = 0
+
+func WsJudger(c *gin.Context) {
+	appG := app.Gin {
+		C: c,
+	}
+	// session token可直接注册
+	if setting.SessionSetting.Token != c.GetHeader("session_token") {
+		appG.RespErr(e.ERROR, "websocket session token error")
+		return
+	}
+	JudgerId++
+	session := app.UserSession {
+		Id: JudgerId,
+		Name: "JUDGER",
+	}
+	handleWsConn(c, &appG, session)
+}
+
+func handleWsConn(c *gin.Context, appG *app.Gin, user app.UserSession) {
+	upGrader := websocket.Upgrader{
+		// cross origin domain
+		CheckOrigin: func(r *http.Request) bool {
+			return true
+		},
+		// 处理 Sec-WebSocket-Protocol Header
+		Subprotocols: []string{c.GetHeader("Sec-WebSocket-Protocol")},
+	}
 	conn, err := upGrader.Upgrade(c.Writer, c.Request, nil)
 	if err != nil {
 		appG.RespErr(e.ERROR, "websocket upgrade error")
@@ -72,7 +101,7 @@ func readData(c *ws.WsClientConn) {
 		}
 
 		// exec
-		strategy.ExecStrategy(wsJsonReq.Cmd)
+		strategy.ExecStrategy(wsJsonReq.Cmd, wsJsonReq.Data)
 	}
 }
 
