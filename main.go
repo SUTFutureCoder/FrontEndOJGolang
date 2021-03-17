@@ -3,7 +3,6 @@ package main
 import (
 	"FrontEndOJGolang/models"
 	"FrontEndOJGolang/pkg/setting"
-	"FrontEndOJGolang/pkg/strategy"
 	"FrontEndOJGolang/pkg/websocket"
 	"FrontEndOJGolang/routers"
 	"fmt"
@@ -17,7 +16,6 @@ func init() {
 	setting.Check()
 	models.Setup()
 	go websocket.NewWsHub().Setup()
-	strategy.Setup()
 }
 
 func main() {

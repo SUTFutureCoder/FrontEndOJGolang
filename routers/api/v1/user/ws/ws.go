@@ -83,6 +83,9 @@ func readData(c *ws.WsClientConn) {
 		c.Hub.Unregister <- c
 		c.Conn.Close()
 	}()
+	s := &startegy.Strategy {
+		Context: c,
+	}
 	for {
 		wsJsonReq := &WsJsonReq{}
 		err := c.Conn.ReadJSON(wsJsonReq)
@@ -101,7 +104,7 @@ func readData(c *ws.WsClientConn) {
 		}
 
 		// exec
-		strategy.ExecStrategy(wsJsonReq.Cmd, wsJsonReq.Data)
+		s.ExecStrategy(wsJsonReq.Cmd, wsJsonReq.Data)
 	}
 }
 
