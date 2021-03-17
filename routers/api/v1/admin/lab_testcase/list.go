@@ -22,12 +22,14 @@ func List(c *gin.Context) {
 		return
 	}
 
-	testcaseIds, err := models.GetLabTestcaseMapByLabId(req.LabId)
+	labTestCaseMap := &models.LabTestcaseMap{}
+	testcaseIds, err := labTestCaseMap.GetLabTestcaseMapByLabId(req.LabId)
 	if len(testcaseIds) == 0 {
 		appG.RespSucc(nil)
 		return
 	}
-	labTestCases, err := models.GetTestcaseByIds(testcaseIds)
+	labTestCase := &models.LabTestcase{}
+	labTestCases, err := labTestCase.GetTestcaseByIds(testcaseIds)
 
 	appG.RespSucc(labTestCases)
 	return

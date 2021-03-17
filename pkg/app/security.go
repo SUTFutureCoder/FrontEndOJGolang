@@ -9,7 +9,8 @@ import (
  * 限制重复提交频率
  */
 func LimitUserSubmitFluency(userId uint64) bool {
-	labSubmit, err := models.GetUserLastSubmit(userId)
+	labSubmit := &models.LabSubmit{}
+	err := labSubmit.GetUserLastSubmit(userId)
 	if err != nil || labSubmit.ID == 0 {
 		return false
 	}

@@ -52,7 +52,7 @@ func (lab *Lab) Insert() (int64, error) {
 	return ret.LastInsertId()
 }
 
-func GetLabListById(labId uint64, status int) ([]Lab, error) {
+func (lab *Lab) GetLabListById(labId uint64, status int) ([]Lab, error) {
 	var stmt *sql.Stmt
 	var rows *sql.Rows
 	var err error
@@ -89,7 +89,7 @@ func GetLabListById(labId uint64, status int) ([]Lab, error) {
 	return labList, err
 }
 
-func GetLabList(page Pager, status int) ([]Lab, error) {
+func (lab *Lab) GetLabList(page Pager, status int) ([]Lab, error) {
 	DefaultPage(&page.Page, &page.PageSize)
 	offset := (page.Page - 1) * page.PageSize
 
@@ -131,7 +131,7 @@ func GetLabList(page Pager, status int) ([]Lab, error) {
 	return labList, err
 }
 
-func GetLabListCount(status int) (int, error) {
+func (lab *Lab) GetLabListCount(status int) (int, error) {
 	var stmt *sql.Stmt
 	var err error
 	if status != STATUS_ALL {
@@ -151,7 +151,7 @@ func GetLabListCount(status int) (int, error) {
 	return cnt, err
 }
 
-func GetLabFullCount() (int, error) {
+func (lab *Lab) GetLabFullCount() (int, error) {
 	stmt, err := DB.Prepare("SELECT count(1) as cnt FROM lab")
 	defer stmt.Close()
 	if err != nil {
@@ -164,11 +164,10 @@ func GetLabFullCount() (int, error) {
 	return cnt, err
 }
 
-func GetLabFullInfo(id uint64) (Lab, error) {
-	var lab Lab
+func (lab *Lab) GetLabFullInfo(id uint64) error {
 	stmt, err := DB.Prepare("SELECT id, lab_name, lab_desc, lab_type, lab_sample, lab_template, status, creator_id, creator, create_time, update_time FROM lab WHERE id=?")
 	if err != nil {
-		return lab, err
+		return err
 	}
 	defer stmt.Close()
 	row := stmt.QueryRow(&id)
@@ -177,12 +176,12 @@ func GetLabFullInfo(id uint64) (Lab, error) {
 	)
 	if err != nil {
 		log.Printf("get lab info error [%v]\n", err)
-		return lab, err
+		return err
 	}
-	return lab, err
+	return err
 }
 
-func ModifyLabStatus(id uint64, status int) bool {
+func (lab *Lab) ModifyLabStatus(id uint64, status int) bool {
 	stmt, err := DB.Prepare("UPDATE lab SET status=?, update_time=? WHERE id=?")
 	if err != nil {
 		log.Printf("update lab status error [%#v]", err)
@@ -212,7 +211,7 @@ func (lab *Lab) Modify() {
 }
 
 // 无视status直接返回根据id检索内容
-func GetByLabIds(labIds []interface{}) []Lab {
+func (lab *Lab) GetByLabIds(labIds []interface{}) []Lab {
 	var labs []Lab
 	if len(labIds) == 0 {
 		return labs

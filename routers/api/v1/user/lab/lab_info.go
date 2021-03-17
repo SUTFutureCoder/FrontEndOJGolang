@@ -33,12 +33,13 @@ func LabInfo(c *gin.Context) {
 		return
 	}
 	resp.LabInfo.ID = req.Id
-	resp.LabInfo, err = models.GetLabFullInfo(resp.LabInfo.ID)
+	lab := &models.Lab{}
+	err = lab.GetLabFullInfo(resp.LabInfo.ID)
 	if err != nil {
 		appGin.RespErr(e.ERROR, err)
 		return
 	}
-
+	resp.LabInfo = *lab
 	if userSession.UserType != models.USERTYPE_ADMIN {
 		resp.LabInfo.LabSample = ""
 	}

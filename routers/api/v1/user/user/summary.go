@@ -23,7 +23,9 @@ func Summary(c *gin.Context) {
 
 	userIds := make([]interface{}, 0)
 	userIds = append(userIds, userSession.Id)
-	userSubmitsSummary := models.SummaryUserSubmits(userIds)
+
+	labSubmit := &models.LabSubmit{}
+	userSubmitsSummary := labSubmit.SummaryUserSubmits(userIds)
 	if _, ok := userSubmitsSummary[userSession.Id]; !ok {
 		appG.RespSucc(*userSubmitSummary)
 		return
@@ -45,7 +47,9 @@ func YearSubmitSummary(c *gin.Context) {
 	}
 	var userIds []interface{}
 	userIds = append(userIds, userSession.Id)
-	submitSummary := models.SummaryUserYearSummary(userIds)
+
+	labSubmit := &models.LabSubmit{}
+	submitSummary := labSubmit.SummaryUserYearSummary(userIds)
 	if _, ok := submitSummary[userSession.Id]; !ok {
 		appG.RespSucc(nil)
 		return

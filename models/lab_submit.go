@@ -76,7 +76,7 @@ func (labSubmit *LabSubmit) Insert() (int64, error) {
 	return insertRet.LastInsertId()
 }
 
-func GetUserLabSubmits(creatorId uint64, pager Pager) ([]LabSubmit, error) {
+func (labSubmit *LabSubmit) GetUserLabSubmits(creatorId uint64, pager Pager) ([]LabSubmit, error) {
 	var stmt *sql.Stmt
 	var err error
 	if creatorId == 0 {
@@ -112,7 +112,7 @@ func GetUserLabSubmits(creatorId uint64, pager Pager) ([]LabSubmit, error) {
 	return labSubmits, err
 }
 
-func GetUserLabSubmitsByLabId(creatorId uint64, labId uint64) ([]LabSubmit, error) {
+func (labSubmit *LabSubmit) GetUserLabSubmitsByLabId(creatorId uint64, labId uint64) ([]LabSubmit, error) {
 	var err error
 	stmt, err := DB.Prepare("SELECT id, lab_id, submit_result, submit_time_usage, status, creator_id, creator, create_time, update_time FROM lab_submit WHERE creator_id = ? AND lab_id = ? ORDER BY id desc")
 	defer stmt.Close()
@@ -139,7 +139,7 @@ func GetUserLabSubmitsByLabId(creatorId uint64, labId uint64) ([]LabSubmit, erro
 	return labSubmits, err
 }
 
-func GetUserLastSubmit(userId uint64) (LabSubmit, error) {
+func (labSubmit *LabSubmit) GetUserLastSubmit(userId uint64) error {
 	stmt, err := DB.Prepare("SELECT id, lab_id, submit_result, submit_time_usage, status, creator_id, creator, create_time, update_time FROM lab_submit WHERE creator_id = ? ORDER BY id desc LIMIT 1")
 	defer stmt.Close()
 	row := stmt.QueryRow(
@@ -157,7 +157,7 @@ func GetUserLastSubmit(userId uint64) (LabSubmit, error) {
 		&labSubmitRow.CreateTime,
 		&labSubmitRow.UpdateTime,
 	)
-	return labSubmitRow, err
+	return err
 
 }
 
@@ -168,7 +168,7 @@ type SubmitSummary struct {
 	CountJuding int `json:"count_juding"`
 }
 
-func GetLabSubmitSummary(labIds []interface{}) map[uint64]*SubmitSummary {
+func (labSubmit *LabSubmit) GetLabSubmitSummary(labIds []interface{}) map[uint64]*SubmitSummary {
 	submitSummaryMap := make(map[uint64]*SubmitSummary)
 	if len(labIds) == 0 {
 		return submitSummaryMap
@@ -211,7 +211,7 @@ type UserSubmitSummary struct {
 	UserLabSubmitSummaryMap map[uint64]*SubmitSummary `json:"user_submit_summary_labmap"`
 }
 
-func SummaryUserSubmits(userIds []interface{}) map[uint64]*UserSubmitSummary {
+func (labSubmit *LabSubmit) SummaryUserSubmits(userIds []interface{}) map[uint64]*UserSubmitSummary {
 	userSummary := make(map[uint64]*UserSubmitSummary)
 	if len(userIds) == 0 {
 		return userSummary
@@ -263,7 +263,7 @@ type SummaryUserYearSubmit struct {
 	Date string `json:"date"`
 	Count int `json:"count"`
 }
-func SummaryUserYearSummary(userIds []interface{}) map[uint64][]SummaryUserYearSubmit {
+func (labSubmit *LabSubmit) SummaryUserYearSummary(userIds []interface{}) map[uint64][]SummaryUserYearSubmit {
 	summary := make(map[uint64][]SummaryUserYearSubmit)
 	if len(userIds) == 0 {
 		return summary
@@ -288,7 +288,7 @@ func SummaryUserYearSummary(userIds []interface{}) map[uint64][]SummaryUserYearS
 	return summary
 }
 
-func GetUserDaySubmits(userId, time uint64) []LabSubmit {
+func (labSubmit *LabSubmit) GetUserDaySubmits(userId, time uint64) []LabSubmit {
 	var labSubmits []LabSubmit
 	stmt, err := DB.Prepare("SELECT id, lab_id, submit_data, submit_result, submit_time_usage, status, creator_id, creator, create_time, update_time FROM lab_submit WHERE creator_id=? AND create_time>=? AND create_time<=? ORDER BY id DESC")
 	if err != nil {

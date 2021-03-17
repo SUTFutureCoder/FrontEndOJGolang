@@ -33,7 +33,8 @@ func ModifyLab(c *gin.Context) {
 	}
 
 	// get lab
-	lab, err := models.GetLabFullInfo(req.Id)
+	lab := &models.Lab{}
+	err = lab.GetLabFullInfo(req.Id)
 	if err != nil {
 		appG.RespErr(e.INVALID_PARAMS, nil)
 		return

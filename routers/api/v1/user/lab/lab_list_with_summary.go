@@ -52,12 +52,13 @@ func LabListAndSummary(c *gin.Context) {
 	if userSession.Id == 0 || userSession.UserType != models.USERTYPE_ADMIN {
 		status = models.STATUS_ENABLE
 	}
+	lab := &models.Lab{}
 	if req.LabId != 0 {
-		labs, err = models.GetLabListById(req.LabId, status)
+		labs, err = lab.GetLabListById(req.LabId, status)
 		resp.Count = len(labs)
 	} else {
-		labs, err = models.GetLabList(req.Pager, status)
-		resp.Count, err = models.GetLabFullCount()
+		labs, err = lab.GetLabList(req.Pager, status)
+		resp.Count, err = lab.GetLabFullCount()
 	}
 
 	if err != nil {
@@ -71,8 +72,10 @@ func LabListAndSummary(c *gin.Context) {
 		labIds = append(labIds, lab.ID)
 	}
 
-	labSubmitSummary := models.GetLabSubmitSummary(labIds)
-	labTestcaseCnt := models.GetLabTestcaseCntByLabIds(labIds)
+	labSubmit := &models.LabSubmit{}
+	labTestCaseMap := &models.LabTestcaseMap{}
+	labSubmitSummary := labSubmit.GetLabSubmitSummary(labIds)
+	labTestcaseCnt := labTestCaseMap.GetLabTestcaseCntByLabIds(labIds)
 	// summary
 	for _, lab := range labs {
 		var tmpLabListwithsummary labListWithSummary

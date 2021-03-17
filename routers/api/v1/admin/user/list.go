@@ -42,8 +42,9 @@ func List(c *gin.Context) {
 	}
 
 	var users []models.User
-	users, err = models.GetUserList(req.SearchParam, req.Pager)
-	resp.Count, err = models.GetUserCount(req.SearchParam, req.Pager)
+	u := &models.User{}
+	users, err = u.GetUserList(req.SearchParam, req.Pager)
+	resp.Count, err = u.GetUserCount(req.SearchParam, req.Pager)
 
 	if err != nil {
 		log.Printf("get db list error while get lab list[%#v]", err)
@@ -61,7 +62,8 @@ func List(c *gin.Context) {
 		return
 	}
 
-	userSubmitSummary := models.SummaryUserSubmits(userIds)
+	labSubmit := &models.LabSubmit{}
+	userSubmitSummary := labSubmit.SummaryUserSubmits(userIds)
 
 	// summary
 	for _, user := range users {

@@ -24,7 +24,8 @@ func DisableUser(c *gin.Context) {
 		return
 	}
 
-	if !models.ModifyUserStatus(req.UserId, models.STATUS_DISABLE) {
+	u := &models.User{}
+	if !u.ModifyUserStatus(req.UserId, models.STATUS_DISABLE) {
 		appG.RespErr(e.INVALID_PARAMS, nil)
 		return
 	}
@@ -42,7 +43,8 @@ func EnableUser(c *gin.Context) {
 		return
 	}
 
-	if !models.ModifyUserStatus(req.UserId, models.STATUS_ENABLE) {
+	u := &models.User{}
+	if !u.ModifyUserStatus(req.UserId, models.STATUS_ENABLE) {
 		appG.RespErr(e.INVALID_PARAMS, nil)
 		return
 	}
@@ -175,8 +177,9 @@ func ModifyUser(c *gin.Context) {
 		return
 	}
 
+	user := &models.User{}
 	// check user exists
-	user := models.GetUserById(req.UserId)
+	user.GetUserById(req.UserId)
 	if user.ID == 0 {
 		appG.RespErr(e.INVALID_PARAMS, "user not exists")
 		return

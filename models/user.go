@@ -43,12 +43,11 @@ func (u *User) GetByName() error {
 	return err
 }
 
-func GetUserById(userId uint64) *User {
-	var u User
+func (u *User) GetUserById(userId uint64) {
 	stmt, err := DB.Prepare("SELECT id, user_password, user_type, status, creator, create_time, update_time FROM user WHERE id=?")
 	if err != nil {
 		log.Printf("[ERROR] prepare sql error user[%v] err[%v]", u, err)
-		return &u
+		return
 	}
 	defer stmt.Close()
 	row := stmt.QueryRow(
@@ -63,7 +62,7 @@ func GetUserById(userId uint64) *User {
 		&u.CreateTime,
 		&u.UpdateTime,
 	)
-	return &u
+	return
 }
 
 func (u *User) Insert() error {
@@ -147,7 +146,7 @@ func prepareUserSearchParams(searchParam *UserSearchParam, pager *Pager, stmtPre
 
 }
 
-func GetUserList(searchParam UserSearchParam, pager Pager) ([]User, error) {
+func (u *User) GetUserList(searchParam UserSearchParam, pager Pager) ([]User, error) {
 	stmtPrepare := "SELECT id, user_type, status, creator_id, creator, create_time, update_time FROM user "
 	var querys []interface{}
 
@@ -180,7 +179,7 @@ func GetUserList(searchParam UserSearchParam, pager Pager) ([]User, error) {
 	return userList, err
 }
 
-func GetUserCount(searchParam UserSearchParam, pager Pager) (int, error) {
+func (u *User) GetUserCount(searchParam UserSearchParam, pager Pager) (int, error) {
 	stmtPrepare := "SELECT count(1) as cnt FROM user "
 	var querys []interface{}
 
@@ -213,7 +212,7 @@ func (u *User) GrantUserType() bool {
 	return true
 }
 
-func ModifyUserStatus(id uint64, status int) bool {
+func (u *User) ModifyUserStatus(id uint64, status int) bool {
 	stmt, err := DB.Prepare("UPDATE user SET status=?, update_time=? WHERE id=?")
 	if err != nil {
 		log.Printf("update user status error [%#v]", err)

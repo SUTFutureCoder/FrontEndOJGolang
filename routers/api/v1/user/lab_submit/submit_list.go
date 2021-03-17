@@ -20,7 +20,8 @@ func SubmitList(c *gin.Context) {
 	}
 
 	pager := models.ToPager(c)
-	labSubmits, err := models.GetUserLabSubmits(userSession.Id, pager)
+	labSubmit := &models.LabSubmit{}
+	labSubmits, err := labSubmit.GetUserLabSubmits(userSession.Id, pager)
 	if err != nil {
 		log.Printf("[ERROR] get user lab submits err[%v] userId[%d]", err, userSession.Id)
 		appG.RespErr(e.ERROR, nil)
@@ -50,8 +51,8 @@ func SubmitListByLabId(c *gin.Context) {
 		appG.RespErr(e.INVALID_PARAMS, "invalid params")
 		return
 	}
-
-	labSubmits, err := models.GetUserLabSubmitsByLabId(userSession.Id, req.LabId)
+	labSubmit := &models.LabSubmit{}
+	labSubmits, err := labSubmit.GetUserLabSubmitsByLabId(userSession.Id, req.LabId)
 	if err != nil {
 		log.Printf("[ERROR] get user lab submits by lab ids err[%v] userId[%d] labId[%s]", err, userSession.Id, req.LabId)
 		appG.RespErr(e.ERROR, nil)
@@ -83,13 +84,16 @@ func DaySubmits(c *gin.Context) {
 		appG.RespErr(e.INVALID_PARAMS, nil)
 		return
 	}
-	resp.Submits = models.GetUserDaySubmits(userSession.Id, req.Time)
+	labSubmit := &models.LabSubmit{}
+	resp.Submits = labSubmit.GetUserDaySubmits(userSession.Id, req.Time)
 	// getLabIds
 	var labIds []interface{}
 	for _, v := range resp.Submits {
 		labIds = append(labIds, v.LabID)
 	}
-	labList := models.GetByLabIds(labIds)
+
+	lab := &models.Lab{}
+	labList := lab.GetByLabIds(labIds)
 	// parsehash
 	resp.LabNameHash = make(map[uint64]string)
 	for _, v := range labList {
