@@ -54,11 +54,11 @@ func LabListAndSummary(c *gin.Context) {
 	}
 	lab := &models.Lab{}
 	if req.LabId != 0 {
-		labs, err = lab.GetLabListById(req.LabId, status)
+		labs, err = lab.GetListById(req.LabId, status)
 		resp.Count = len(labs)
 	} else {
-		labs, err = lab.GetLabList(req.Pager, status)
-		resp.Count, err = lab.GetLabFullCount()
+		labs, err = lab.GetList(req.Pager, status)
+		resp.Count, err = models.GetCountByStatus(models.TABLE_LAB, models.STATUS_ALL)
 	}
 
 	if err != nil {
@@ -74,8 +74,8 @@ func LabListAndSummary(c *gin.Context) {
 
 	labSubmit := &models.LabSubmit{}
 	labTestCaseMap := &models.LabTestcaseMap{}
-	labSubmitSummary := labSubmit.GetLabSubmitSummary(labIds)
-	labTestcaseCnt := labTestCaseMap.GetLabTestcaseCntByLabIds(labIds)
+	labSubmitSummary := labSubmit.GetSummary(labIds)
+	labTestcaseCnt := labTestCaseMap.GetCntByLabIds(labIds)
 	// summary
 	for _, lab := range labs {
 		var tmpLabListwithsummary labListWithSummary

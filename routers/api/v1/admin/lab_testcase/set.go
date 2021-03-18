@@ -37,7 +37,7 @@ func Set(c *gin.Context) {
 	// set trans
 	tx, err := models.DB.Begin()
 	// invalid all formal testcases
-	formalLabTestcaseMap.InvalidLabAllTestcases(tx)
+	formalLabTestcaseMap.InvalidAll(tx)
 	// set all new testcases
 	var labTestCaseMap models.LabTestcaseMap
 	labTestCaseMap.LabID = req.LabId

@@ -32,7 +32,7 @@ func (s *submitList) execute(v ...interface{}) {
 				fmt.Printf("Unmarshal submitlist req error:%v", err)
 			}
 			labSubmit := &models.LabSubmit{}
-			data, _ := labSubmit.GetUserLabSubmitsByLabId(c.User.Id, req.LabId)
+			data, _ := labSubmit.GetUserSubmitsByLabId(c.User.Id, req.LabId)
 			s.Data = &submitListData{
 				LabId: req.LabId,
 				ResultList: data,

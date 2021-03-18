@@ -7,6 +7,7 @@ import (
 	"github.com/gin-gonic/gin"
 	_ "github.com/go-sql-driver/mysql"
 	"log"
+	"strconv"
 )
 
 const (
@@ -81,4 +82,67 @@ func DefaultPage(page, pageSize *int) {
 	if *pageSize <= 0 {
 		*pageSize = 20
 	}
+}
+
+func GetByPager(sqlpre string, page Pager, status int) (*sql.Stmt, *sql.Rows, error){
+	DefaultPage(&page.Page, &page.PageSize)
+	offset := (page.Page - 1) * page.PageSize
+
+	var stmt *sql.Stmt
+	var rows *sql.Rows
+	var err error
+	if status != STATUS_ALL {
+		stmt, err = DB.Prepare( sqlpre + " WHERE status=? ORDER BY id desc LIMIT ? OFFSET ? ")
+		rows, err = stmt.Query(
+			&status,
+			&page.PageSize,
+			&offset,
+		)
+	} else {
+		stmt, err = DB.Prepare( sqlpre + " ORDER BY id desc LIMIT ? OFFSET ? ")
+		rows, err = stmt.Query(
+			&page.PageSize,
+			&offset,
+		)
+	}
+	return stmt, rows, err
+}
+
+func GetCountByStatus(table string, status int) (int, error) {
+	var stmt *sql.Stmt
+	var err error
+	if status != STATUS_ALL {
+		stmt, err = DB.Prepare("SELECT count(1) as cnt FROM " + table + " WHERE status=" + strconv.Itoa(status))
+	} else {
+		stmt, err = DB.Prepare("SELECT count(1) as cnt FROM " + table)
+	}
+
+	defer stmt.Close()
+	if err != nil {
+		log.Printf("get list count error table[%s] err[%v]\n", table, err)
+		return 0, err
+	}
+	var cnt int
+	row := stmt.QueryRow()
+	err = row.Scan(&cnt)
+	return cnt, err
+}
+
+func GetListByIdAndStatus(sqlpre string, id uint64, status int) (*sql.Stmt, *sql.Rows, error) {
+	var stmt *sql.Stmt
+	var rows *sql.Rows
+	var err error
+	if status != STATUS_ALL {
+		stmt, err = DB.Prepare(sqlpre + " WHERE status=? AND id=?")
+		rows, err = stmt.Query(
+			&status,
+			&id,
+		)
+	} else {
+		stmt, err = DB.Prepare(sqlpre + " WHERE id=?")
+		rows, err = stmt.Query(
+			&id,
+		)
+	}
+	return stmt, rows, err
 }

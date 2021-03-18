@@ -36,6 +36,16 @@ func InitUserRouter(r *gin.Engine) {
 	userGroup.POST("/day_submits", lab_submit.DaySubmits)
 	userGroup.POST("/change_pwd", user.ChangePwd)
 
+	contestGroup := r.Group("/contest")
+	contestGroup.POST("/list_with_summary", contest.ListWithSummary)
+	contestGroup.POST("/info", contest.Info)
+	contestGroup.POST("/sign", contest.Sign)
+	contestGroup.POST("/dashboard", contest.Dashboard)
+
+	contestGroup.POST("/get_labs", contest.GetLabs)
+
+	contestGroup.POST("/get_users", contest.GetUsers)
+
 	// 工具
 	tool := r.Group("/tool")
 	tool.GET("/getfile", file.GetFile)

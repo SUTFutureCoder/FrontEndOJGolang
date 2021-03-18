@@ -30,8 +30,10 @@ func DisableLab(c *gin.Context) {
 	if req.LabId == 0 {
 		return
 	}
-	lab := models.Lab{}
-	lab.ModifyLabStatus(req.LabId, models.STATUS_DISABLE)
+	lab := models.Lab{
+		Model: models.Model{ID: req.LabId},
+	}
+	lab.ModifyStatus(models.STATUS_DISABLE)
 	appG.RespSucc(nil)
 }
 
@@ -43,8 +45,10 @@ func EnableLab(c *gin.Context) {
 	if req.LabId == 0 {
 		return
 	}
-	lab := models.Lab{}
-	lab.ModifyLabStatus(req.LabId, models.STATUS_ENABLE)
+	lab := models.Lab{
+		Model: models.Model{ID: req.LabId},
+	}
+	lab.ModifyStatus(models.STATUS_ENABLE)
 	appG.RespSucc(nil)
 }
 
@@ -57,7 +61,9 @@ func ConstructingLab(c *gin.Context) {
 	if req.LabId == 0 {
 		return
 	}
-	lab := models.Lab{}
-	lab.ModifyLabStatus(req.LabId, models.STATUS_CONSTRUCTING)
+	lab := models.Lab{
+		Model: models.Model{ID: req.LabId},
+	}
+	lab.ModifyStatus(models.STATUS_CONSTRUCTING)
 	appG.RespSucc(nil)
 }

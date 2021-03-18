@@ -34,7 +34,7 @@ func LabInfo(c *gin.Context) {
 	}
 	resp.LabInfo.ID = req.Id
 	lab := &models.Lab{}
-	err = lab.GetLabFullInfo(resp.LabInfo.ID)
+	err = lab.GetFullInfo(resp.LabInfo.ID)
 	if err != nil {
 		appGin.RespErr(e.ERROR, err)
 		return

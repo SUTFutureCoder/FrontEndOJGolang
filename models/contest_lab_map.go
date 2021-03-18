@@ -1,6 +1,8 @@
 package models
 
-import "log"
+import (
+	"log"
+)
 
 // ContestLabMap 比赛实验室关联表
 type ContestLabMap struct {
@@ -32,4 +34,24 @@ func (c *ContestLabMap) Insert() (int64, error) {
 	return ret.LastInsertId()
 }
 
+func (c *ContestLabMap) GetLabList(pager Pager, status int) ([]*ContestLabMap, error) {
+	var contestLabMaps []*ContestLabMap
+	stmt, rows, err := GetByPager("SELECT id, contest_id, lab_id, creator_id, status, creator_id, creator, create_time, update_time FROM contest_lab_map", pager, status)
+	defer stmt.Close()
+	if err != nil {
+		log.Printf("get contest lab list from db error [%v]", err)
+		return nil, err
+	}
 
+	if rows == nil {
+		return nil, err
+	}
+	for rows.Next() {
+		c := &ContestLabMap{}
+		err = rows.Scan(
+			&c.ID, &c.ContestId, &c.LabId, &c.Status, &c.CreatorId, &c.Creator, &c.CreateTime, &c.UpdateTime,
+		)
+		contestLabMaps = append(contestLabMaps, c)
+	}
+	return contestLabMaps, err
+}

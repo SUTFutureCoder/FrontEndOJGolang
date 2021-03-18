@@ -43,7 +43,7 @@ func (u *User) GetByName() error {
 	return err
 }
 
-func (u *User) GetUserById(userId uint64) {
+func (u *User) GetById(userId uint64) {
 	stmt, err := DB.Prepare("SELECT id, user_password, user_type, status, creator, create_time, update_time FROM user WHERE id=?")
 	if err != nil {
 		log.Printf("[ERROR] prepare sql error user[%v] err[%v]", u, err)
@@ -146,7 +146,7 @@ func prepareUserSearchParams(searchParam *UserSearchParam, pager *Pager, stmtPre
 
 }
 
-func (u *User) GetUserList(searchParam UserSearchParam, pager Pager) ([]User, error) {
+func (u *User) GetList(searchParam UserSearchParam, pager Pager) ([]User, error) {
 	stmtPrepare := "SELECT id, user_type, status, creator_id, creator, create_time, update_time FROM user "
 	var querys []interface{}
 
@@ -179,7 +179,7 @@ func (u *User) GetUserList(searchParam UserSearchParam, pager Pager) ([]User, er
 	return userList, err
 }
 
-func (u *User) GetUserCount(searchParam UserSearchParam, pager Pager) (int, error) {
+func (u *User) GetCount(searchParam UserSearchParam, pager Pager) (int, error) {
 	stmtPrepare := "SELECT count(1) as cnt FROM user "
 	var querys []interface{}
 
@@ -197,7 +197,7 @@ func (u *User) GetUserCount(searchParam UserSearchParam, pager Pager) (int, erro
 	return cnt, err
 }
 
-func (u *User) GrantUserType() bool {
+func (u *User) GrantType() bool {
 	stmt, err := DB.Prepare("UPDATE user SET user_type=?, update_time=? WHERE id=?")
 	if err != nil {
 		log.Printf("update user type error [%#v]", err)
@@ -212,14 +212,14 @@ func (u *User) GrantUserType() bool {
 	return true
 }
 
-func (u *User) ModifyUserStatus(id uint64, status int) bool {
+func (u *User) ModifyStatus(status int) bool {
 	stmt, err := DB.Prepare("UPDATE user SET status=?, update_time=? WHERE id=?")
 	if err != nil {
 		log.Printf("update user status error [%#v]", err)
 		return false
 	}
 	defer stmt.Close()
-	_, err = stmt.Exec(status, utils.GetMillTime(), id)
+	_, err = stmt.Exec(status, utils.GetMillTime(), u.ID)
 	if err != nil {
 		log.Printf("update user status error[%#v]", err)
 		return false

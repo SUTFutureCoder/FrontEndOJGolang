@@ -21,7 +21,7 @@ func SubmitList(c *gin.Context) {
 
 	pager := models.ToPager(c)
 	labSubmit := &models.LabSubmit{}
-	labSubmits, err := labSubmit.GetUserLabSubmits(userSession.Id, pager)
+	labSubmits, err := labSubmit.GetUserSubmits(userSession.Id, pager)
 	if err != nil {
 		log.Printf("[ERROR] get user lab submits err[%v] userId[%d]", err, userSession.Id)
 		appG.RespErr(e.ERROR, nil)
@@ -52,7 +52,7 @@ func SubmitListByLabId(c *gin.Context) {
 		return
 	}
 	labSubmit := &models.LabSubmit{}
-	labSubmits, err := labSubmit.GetUserLabSubmitsByLabId(userSession.Id, req.LabId)
+	labSubmits, err := labSubmit.GetUserSubmitsByLabId(userSession.Id, req.LabId)
 	if err != nil {
 		log.Printf("[ERROR] get user lab submits by lab ids err[%v] userId[%d] labId[%s]", err, userSession.Id, req.LabId)
 		appG.RespErr(e.ERROR, nil)
@@ -93,7 +93,7 @@ func DaySubmits(c *gin.Context) {
 	}
 
 	lab := &models.Lab{}
-	labList := lab.GetByLabIds(labIds)
+	labList := lab.GetByIds(labIds)
 	// parsehash
 	resp.LabNameHash = make(map[uint64]string)
 	for _, v := range labList {

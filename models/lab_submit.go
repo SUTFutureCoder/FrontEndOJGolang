@@ -76,7 +76,7 @@ func (labSubmit *LabSubmit) Insert() (int64, error) {
 	return insertRet.LastInsertId()
 }
 
-func (labSubmit *LabSubmit) GetUserLabSubmits(creatorId uint64, pager Pager) ([]LabSubmit, error) {
+func (labSubmit *LabSubmit) GetUserSubmits(creatorId uint64, pager Pager) ([]LabSubmit, error) {
 	var stmt *sql.Stmt
 	var err error
 	if creatorId == 0 {
@@ -112,7 +112,7 @@ func (labSubmit *LabSubmit) GetUserLabSubmits(creatorId uint64, pager Pager) ([]
 	return labSubmits, err
 }
 
-func (labSubmit *LabSubmit) GetUserLabSubmitsByLabId(creatorId uint64, labId uint64) ([]LabSubmit, error) {
+func (labSubmit *LabSubmit) GetUserSubmitsByLabId(creatorId uint64, labId uint64) ([]LabSubmit, error) {
 	var err error
 	stmt, err := DB.Prepare("SELECT id, lab_id, submit_result, submit_time_usage, status, creator_id, creator, create_time, update_time FROM lab_submit WHERE creator_id = ? AND lab_id = ? ORDER BY id desc")
 	defer stmt.Close()
@@ -168,7 +168,7 @@ type SubmitSummary struct {
 	CountJuding int `json:"count_juding"`
 }
 
-func (labSubmit *LabSubmit) GetLabSubmitSummary(labIds []interface{}) map[uint64]*SubmitSummary {
+func (labSubmit *LabSubmit) GetSummary(labIds []interface{}) map[uint64]*SubmitSummary {
 	submitSummaryMap := make(map[uint64]*SubmitSummary)
 	if len(labIds) == 0 {
 		return submitSummaryMap

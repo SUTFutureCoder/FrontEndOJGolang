@@ -2,9 +2,7 @@ package models
 
 import (
 	"FrontEndOJGolang/pkg/utils"
-	"database/sql"
 	"log"
-	"strconv"
 	"strings"
 )
 
@@ -27,6 +25,8 @@ const (
 	LABTYPE_NORMAL = iota
 	LABTYPE_IMITATE
 )
+
+const TABLE_LAB = "lab"
 
 func (lab *Lab) Insert() (int64, error) {
 	stmt, err := DB.Prepare("INSERT INTO lab (lab_name, lab_desc, lab_type, lab_sample, lab_template, status, creator_id, creator, create_time) VALUES(?,?,?,?,?,?,?,?,?)")
@@ -52,23 +52,8 @@ func (lab *Lab) Insert() (int64, error) {
 	return ret.LastInsertId()
 }
 
-func (lab *Lab) GetLabListById(labId uint64, status int) ([]Lab, error) {
-	var stmt *sql.Stmt
-	var rows *sql.Rows
-	var err error
-	if status != STATUS_ALL {
-		stmt, err = DB.Prepare("SELECT id, lab_name, lab_type, status, creator_id, creator, create_time, update_time FROM lab WHERE status=? AND id=?")
-		rows, err = stmt.Query(
-			&status,
-			&labId,
-		)
-	} else {
-		stmt, err = DB.Prepare("SELECT id, lab_name, lab_type, status, creator_id, creator, create_time, update_time FROM lab WHERE id=?")
-		rows, err = stmt.Query(
-			&labId,
-		)
-	}
-
+func (lab *Lab) GetListById(labId uint64, status int) ([]Lab, error) {
+	stmt, rows, err := GetListByIdAndStatus("SELECT id, lab_name, lab_type, status, creator_id, creator, create_time, update_time FROM lab", labId, status)
 	defer stmt.Close()
 	if err != nil {
 		log.Printf("get lab list from db error [%v]", err)
@@ -89,28 +74,8 @@ func (lab *Lab) GetLabListById(labId uint64, status int) ([]Lab, error) {
 	return labList, err
 }
 
-func (lab *Lab) GetLabList(page Pager, status int) ([]Lab, error) {
-	DefaultPage(&page.Page, &page.PageSize)
-	offset := (page.Page - 1) * page.PageSize
-
-	var stmt *sql.Stmt
-	var rows *sql.Rows
-	var err error
-	if status != STATUS_ALL {
-		stmt, err = DB.Prepare("SELECT id, lab_name, lab_type, status, creator_id, creator, create_time, update_time FROM lab WHERE status=? ORDER BY id desc LIMIT ? OFFSET ? ")
-		rows, err = stmt.Query(
-			&status,
-			&page.PageSize,
-			&offset,
-		)
-	} else {
-		stmt, err = DB.Prepare("SELECT id, lab_name, lab_type, status, creator_id, creator, create_time, update_time FROM lab ORDER BY id desc LIMIT ? OFFSET ? ")
-		rows, err = stmt.Query(
-			&page.PageSize,
-			&offset,
-		)
-	}
-
+func (lab *Lab) GetList(page Pager, status int) ([]Lab, error) {
+	stmt, rows, err := GetByPager("SELECT id, lab_name, lab_type, status, creator_id, creator, create_time, update_time FROM lab", page, status)
 	defer stmt.Close()
 	if err != nil {
 		log.Printf("get lab list from db error [%v]", err)
@@ -131,40 +96,7 @@ func (lab *Lab) GetLabList(page Pager, status int) ([]Lab, error) {
 	return labList, err
 }
 
-func (lab *Lab) GetLabListCount(status int) (int, error) {
-	var stmt *sql.Stmt
-	var err error
-	if status != STATUS_ALL {
-		stmt, err = DB.Prepare("SELECT count(1) as cnt FROM lab WHERE status=" + strconv.Itoa(status))
-	} else {
-		stmt, err = DB.Prepare("SELECT count(1) as cnt FROM lab")
-	}
-
-	defer stmt.Close()
-	if err != nil {
-		log.Printf("get lab list count error [%v]\n", err)
-		return 0, err
-	}
-	var cnt int
-	row := stmt.QueryRow()
-	err = row.Scan(&cnt)
-	return cnt, err
-}
-
-func (lab *Lab) GetLabFullCount() (int, error) {
-	stmt, err := DB.Prepare("SELECT count(1) as cnt FROM lab")
-	defer stmt.Close()
-	if err != nil {
-		log.Printf("get lab list count error [%v]\n", err)
-		return 0, err
-	}
-	var cnt int
-	row := stmt.QueryRow()
-	err = row.Scan(&cnt)
-	return cnt, err
-}
-
-func (lab *Lab) GetLabFullInfo(id uint64) error {
+func (lab *Lab) GetFullInfo(id uint64) error {
 	stmt, err := DB.Prepare("SELECT id, lab_name, lab_desc, lab_type, lab_sample, lab_template, status, creator_id, creator, create_time, update_time FROM lab WHERE id=?")
 	if err != nil {
 		return err
@@ -181,14 +113,14 @@ func (lab *Lab) GetLabFullInfo(id uint64) error {
 	return err
 }
 
-func (lab *Lab) ModifyLabStatus(id uint64, status int) bool {
+func (lab *Lab) ModifyStatus(status int) bool {
 	stmt, err := DB.Prepare("UPDATE lab SET status=?, update_time=? WHERE id=?")
 	if err != nil {
 		log.Printf("update lab status error [%#v]", err)
 		return false
 	}
 	defer stmt.Close()
-	_, err = stmt.Exec(status, utils.GetMillTime(), id)
+	_, err = stmt.Exec(status, utils.GetMillTime(), lab.ID)
 	if err != nil {
 		log.Printf("update modify status error[%#v]", err)
 		return false
@@ -211,7 +143,7 @@ func (lab *Lab) Modify() {
 }
 
 // 无视status直接返回根据id检索内容
-func (lab *Lab) GetByLabIds(labIds []interface{}) []Lab {
+func (lab *Lab) GetByIds(labIds []interface{}) []Lab {
 	var labs []Lab
 	if len(labIds) == 0 {
 		return labs

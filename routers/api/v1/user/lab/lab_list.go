@@ -32,11 +32,11 @@ func LabList(c *gin.Context) {
 	var resp labListResp
 	lab := &models.Lab{}
 	if req.LabId != 0 {
-		resp.LabList, err = lab.GetLabListById(req.LabId, models.STATUS_ENABLE)
+		resp.LabList, err = lab.GetListById(req.LabId, models.STATUS_ENABLE)
 		resp.Count = len(resp.LabList)
 	} else {
-		resp.LabList, err = lab.GetLabList(req.Pager, models.STATUS_ENABLE)
-		resp.Count, err = lab.GetLabListCount(models.STATUS_ENABLE)
+		resp.LabList, err = lab.GetList(req.Pager, models.STATUS_ENABLE)
+		resp.Count, err = models.GetCountByStatus(models.TABLE_LAB, models.STATUS_ENABLE)
 	}
 	if err != nil {
 		appGin.RespErr(e.ERROR, err)

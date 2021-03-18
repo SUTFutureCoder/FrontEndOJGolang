@@ -63,9 +63,9 @@ var JudgerSetting = &Judger{}
 
 var cfg *ini.File
 
-func Setup() {
+func Setup(iniSource string) {
 	var err error
-	cfg, err = ini.Load("conf/app.ini")
+	cfg, err = ini.Load(iniSource)
 	if err != nil {
 		log.Fatalf("setting.Setup, fail to parse 'conf/app.ini': %v", err)
 	}
@@ -120,4 +120,8 @@ func checkAndFixDirExists(targetDir string, suffix string) string {
 	}
 	log.Fatalf("Can not create home dir, please check your config in conf/*.ini was set correctly.")
 	return ""
+}
+
+func Init() {
+
 }

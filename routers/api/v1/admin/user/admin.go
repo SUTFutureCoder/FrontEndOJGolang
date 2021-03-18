@@ -24,8 +24,10 @@ func DisableUser(c *gin.Context) {
 		return
 	}
 
-	u := &models.User{}
-	if !u.ModifyUserStatus(req.UserId, models.STATUS_DISABLE) {
+	user := &models.User{
+		Model: models.Model{ID: req.UserId},
+	}
+	if !user.ModifyStatus(models.STATUS_DISABLE) {
 		appG.RespErr(e.INVALID_PARAMS, nil)
 		return
 	}
@@ -43,8 +45,10 @@ func EnableUser(c *gin.Context) {
 		return
 	}
 
-	u := &models.User{}
-	if !u.ModifyUserStatus(req.UserId, models.STATUS_ENABLE) {
+	user := &models.User{
+		Model: models.Model{ID: req.UserId},
+	}
+	if !user.ModifyStatus(models.STATUS_ENABLE) {
 		appG.RespErr(e.INVALID_PARAMS, nil)
 		return
 	}
@@ -147,7 +151,7 @@ func GrantPermission(c *gin.Context) {
 	var user models.User
 	user.UserType = req.UserType
 	user.ID = req.UserId
-	if !user.GrantUserType() {
+	if !user.GrantType() {
 		appG.RespErr(e.INVALID_PARAMS, nil)
 		return
 	}
@@ -179,7 +183,7 @@ func ModifyUser(c *gin.Context) {
 
 	user := &models.User{}
 	// check user exists
-	user.GetUserById(req.UserId)
+	user.GetById(req.UserId)
 	if user.ID == 0 {
 		appG.RespErr(e.INVALID_PARAMS, "user not exists")
 		return

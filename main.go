@@ -12,7 +12,7 @@ import (
 )
 
 func init() {
-	setting.Setup()
+	setting.Setup("conf/app.ini")
 	setting.Check()
 	models.Setup()
 	go websocket.NewWsHub().Setup()

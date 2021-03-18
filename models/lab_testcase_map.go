@@ -15,7 +15,7 @@ type LabTestcaseMap struct {
 	TestcaseID uint64 `json:"testcase_id"`
 }
 
-func (labTestCaseMap *LabTestcaseMap) GetLabTestcaseMapByLabId(labId uint64) ([]interface{}, error) {
+func (labTestCaseMap *LabTestcaseMap) GetByLabId(labId uint64) ([]interface{}, error) {
 	var testcaseIds []interface{}
 	stmt, err := DB.Prepare("SELECT testcase_id FROM lab_testcase_map WHERE lab_id = ? AND status = 1")
 	rows, err := stmt.Query(
@@ -44,7 +44,7 @@ func (labTestCaseMap *LabTestcaseMap) Insert(tx *sql.Tx) (sql.Result, error) {
 
 }
 
-func (labTestCaseMap *LabTestcaseMap) GetLabTestcaseCntByLabIds(labIds []interface{}) map[uint64]int {
+func (labTestCaseMap *LabTestcaseMap) GetCntByLabIds(labIds []interface{}) map[uint64]int {
 	testcaseCntMap := make(map[uint64]int)
 	rows, err := DB.Query("SELECT lab_id, count(*) as cnt FROM lab_testcase_map WHERE lab_id IN (?"+strings.Repeat(",?", len(labIds)-1)+")"+" GROUP BY lab_id", labIds...)
 	if err != nil {
@@ -63,7 +63,7 @@ func (labTestCaseMap *LabTestcaseMap) GetLabTestcaseCntByLabIds(labIds []interfa
 	return testcaseCntMap
 }
 
-func (labTestCaseMap *LabTestcaseMap) InvalidLabAllTestcases(tx *sql.Tx) {
+func (labTestCaseMap *LabTestcaseMap) InvalidAll(tx *sql.Tx) {
 	stmt, err := tx.Prepare("UPDATE lab_testcase_map SET status=? WHERE lab_id=?")
 	if err != nil {
 		tx.Rollback()

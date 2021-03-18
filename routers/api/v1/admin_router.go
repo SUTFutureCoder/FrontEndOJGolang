@@ -44,4 +44,18 @@ func InitAdminRouter(r *gin.Engine) {
 	userGroup.POST("/change_pwd", user.ChangePasswd)
 	userGroup.POST("/grant", user.GrantPermission)
 	userGroup.POST("/modify", user.ModifyUser)
+
+	// contest管理区
+	contestGroup := admin.Group("/contest")
+	contestGroup.POST("/create", contest.CreateContest)
+	contestGroup.POST("/disable", contest.DisableContest)
+	contestGroup.POST("/enable", contest.EnableContest)
+
+	contestGroup.POST("/manage_labs", contest.ManageLabs)
+	contestGroup.POST("/summary_labs", contest.SummaryLabs)
+
+	contestGroup.POST("/manage_users", contest.ManageUsers)
+	contestGroup.POST("/summary_users", contest.SummaryUsers)
+
+
 }
