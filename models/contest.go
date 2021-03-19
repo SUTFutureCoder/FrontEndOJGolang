@@ -62,13 +62,35 @@ func (c *Contest) GetList(page Pager, status int) ([]*Contest, error) {
 		return nil, err
 	}
 	for rows.Next() {
-		c := &Contest{}
+		contest := &Contest{}
 		err = rows.Scan(
-			&c.ID, &c.ContestName, &c.ContestDesc, &c.ContestStartTime, &c.ContestEndTime, &c.SignupStartTime, &c.SignupEndTime, &c.Status, &c.CreatorId, &c.Creator, &c.CreateTime, &c.UpdateTime,
+			&contest.ID, &contest.ContestName, &contest.ContestDesc, &contest.ContestStartTime, &contest.ContestEndTime, &contest.SignupStartTime, &contest.SignupEndTime, &contest.Status, &contest.CreatorId, &contest.Creator, &contest.CreateTime, &contest.UpdateTime,
 		)
-		contests = append(contests, c)
+		contests = append(contests, contest)
 	}
 	return contests, err
+}
+
+func (c *Contest) GetListById(contestId uint64, status int) ([]*Contest, error) {
+	stmt, rows, err := GetListByIdAndStatus("SELECT id, contest_name, contest_desc, contest_start_time, contest_end_time, signup_start_time, signup_end_time, status, creator_id, creator, create_time, update_time FROM contest", contestId, status)
+	defer stmt.Close()
+	if err != nil {
+		log.Printf("get contest list from db error [%v]", err)
+		return nil, err
+	}
+
+	if rows == nil {
+		return nil, err
+	}
+	var contestList []*Contest
+	for rows.Next() {
+		contest := &Contest{}
+		err = rows.Scan(
+			&contest.ID, &contest.ContestName, &contest.ContestDesc, &contest.ContestStartTime, &contest.ContestEndTime, &contest.SignupStartTime, &contest.SignupEndTime, &contest.Status, &contest.CreatorId, &contest.Creator, &contest.CreateTime, &contest.UpdateTime,
+		)
+		contestList = append(contestList, contest)
+	}
+	return contestList, err
 }
 
 func (c *Contest) GetByIds(contestIds []interface{}) []*Contest {
@@ -83,15 +105,15 @@ func (c *Contest) GetByIds(contestIds []interface{}) []*Contest {
 		return contests
 	}
 	for rows.Next() {
-		c := &Contest{}
+		contest := &Contest{}
 		err = rows.Scan(
-			&c.ID, &c.ContestName, &c.ContestDesc, &c.ContestStartTime, &c.ContestEndTime, &c.SignupStartTime, &c.SignupEndTime, &c.Status, &c.CreatorId, &c.Creator, &c.CreateTime, &c.UpdateTime,
+			&contest.ID, &contest.ContestName, &contest.ContestDesc, &contest.ContestStartTime, &contest.ContestEndTime, &contest.SignupStartTime, &contest.SignupEndTime, &contest.Status, &contest.CreatorId, &contest.Creator, &contest.CreateTime, &contest.UpdateTime,
 		)
 		if err != nil {
 			log.Printf("scan lab list by ids ")
 			return contests
 		}
-		contests = append(contests, c)
+		contests = append(contests, contest)
 	}
 	return contests
 }

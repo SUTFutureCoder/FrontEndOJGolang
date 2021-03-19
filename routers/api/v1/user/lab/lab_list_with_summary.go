@@ -58,25 +58,27 @@ func LabListAndSummary(c *gin.Context) {
 		resp.Count = len(labs)
 	} else {
 		labs, err = lab.GetList(req.Pager, status)
-		resp.Count, err = models.GetCountByStatus(models.TABLE_LAB, models.STATUS_ALL)
+		resp.Count, err = models.GetCountByStatus(models.TABLE_LAB, status)
 	}
-
 	if err != nil {
 		log.Printf("get db list error while get lab list[%#v]", err)
 		appG.RespErr(e.INVALID_PARAMS, nil)
 		return
 	}
 
+	// get labIds
 	var labIds []interface{}
 	for _, lab := range labs {
 		labIds = append(labIds, lab.ID)
 	}
 
+	// summary
 	labSubmit := &models.LabSubmit{}
 	labTestCaseMap := &models.LabTestcaseMap{}
 	labSubmitSummary := labSubmit.GetSummary(labIds)
 	labTestcaseCnt := labTestCaseMap.GetCntByLabIds(labIds)
-	// summary
+
+	// prepare resp
 	for _, lab := range labs {
 		var tmpLabListwithsummary labListWithSummary
 		tmpLabListwithsummary.LabInfo = lab

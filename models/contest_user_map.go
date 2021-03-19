@@ -54,12 +54,18 @@ func (c *ContestUserMap) GetList(page Pager, status int) ([]*ContestUserMap, err
 	return contestUserMaps, err
 }
 
-func (c *ContestUserMap) GetByContestIds(contestIds []interface{}) []*ContestUserMap {
+func (c *ContestUserMap) GetByContestIds(contestIds []interface{}, status int) []*ContestUserMap {
 	var contestUserMaps []*ContestUserMap
 	if len(contestIds) == 0 {
 		return contestUserMaps
 	}
-	rows, err := DB.Query("SELECT id, contest_id, status, creator_id, creator, create_time, update_time FROM contest_user_map WHERE contest_id IN (?"+strings.Repeat(",?", len(contestIds)-1)+")", contestIds...)
+
+	query := "SELECT contest_id, creator_id, creator, status FROM contest_user_map WHERE contest_id IN (?"+strings.Repeat(",?", len(contestIds)-1)+")"
+	if status != STATUS_ALL {
+		contestIds = append(contestIds, status)
+		query += " AND status=?"
+	}
+	rows, err := DB.Query(query, contestIds...)
 	defer rows.Close()
 	if err != nil {
 		log.Printf("get contest user list by ids error [%v]\n", err)
@@ -68,7 +74,7 @@ func (c *ContestUserMap) GetByContestIds(contestIds []interface{}) []*ContestUse
 	for rows.Next() {
 		c := &ContestUserMap{}
 		err = rows.Scan(
-			&c.ID, &c.ContestId, &c.Status, &c.CreatorId, &c.Creator, &c.CreateTime, &c.UpdateTime,
+			&c.ContestId, &c.CreatorId, &c.Creator, &c.Status,
 		)
 		if err != nil {
 			log.Printf("scan lab list by ids ")
@@ -79,4 +85,41 @@ func (c *ContestUserMap) GetByContestIds(contestIds []interface{}) []*ContestUse
 	return contestUserMaps
 }
 
+func (c *ContestUserMap) GetMap(ids []interface{}, status int) map[uint64][]*User {
+	contestUserMap := c.GetByContestIds(ids, status)
+	ret := make(map[uint64][]*User)
+	for _, cMap := range contestUserMap {
+		if _, ok := ret[cMap.ContestId]; !ok {
+			var uList []*User
+			ret[cMap.ContestId] = uList
+		}
+		u := &User{
+			Model: Model{
+				ID:         cMap.CreatorId,
+				Creator:    cMap.Creator,
+			},
+		}
+		ret[cMap.ContestId] = append(ret[cMap.ContestId], u)
+	}
+	return ret
+}
+
+func (c *ContestUserMap) CheckUserSignIn() bool {
+	stmt, err := DB.Prepare("SELECT count(1) as cnt FROM contest_user_map WHERE contest_id=? AND creator_id=? AND status=?")
+	if err != nil {
+		log.Printf("Check User Signin contest error[%v]", err)
+		return false
+	}
+	defer stmt.Close()
+	row := stmt.QueryRow(
+		&c.ContestId,
+		&c.CreatorId,
+		STATUS_ENABLE,
+	)
+	var cnt uint64
+	row.Scan(
+		&cnt,
+	)
+	return cnt == 1
+}
 

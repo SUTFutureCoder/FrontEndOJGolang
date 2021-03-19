@@ -1,6 +1,7 @@
 package v1
 
 import (
+	"FrontEndOJGolang/routers/api/v1/user/contest"
 	"FrontEndOJGolang/routers/api/v1/user/judger"
 	"FrontEndOJGolang/routers/api/v1/user/lab"
 	"FrontEndOJGolang/routers/api/v1/user/lab_submit"

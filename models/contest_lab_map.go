@@ -2,6 +2,7 @@ package models
 
 import (
 	"log"
+	"strings"
 )
 
 // ContestLabMap 比赛实验室关联表
@@ -33,25 +34,59 @@ func (c *ContestLabMap) Insert() (int64, error) {
 	}
 	return ret.LastInsertId()
 }
+//
+//func (c *ContestLabMap) GetLabList(pager Pager, status int) ([]*ContestLabMap, error) {
+//	var contestLabMaps []*ContestLabMap
+//	stmt, rows, err := GetByPager("SELECT id, contest_id, lab_id, creator_id, status, creator_id, creator, create_time, update_time FROM contest_lab_map", pager, status)
+//	defer stmt.Close()
+//	if err != nil {
+//		log.Printf("get contest lab list from db error [%v]", err)
+//		return nil, err
+//	}
+//
+//	if rows == nil {
+//		return nil, err
+//	}
+//	for rows.Next() {
+//		c := &ContestLabMap{}
+//		err = rows.Scan(
+//			&c.ID, &c.ContestId, &c.LabId, &c.Status, &c.CreatorId, &c.Creator, &c.CreateTime, &c.UpdateTime,
+//		)
+//		contestLabMaps = append(contestLabMaps, c)
+//	}
+//	return contestLabMaps, err
+//}
 
-func (c *ContestLabMap) GetLabList(pager Pager, status int) ([]*ContestLabMap, error) {
-	var contestLabMaps []*ContestLabMap
-	stmt, rows, err := GetByPager("SELECT id, contest_id, lab_id, creator_id, status, creator_id, creator, create_time, update_time FROM contest_lab_map", pager, status)
-	defer stmt.Close()
+func (c *ContestLabMap) GetIdMap(contestIds []interface{}, status int) (map[uint64][]uint64, []interface{}, error) {
+	contestLabIdMap := make(map[uint64][]uint64)
+	var labIdList []interface{}
+	if len(contestIds) == 0 {
+		return contestLabIdMap, labIdList, nil
+	}
+
+	query := "SELECT contest_id, lab_id, status FROM contest_lab_map WHERE contest_id IN (?"+strings.Repeat(",?", len(contestIds)-1)+") ORDER BY lab_order DESC"
+	if status != STATUS_ALL {
+		contestIds = append(contestIds, status)
+		query += " AND status=?"
+	}
+	rows, err := DB.Query(query, contestIds...)
+	defer rows.Close()
 	if err != nil {
-		log.Printf("get contest lab list from db error [%v]", err)
-		return nil, err
+		log.Printf("get contest lab map ids error [%v]", err)
 	}
 
-	if rows == nil {
-		return nil, err
-	}
 	for rows.Next() {
-		c := &ContestLabMap{}
+		contestLabMap := &ContestLabMap{}
 		err = rows.Scan(
-			&c.ID, &c.ContestId, &c.LabId, &c.Status, &c.CreatorId, &c.Creator, &c.CreateTime, &c.UpdateTime,
+			&contestLabMap.ContestId, &contestLabMap.LabId, &contestLabMap.Status,
 		)
-		contestLabMaps = append(contestLabMaps, c)
+		if _, ok := contestLabIdMap[contestLabMap.ContestId]; !ok {
+			var tmpIdList []uint64
+			contestLabIdMap[contestLabMap.ContestId] = tmpIdList
+		}
+		contestLabIdMap[contestLabMap.ContestId] = append(contestLabIdMap[contestLabMap.ContestId], contestLabMap.LabId)
+		labIdList = append(labIdList, contestLabMap.LabId)
 	}
-	return contestLabMaps, err
+
+	return contestLabIdMap, labIdList, err
 }
