@@ -146,3 +146,12 @@ func GetListByIdAndStatus(sqlpre string, id uint64, status int) (*sql.Stmt, *sql
 	}
 	return stmt, rows, err
 }
+
+
+func ConvertUint64ToInterface(ids []uint64) []interface{} {
+	var interfaceList []interface{}
+	for _, id := range ids {
+		interfaceList = append(interfaceList, id)
+	}
+	return interfaceList
+}

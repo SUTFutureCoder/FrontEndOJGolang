@@ -29,7 +29,7 @@ func LabInfo(c *gin.Context) {
 	var req reqLabInfo
 	err := c.BindJSON(&req)
 	if err != nil {
-		appGin.RespErr(e.INVALID_PARAMS, err)
+		appGin.RespErr(e.PARSE_PARAM_ERROR, err)
 		return
 	}
 	resp.LabInfo.ID = req.Id

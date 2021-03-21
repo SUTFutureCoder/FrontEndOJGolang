@@ -48,7 +48,7 @@ func SubmitListByLabId(c *gin.Context) {
 	var req submitlistByLabIdReq
 	err := c.BindJSON(&req)
 	if err != nil || req.LabId == 0 {
-		appG.RespErr(e.INVALID_PARAMS, "invalid params")
+		appG.RespErr(e.PARSE_PARAM_ERROR, nil)
 		return
 	}
 	labSubmit := &models.LabSubmit{}
@@ -75,13 +75,11 @@ func DaySubmits(c *gin.Context) {
 	}
 	var req daySubmitsReq
 	var resp daySubmitsResp
-	err := c.BindJSON(&req)
+	if err := c.BindJSON(&req); err != nil {
+		appG.RespErr(e.PARSE_PARAM_ERROR, nil)
+	}
 	userSession := app.GetUserFromSession(appG)
 	if userSession.Id == 0 {
-		return
-	}
-	if err != nil {
-		appG.RespErr(e.INVALID_PARAMS, nil)
 		return
 	}
 	labSubmit := &models.LabSubmit{}

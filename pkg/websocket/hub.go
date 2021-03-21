@@ -45,9 +45,6 @@ type ClientMsg struct {
 
 var Wshub *WsHub
 
-// todo solve concurrent issue
-var locker sync.RWMutex
-
 func NewWsHub() *WsHub {
 	Wshub = &WsHub{
 		clients:    sync.Map{},

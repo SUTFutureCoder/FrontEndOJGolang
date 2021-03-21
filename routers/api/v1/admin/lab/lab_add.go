@@ -27,14 +27,14 @@ func AddLab(c *gin.Context) {
 		return
 	}
 
-	req := addLabReq{}
-	err := c.BindJSON(&req)
+	req := &addLabReq{}
+	err := c.BindJSON(req)
 	if err != nil {
-		appG.RespErr(e.INVALID_PARAMS, err.Error())
+		appG.RespErr(e.PARSE_PARAM_ERROR, err.Error())
 		return
 	}
 
-	lab := prepareAdd(&req, &userSession)
+	lab := prepareAdd(req, &userSession)
 
 	labId, err := lab.Insert()
 	if err != nil {

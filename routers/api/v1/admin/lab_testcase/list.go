@@ -18,7 +18,7 @@ func List(c *gin.Context) {
 	var req reqLabTestCaseList
 	err := c.BindJSON(&req)
 	if err != nil || req.LabId == 0 {
-		appG.RespErr(e.INVALID_PARAMS, "param error")
+		appG.RespErr(e.PARSE_PARAM_ERROR, nil)
 		return
 	}
 

@@ -2,7 +2,9 @@ package models
 
 import (
 	"FrontEndOJGolang/pkg/utils"
+	"database/sql"
 	"log"
+	"strconv"
 	"strings"
 )
 
@@ -166,4 +168,13 @@ func (lab *Lab) GetByIds(labIds []interface{}) []Lab {
 		labs = append(labs, lab)
 	}
 	return labs
+}
+
+func (lab *Lab) HideLabs(labIds []interface{}, tx *sql.Tx) bool {
+	_, err := tx.Exec("UPDATE lab SET status=" + strconv.Itoa(STATUS_HIDE) + " WHERE id IN(?" + strings.Repeat(",?", len(labIds) - 1) + ")", labIds...)
+	if err != nil {
+		tx.Rollback()
+		return false
+	}
+	return true
 }

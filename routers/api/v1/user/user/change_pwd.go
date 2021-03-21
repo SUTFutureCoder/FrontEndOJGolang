@@ -25,7 +25,9 @@ func ChangePwd(c *gin.Context) {
 	}
 
 	var req changePwdReq
-	c.BindJSON(&req)
+	if err := c.BindJSON(&req); err != nil {
+		appG.RespErr(e.PARSE_PARAM_ERROR, nil)
+	}
 
 	user := new(models.User)
 	user.Creator = userSession.Name

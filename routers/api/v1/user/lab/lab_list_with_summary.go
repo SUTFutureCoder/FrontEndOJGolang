@@ -37,14 +37,12 @@ func LabListAndSummary(c *gin.Context) {
 	var req listWithSummaryReq
 	var resp listWithSummaryResp
 	err := c.BindJSON(&req)
-
-	userSession := app.GetUserFromSessionNoRespErr(appG)
-
 	if err != nil {
-		log.Printf("bind json error while get lab list[%#v]", err)
-		appG.RespErr(e.INVALID_PARAMS, nil)
+		appG.RespErr(e.PARSE_PARAM_ERROR, nil)
 		return
 	}
+
+	userSession := app.GetUserFromSessionNoRespErr(appG)
 
 	var labs []models.Lab
 	status := models.STATUS_ALL

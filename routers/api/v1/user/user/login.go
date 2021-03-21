@@ -21,7 +21,8 @@ func Login(c *gin.Context) {
 
 	var req loginReq
 	if err := c.BindJSON(&req); err != nil {
-		log.Println(err)
+		appG.RespErr(e.PARSE_PARAM_ERROR, nil)
+		return
 	}
 
 	user := new(models.User)

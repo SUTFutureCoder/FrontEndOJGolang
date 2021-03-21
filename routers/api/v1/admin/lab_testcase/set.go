@@ -26,7 +26,7 @@ func Set(c *gin.Context) {
 	var req setTestcaseReq
 	err := c.BindJSON(&req)
 	if err != nil {
-		appG.RespErr(e.INVALID_PARAMS, err.Error())
+		appG.RespErr(e.PARSE_PARAM_ERROR, err.Error())
 		return
 	}
 

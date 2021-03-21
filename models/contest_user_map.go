@@ -2,6 +2,7 @@ package models
 
 import (
 	"log"
+	"strconv"
 	"strings"
 )
 
@@ -11,6 +12,8 @@ type ContestUserMap struct {
 	// ContestId 比赛Id
 	ContestId uint64 `json:"contest_id"`
 }
+
+const TABLE_CONTEST_USER_MAP = "contest_user_map"
 
 func (c *ContestUserMap) Insert() (int64, error) {
 	stmt, err := DB.Prepare("INSERT INTO contest_user_map (contest_id, status, creator_id, creator, create_time) VALUES(?,?,?,?,?)")
@@ -120,6 +123,32 @@ func (c *ContestUserMap) CheckUserSignIn() bool {
 	row.Scan(
 		&cnt,
 	)
-	return cnt == 1
+	return cnt >= 1
 }
 
+func (c *ContestUserMap) CheckUserExists() bool {
+	stmt, err := DB.Prepare("SELECT count(1) as cnt FROM contest_user_map WHERE contest_id=? AND creator_id=?")
+	if err != nil {
+		log.Printf("Check User Exists contest error[%v]", err)
+		return false
+	}
+	defer stmt.Close()
+	row := stmt.QueryRow(
+		&c.ContestId,
+		&c.CreatorId,
+	)
+	var cnt uint64
+	row.Scan(
+		&cnt,
+	)
+	return cnt >= 1
+}
+
+func (c *ContestUserMap) ModifyStatus(userIds []interface{}, status int) bool {
+	_, err := DB.Exec("UPDATE contest_user_map SET status=" + strconv.Itoa(status) + " WHERE contest_id=" + strconv.FormatUint(c.ContestId, 10) + " AND creator_id IN (?" + strings.Repeat(",?", len(userIds) - 1) + ")", userIds...)
+	if err != nil {
+		log.Printf("modify lab user status error [%#v]", err)
+		return false
+	}
+	return true
+}

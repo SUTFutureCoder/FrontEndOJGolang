@@ -1,6 +1,7 @@
 package models
 
 import (
+	"database/sql"
 	"log"
 	"strings"
 )
@@ -14,9 +15,10 @@ type ContestLabMap struct {
 	LabId uint64 `json:"lab_id"`
 }
 
-func (c *ContestLabMap) Insert() (int64, error) {
-	stmt, err := DB.Prepare("INSERT INTO contest_lab_map (contest_id, lab_id, status, creator_id, creator, create_time) VALUES(?,?,?,?,?,?)")
+func (c *ContestLabMap) InsertWithTx(tx *sql.Tx) (int64, error) {
+	stmt, err := tx.Prepare("INSERT INTO contest_lab_map (contest_id, lab_id, status, creator_id, creator, create_time) VALUES(?,?,?,?,?,?)")
 	if err != nil {
+		tx.Rollback()
 		log.Printf("[ERROR] database exec error input[%v] err[%v]", c, err)
 		return 0, err
 	}
@@ -30,6 +32,7 @@ func (c *ContestLabMap) Insert() (int64, error) {
 		c.CreateTime,
 	)
 	if err != nil || ret == nil {
+		tx.Rollback()
 		return 0, err
 	}
 	return ret.LastInsertId()
@@ -64,7 +67,7 @@ func (c *ContestLabMap) GetIdMap(contestIds []interface{}, status int) (map[uint
 		return contestLabIdMap, labIdList, nil
 	}
 
-	query := "SELECT contest_id, lab_id, status FROM contest_lab_map WHERE contest_id IN (?"+strings.Repeat(",?", len(contestIds)-1)+") ORDER BY lab_order DESC"
+	query := "SELECT contest_id, lab_id, status FROM contest_lab_map WHERE contest_id IN (?"+strings.Repeat(",?", len(contestIds)-1)+") ORDER BY lab_order"
 	if status != STATUS_ALL {
 		contestIds = append(contestIds, status)
 		query += " AND status=?"
@@ -90,3 +93,26 @@ func (c *ContestLabMap) GetIdMap(contestIds []interface{}, status int) (map[uint
 
 	return contestLabIdMap, labIdList, err
 }
+
+func (c *ContestLabMap) InvalidAll(tx *sql.Tx) bool {
+	if c.ID == 0 {
+		tx.Rollback()
+		return false
+	}
+ 	stmt, err := tx.Prepare("UPDATE contest_lab_map SET status=? WHERE contest_id=?")
+ 	defer stmt.Close()
+	if err != nil {
+		tx.Rollback()
+		return false
+	}
+	_, err = stmt.Exec(
+			STATUS_DISABLE,
+			c.ContestId,
+		)
+	if err != nil {
+		tx.Rollback()
+		return false
+	}
+	return true
+}
+

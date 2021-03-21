@@ -115,6 +115,7 @@ func writeData(c *ws.WsClientConn) {
 		case message, ok := <-c.Send:
 			if !ok {
 				c.Conn.WriteMessage(websocket.CloseMessage, []byte{})
+				c.Send = nil
 				return
 			}
 

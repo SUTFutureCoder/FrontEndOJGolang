@@ -22,7 +22,7 @@ func Reg(c *gin.Context) {
 	var req regReq
 	err := c.BindJSON(&req)
 	if err != nil || req.UserName == "" || req.UserPassWord == ""{
-		appG.RespErr(e.INVALID_PARAMS, "please check your param")
+		appG.RespErr(e.PARSE_PARAM_ERROR, nil)
 		return
 	}
 

@@ -2,6 +2,9 @@ package v1
 
 import (
 	"FrontEndOJGolang/pkg/app"
+	"FrontEndOJGolang/routers/api/v1/admin/contest"
+	"FrontEndOJGolang/routers/api/v1/admin/contest_lab"
+	"FrontEndOJGolang/routers/api/v1/admin/contest_user"
 	"FrontEndOJGolang/routers/api/v1/admin/lab"
 	"FrontEndOJGolang/routers/api/v1/admin/lab_testcase"
 	"FrontEndOJGolang/routers/api/v1/admin/testfield"
@@ -48,14 +51,13 @@ func InitAdminRouter(r *gin.Engine) {
 	// contest管理区
 	contestGroup := admin.Group("/contest")
 	contestGroup.POST("/create", contest.CreateContest)
-	contestGroup.POST("/disable", contest.DisableContest)
-	contestGroup.POST("/enable", contest.EnableContest)
+	contestGroup.POST("/modify", contest.ModifyContest)
+	contestGroup.POST("/status_modify", contest.ModifyContestStatus)
 
-	contestGroup.POST("/manage_labs", contest.ManageLabs)
-	contestGroup.POST("/summary_labs", contest.SummaryLabs)
+	contestGroup.POST("/manage_labs", contest_lab.ManageLabs)
 
-	contestGroup.POST("/manage_users", contest.ManageUsers)
-	contestGroup.POST("/summary_users", contest.SummaryUsers)
+	contestGroup.POST("/users_status_modify", contest_user.ModifyUsersStatus)
+	contestGroup.POST("/add_users", contest_user.AddUsers)
 
 
 }

@@ -1,6 +1,8 @@
 package models
 
 import (
+	"FrontEndOJGolang/pkg/utils"
+	"errors"
 	"log"
 	"strings"
 )
@@ -118,6 +120,54 @@ func (c *Contest) GetByIds(contestIds []interface{}) []*Contest {
 	return contests
 }
 
-func (c *Contest) ModifyStatus() {
+func (c *Contest) Modify() bool {
+	stmt, err := DB.Prepare("UPDATE contest SET contest_name=?, contest_desc=?, contest_start_time=?, contest_end_time=?, signup_start_time=?, signup_end_time=?, update_time=? WHERE id=?")
+	if err != nil {
+		log.Printf("update contest error [%#v]", err)
+		return false
+	}
+	defer stmt.Close()
+	_, err = stmt.Exec(
+		c.ContestName,
+		c.ContestDesc,
+		c.ContestStartTime,
+		c.ContestEndTime,
+		c.SignupStartTime,
+		c.SignupEndTime,
+		utils.GetMillTime(),
+		c.ID,
+	)
+	if err != nil {
+		log.Printf("update contest error [%#v]", err)
+		return false
+	}
+	return true
+}
 
+func (c *Contest) ModifyStatus(to int) bool {
+	stmt, err := DB.Prepare("UPDATE contest SET status=?, update_time=? WHERE id=?")
+	if err != nil {
+		log.Printf("update contest status error [%#v]", err)
+		return false
+	}
+	defer stmt.Close()
+	_, err = stmt.Exec(to, utils.GetMillTime(), c.ID)
+	if err != nil {
+		log.Printf("update contest status error[%#v]", err)
+		return false
+	}
+	return true
+}
+
+func (c *Contest) CheckParams() error {
+	if c.ContestEndTime == 0 || c.SignupEndTime == 0 {
+		return errors.New("time can not equals 0")
+	}
+	if c.ContestStartTime > c.ContestEndTime || c.SignupStartTime > c.SignupEndTime {
+		return errors.New("end time must greater than start time")
+	}
+	if c.ContestEndTime < utils.GetMillTime() || c.SignupEndTime < utils.GetMillTime() {
+		return errors.New("end time must greater than now")
+	}
+	return nil
 }

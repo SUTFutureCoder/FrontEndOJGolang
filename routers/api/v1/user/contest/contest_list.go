@@ -31,7 +31,7 @@ func ListWithSummary(c *gin.Context) {
 	var req listWithSummaryReq
 	err := c.BindJSON(&req)
 	if err != nil {
-		appG.RespErr(e.INVALID_PARAMS, err)
+		appG.RespErr(e.PARSE_PARAM_ERROR, err)
 		return
 	}
 

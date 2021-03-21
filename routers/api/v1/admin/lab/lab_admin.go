@@ -15,7 +15,7 @@ func prepareAdmin(appG *app.Gin) adminReq {
 	var req adminReq
 	err := appG.C.BindJSON(&req)
 	if err != nil {
-		appG.RespErr(e.INVALID_PARAMS, nil)
+		appG.RespErr(e.PARSE_PARAM_ERROR, nil)
 		appG.C.Abort()
 		return req
 	}

@@ -8,6 +8,7 @@ var MsgFlags = map[int]string{
 	NOT_LOGINED:    "please login first",
 	INVALID_PARAMS: "please check your request",
 	UNAUTHORIZED:   "please check your authorize",
+	PARSE_PARAM_ERROR: "parse param error",
 }
 
 func GetMsg(code int) string {

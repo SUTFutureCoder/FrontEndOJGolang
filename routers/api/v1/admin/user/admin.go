@@ -20,7 +20,7 @@ func DisableUser(c *gin.Context) {
 	var req adminUserReq
 	err := c.BindJSON(&req)
 	if err != nil {
-		appG.RespErr(e.INVALID_PARAMS, nil)
+		appG.RespErr(e.PARSE_PARAM_ERROR, nil)
 		return
 	}
 
@@ -41,7 +41,7 @@ func EnableUser(c *gin.Context) {
 	var req adminUserReq
 	err := c.BindJSON(&req)
 	if err != nil {
-		appG.RespErr(e.INVALID_PARAMS, nil)
+		appG.RespErr(e.PARSE_PARAM_ERROR, nil)
 		return
 	}
 
@@ -75,7 +75,7 @@ func CreateUser(c *gin.Context) {
 	var user models.User
 	err := c.BindJSON(&req)
 	if err != nil {
-		appG.RespErr(e.INVALID_PARAMS, err.Error())
+		appG.RespErr(e.PARSE_PARAM_ERROR, err.Error())
 		return
 	}
 	passByte, _ := bcrypt.GenerateFromPassword([]byte(req.UserPasswd), bcrypt.DefaultCost)
@@ -110,19 +110,23 @@ func ChangePasswd(c *gin.Context) {
 	}
 
 	userSession := app.GetUserFromSession(appG)
-	if userSession.Id != 0 {
+	if userSession.Id == 0 {
 		return
 	}
 
 	var req changePasswdReq
-	c.BindJSON(&req)
+	err := c.BindJSON(&req)
+	if err != nil {
+		appG.RespErr(e.PARSE_PARAM_ERROR, nil)
+		return
+	}
 
 	var user models.User
 	user.ID = req.UserId
 	passByte, _ := bcrypt.GenerateFromPassword([]byte(req.NewPasswd), bcrypt.DefaultCost)
 	user.UserPassword = string(passByte)
 
-	_, err := user.UpdatePwd()
+	_, err = user.UpdatePwd()
 	if err != nil {
 		log.Printf("update user passwd error[%#v]", err)
 		appG.RespErr(e.INVALID_PARAMS, nil)
@@ -143,7 +147,7 @@ func GrantPermission(c *gin.Context) {
 	}
 
 	usersession := app.GetUserFromSession(appG)
-	if usersession.Id != 0 {
+	if usersession.Id == 0 {
 		return
 	}
 
@@ -172,7 +176,7 @@ func ModifyUser(c *gin.Context) {
 	var req modifyUserReq
 	err := c.BindJSON(&req)
 	if err != nil {
-		appG.RespErr(e.INVALID_PARAMS, nil)
+		appG.RespErr(e.PARSE_PARAM_ERROR, nil)
 		return
 	}
 

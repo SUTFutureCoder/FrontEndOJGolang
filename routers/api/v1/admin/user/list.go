@@ -37,7 +37,7 @@ func List(c *gin.Context) {
 	var resp userListResp
 	err := c.BindJSON(&req)
 	if err != nil {
-		appG.RespErr(e.INVALID_PARAMS, nil)
+		appG.RespErr(e.PARSE_PARAM_ERROR, nil)
 		return
 	}
 

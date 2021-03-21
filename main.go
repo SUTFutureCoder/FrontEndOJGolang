@@ -9,6 +9,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"log"
 	"net/http"
+	_ "net/http/pprof"
 )
 
 func init() {
@@ -19,6 +20,11 @@ func init() {
 }
 
 func main() {
+
+	go func() {
+		http.ListenAndServe("0.0.0.0:8898", nil)
+	}()
+
 	gin.SetMode(setting.ServerSetting.RunMode)
 
 	routersInit := routers.InitRouter

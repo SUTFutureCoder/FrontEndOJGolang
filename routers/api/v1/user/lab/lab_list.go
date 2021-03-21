@@ -25,7 +25,7 @@ func LabList(c *gin.Context) {
 	var req labListReq
 	err := c.BindJSON(&req)
 	if err != nil {
-		appGin.RespErr(e.INVALID_PARAMS, err)
+		appGin.RespErr(e.PARSE_PARAM_ERROR, err)
 		return
 	}
 	app.GetUserFromSession(appGin)

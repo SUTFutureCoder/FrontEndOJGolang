@@ -25,7 +25,7 @@ func Info(c *gin.Context) {
 	req := &infoReq{}
 	err := c.BindJSON(req)
 	if err != nil {
-		appG.RespErr(e.INVALID_PARAMS, err)
+		appG.RespErr(e.PARSE_PARAM_ERROR, err)
 		return
 	}
 
@@ -73,9 +73,13 @@ func Info(c *gin.Context) {
 	}
 
 	lab := &models.Lab{}
+	labList := lab.GetByIds(labIds)
+	for k, _ := range labList {
+		labList[k].LabSample = ""
+	}
 	appG.RespSucc(infoResp{
 		ContestInfo: *contest,
-		LabList: lab.GetByIds(labIds),
+		LabList: labList,
 	})
 }
 
