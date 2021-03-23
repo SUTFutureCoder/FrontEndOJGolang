@@ -58,6 +58,8 @@ const (
 	LABSUBMITSTATUS_SYSTEM_ERROR
 )
 
+const PENAL_TIME = 20
+
 func (labSubmit *LabSubmit) Insert() (int64, error) {
 	stmt, err := DB.Prepare("INSERT INTO lab_submit (lab_id, submit_data, submit_result, creator_id, creator, create_time) VALUES (?,?,?,?,?,?)")
 	defer stmt.Close()
@@ -323,4 +325,32 @@ func (labSubmit *LabSubmit) GetUserDaySubmits(userId, time uint64) []LabSubmit {
 		labSubmits = append(labSubmits, labSubmit)
 	}
 	return labSubmits
+}
+
+type SubmitGroupData struct {
+	LabSubmit
+	Cnt int `json:"cnt"`
+}
+
+func (labSubmit *LabSubmit) GroupByUserAndLabIds(labIds []interface{}, userIds []interface{}) []SubmitGroupData {
+	var submitGroupDataList []SubmitGroupData
+	params := labIds
+	params = append(params, userIds...)
+	rows, err := DB.Query("SELECT lab_id, status, creator_id, ANY_VALUE(creator) as creator, count(1) as cnt FROM lab_submit WHERE lab_id IN(?" + strings.Repeat(",?", len(labIds) - 1) + ") AND creator_id IN(?" + strings.Repeat(",?", len(userIds) - 1) + ") GROUP BY lab_id, creator, status", params...)
+	if err != nil {
+		log.Printf("group submits by user and labids error [%#v] params [%#v]", err, params)
+		return submitGroupDataList
+	}
+	defer rows.Close()
+	for rows.Next() {
+		var submitGroupData SubmitGroupData
+		err = rows.Scan(
+			&submitGroupData.LabID,
+			&submitGroupData.Status,
+			&submitGroupData.CreatorId,
+			&submitGroupData.Creator,
+			&submitGroupData.Cnt,
+		)
+	}
+	return submitGroupDataList
 }

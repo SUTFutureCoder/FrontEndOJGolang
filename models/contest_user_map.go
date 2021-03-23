@@ -88,6 +88,15 @@ func (c *ContestUserMap) GetByContestIds(contestIds []interface{}, status int) [
 	return contestUserMaps
 }
 
+func (c *ContestUserMap) GetIdListByContestIds(contestIds []interface{}, status int) ([]*ContestUserMap, []interface{}) {
+	contestUserMap := c.GetByContestIds(contestIds, status)
+	var list []interface{}
+	for _, v := range contestUserMap {
+		list = append(list, v.CreatorId)
+	}
+	return contestUserMap, list
+}
+
 func (c *ContestUserMap) GetMap(ids []interface{}, status int) map[uint64][]*User {
 	contestUserMap := c.GetByContestIds(ids, status)
 	ret := make(map[uint64][]*User)

@@ -33,7 +33,6 @@ func(labTestCase *LabTestcase) GetByIds(testcaseIds []interface{}) ([]LabTestcas
 		err = rows.Scan(&testcase.ID, &testcase.TestcaseCode, &testcase.TestcaseDesc, &testcase.Input, &testcase.Output, &testcase.TimeLimit, &testcase.MemLimit, &testcase.WaitBefore, &testcase.Status, &testcase.Creator, &testcase.CreateTime, &testcase.UpdateTime)
 		testcases = append(testcases, testcase)
 	}
-	rows.Close()
 	return testcases, err
 
 }
