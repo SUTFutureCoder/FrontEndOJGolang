@@ -56,8 +56,8 @@ func InitAdminRouter(r *gin.Engine) {
 
 	contestGroup.POST("/manage_labs", contest_lab.ManageLabs)
 
-	contestGroup.POST("/users_status_modify", contest_user.ModifyUsersStatus)
 	contestGroup.POST("/add_users", contest_user.AddUsers)
+	contestGroup.POST("/users_status_modify", contest_user.ModifyUsersStatus)
 
 
 }

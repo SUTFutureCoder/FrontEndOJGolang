@@ -24,8 +24,8 @@ func (c *ContestUserMap) Insert() (int64, error) {
 	defer stmt.Close()
 	ret, err := stmt.Exec(
 		c.ContestId,
-		c.CreatorId,
 		c.Status,
+		c.CreatorId,
 		c.Creator,
 		c.CreateTime,
 	)

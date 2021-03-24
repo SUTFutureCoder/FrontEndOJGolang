@@ -38,6 +38,12 @@ func CreateContest(c *gin.Context) {
 			Creator: userSession.Name,
 			CreateTime: utils.GetMillTime(),
 		},
+		ContestName: req.ContestName,
+		ContestDesc: req.ContestDesc,
+		ContestStartTime: req.ContestStartTime,
+		ContestEndTime: req.ContestEndTime,
+		SignupStartTime: req.SignupStartTime,
+		SignupEndTime: req.SignupEndTime,
 	}
 
 	err = contest.CheckParams()

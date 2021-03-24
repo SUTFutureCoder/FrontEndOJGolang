@@ -38,4 +38,5 @@ func ModifyContestStatus(c *gin.Context) {
 		return
 	}
 
+	appG.RespSucc(nil)
 }

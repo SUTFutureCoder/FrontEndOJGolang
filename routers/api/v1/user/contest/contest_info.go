@@ -67,16 +67,16 @@ func Info(c *gin.Context) {
 
 	contestLabMap := &models.ContestLabMap{}
 	_, labIds, err := contestLabMap.GetIdMap([]interface{}{contest.ID}, status)
-	if len(labIds) == 0 {
-		appG.RespErr(e.ERROR, "Contest Contains No Labs")
-		return
+	labList := make([]models.Lab, 0)
+
+	if len(labIds) != 0 {
+		lab := &models.Lab{}
+		labList = lab.GetByIds(labIds)
+		for k, _ := range labList {
+			labList[k].LabSample = ""
+		}
 	}
 
-	lab := &models.Lab{}
-	labList := lab.GetByIds(labIds)
-	for k, _ := range labList {
-		labList[k].LabSample = ""
-	}
 	appG.RespSucc(infoResp{
 		ContestInfo: *contest,
 		LabList: labList,

@@ -37,7 +37,7 @@ func Sign(c *gin.Context) {
 			Creator: userSession.Name,
 		},
 	}
-	if !contestUserMap.CheckUserSignIn() {
+	if contestUserMap.CheckUserSignIn() {
 		appG.RespErr(e.INVALID_PARAMS, "User Had Signed This Contest")
 		return
 	}

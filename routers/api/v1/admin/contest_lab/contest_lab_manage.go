@@ -61,6 +61,7 @@ func ManageLabs(c *gin.Context) {
 			CreatorId: usersession.Id,
 			Creator: usersession.Name,
 			CreateTime: utils.GetMillTime(),
+			Status: models.STATUS_ENABLE,
 		},
 	}
 	if !contestLabMap.InvalidAll(tx) {
@@ -89,8 +90,9 @@ func ManageLabs(c *gin.Context) {
 func buildAndInsertBatch(contestLabMap *models.ContestLabMap, labIds []uint64, tx *sql.Tx) bool {
 	for _, id := range labIds {
 		contestLabMap.LabId = id
-		retId, err := contestLabMap.InsertWithTx(tx)
-		if err != nil || retId == 0 {
+		ret, err := contestLabMap.InsertWithTx(tx)
+		if err != nil || ret == 0 {
+			log.Printf("buildAndInsertBatch failed error[%#v]", err)
 			return false
 		}
 	}

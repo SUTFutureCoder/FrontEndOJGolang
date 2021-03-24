@@ -28,14 +28,14 @@ func ModifyContest(c *gin.Context) {
 		return
 	}
 
-	contest := &models.Contest{}
+	contest := req
 	err = contest.CheckParams()
 	if err != nil {
-		appG.RespErr(e.INVALID_PARAMS, err)
+		appG.RespErr(e.INVALID_PARAMS, err.Error())
 		return
 	}
 
-	if !contest.Modify() {
+	if contest.ID == 0 || !contest.Modify() {
 		appG.RespErr(e.ERROR, "modify contest error")
 		return
 	}

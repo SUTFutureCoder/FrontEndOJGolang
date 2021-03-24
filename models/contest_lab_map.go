@@ -26,8 +26,8 @@ func (c *ContestLabMap) InsertWithTx(tx *sql.Tx) (int64, error) {
 	ret, err := stmt.Exec(
 		c.ContestId,
 		c.LabId,
-		c.CreatorId,
 		c.Status,
+		c.CreatorId,
 		c.Creator,
 		c.CreateTime,
 	)
@@ -95,10 +95,6 @@ func (c *ContestLabMap) GetIdMap(contestIds []interface{}, status int) (map[uint
 }
 
 func (c *ContestLabMap) InvalidAll(tx *sql.Tx) bool {
-	if c.ID == 0 {
-		tx.Rollback()
-		return false
-	}
  	stmt, err := tx.Prepare("UPDATE contest_lab_map SET status=? WHERE contest_id=?")
  	defer stmt.Close()
 	if err != nil {

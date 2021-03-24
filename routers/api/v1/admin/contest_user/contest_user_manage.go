@@ -95,4 +95,6 @@ func AddUsers(c *gin.Context) {
 		}
 	}
 
+	appG.RespSucc(nil)
+
 }

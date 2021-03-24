@@ -166,6 +166,9 @@ func (c *Contest) CheckParams() error {
 	if c.ContestStartTime > c.ContestEndTime || c.SignupStartTime > c.SignupEndTime {
 		return errors.New("end time must greater than start time")
 	}
+	if c.SignupEndTime > c.ContestEndTime {
+		return errors.New("contest end time must greater than signup end time")
+	}
 	if c.ContestEndTime < utils.GetMillTime() || c.SignupEndTime < utils.GetMillTime() {
 		return errors.New("end time must greater than now")
 	}
