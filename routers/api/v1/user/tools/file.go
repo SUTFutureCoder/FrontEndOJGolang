@@ -1,16 +1,13 @@
-package file
+package tools
 
 import (
 	"FrontEndOJGolang/pkg/app"
 	"FrontEndOJGolang/pkg/e"
 	"FrontEndOJGolang/pkg/setting"
-	"crypto/sha1"
-	"encoding/hex"
+	"FrontEndOJGolang/routers/api/v1/user/tools/file"
 	"github.com/gin-gonic/gin"
 	"log"
-	"os"
-	"path"
-	"strconv"
+	"net/http"
 	"strings"
 )
 
@@ -26,28 +23,20 @@ func UploadFile(c *gin.Context) {
 	}
 
 	fileReader, err := c.FormFile("file")
-	if err != nil {
+
+	fileTool, err := file.GetFileToolWithUser(setting.ToolSetting.FileToolType, userSession.Id)
+	if fileTool == nil || err != nil {
 		log.Printf("[ERROR] upload file error:[%v]", err)
 		appG.RespErr(e.INVALID_PARAMS, "upload file error")
 		return
 	}
-
-	// gen new hashed filename
-	h := sha1.New()
-	h.Write([]byte(fileReader.Filename))
-	fileName := hex.EncodeToString(h.Sum(nil)) + path.Ext(fileReader.Filename)
-
-	filePath := setting.ToolSetting.FileBaseDir + "/" + strconv.FormatUint(userSession.Id, 10)
-	os.MkdirAll(filePath, os.ModePerm)
-	filePath += "/" + fileName
-
-	err = c.SaveUploadedFile(fileReader, filePath)
+	filePath, err := fileTool.Put(fileReader)
 	if err != nil {
 		log.Printf("[ERROR] save upload file error:[%v]", err)
 		appG.RespErr(e.INVALID_PARAMS, "save upload file error")
 		return
 	}
-	appG.RespSucc(fileName)
+	appG.RespSucc(filePath)
 }
 
 func GetFile(c *gin.Context) {
@@ -60,12 +49,19 @@ func GetFile(c *gin.Context) {
 		return
 	}
 
-	file := c.Query("file")
-	if file == "" || strings.Contains(file, "..") || strings.Contains(file, "/") {
+	fileParam := c.Query("file")
+	if fileParam == "" || strings.Contains(fileParam, "..") {
 		appG.RespErr(e.INVALID_PARAMS, "invalid file url")
 		return
 	}
 
-	filePath := setting.ToolSetting.FileBaseDir + "/" + strconv.FormatUint(userSession.Id, 10) + "/" + file
-	c.File(filePath)
+	fileTool, err := file.GetFileTool(setting.ToolSetting.FileToolType)
+	if fileTool == nil || err != nil {
+		log.Printf("[ERROR] upload file error:[%v]", err)
+		appG.RespErr(e.INVALID_PARAMS, "upload file error")
+		return
+	}
+
+	bytes, err := fileTool.Get(setting.ToolSetting.FileBaseDir + "/" + fileParam)
+	c.Data(e.SUCCESS, http.DetectContentType(bytes), bytes)
 }

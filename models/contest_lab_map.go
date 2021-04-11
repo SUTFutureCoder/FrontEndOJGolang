@@ -3,6 +3,7 @@ package models
 import (
 	"database/sql"
 	"log"
+	"strconv"
 	"strings"
 )
 
@@ -110,5 +111,35 @@ func (c *ContestLabMap) InvalidAll(tx *sql.Tx) bool {
 		return false
 	}
 	return true
+}
+
+func (c *ContestLabMap) GetContestIdsByLabId(labId uint64, status int) ([]interface{}, error) {
+	var contestIdList []interface{}
+	stmt := &sql.Stmt{}
+	var err error
+
+	if status == STATUS_ALL {
+		stmt, err = DB.Prepare("SELECT contest_id FROM contest_lab_map WHERE lab_id=?")
+	} else {
+		stmt, err = DB.Prepare("SELECT contest_id FROM contest_lab_map WHERE lab_id=? AND status="+ strconv.Itoa(status))
+	}
+
+	defer stmt.Close()
+	rows, err := stmt.Query(&labId)
+	if err != nil {
+		log.Printf("get contest by lab id from db error:%#v", err)
+		return contestIdList, err
+	}
+
+	for rows.Next() {
+		var tmpContestId uint64
+		err = rows.Scan(&tmpContestId)
+		if err != nil {
+			log.Printf("get contest by lab id from db error:%#v", err)
+			return contestIdList, err
+		}
+		contestIdList = append(contestIdList, tmpContestId)
+	}
+	return contestIdList, nil
 }
 

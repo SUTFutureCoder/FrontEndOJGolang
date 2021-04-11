@@ -5,7 +5,7 @@ import (
 	"FrontEndOJGolang/routers/api/v1/user/judger"
 	"FrontEndOJGolang/routers/api/v1/user/lab"
 	"FrontEndOJGolang/routers/api/v1/user/lab_submit"
-	"FrontEndOJGolang/routers/api/v1/user/tools/file"
+	"FrontEndOJGolang/routers/api/v1/user/tools"
 	"FrontEndOJGolang/routers/api/v1/user/user"
 	"FrontEndOJGolang/routers/api/v1/user/ws"
 	"github.com/gin-gonic/gin"
@@ -20,6 +20,7 @@ func InitUserRouter(r *gin.Engine) {
 
 	labSubmitGroup := r.Group("/lab_submit")
 	labSubmitGroup.POST("/submit", lab_submit.Submit)
+	labSubmitGroup.POST("/submit_with_file", lab_submit.SubmitWithFile)
 	labSubmitGroup.POST("/submit_list", lab_submit.SubmitList)
 	labSubmitGroup.POST("/submit_list_by_lab_id", lab_submit.SubmitListByLabId)
 
@@ -47,8 +48,8 @@ func InitUserRouter(r *gin.Engine) {
 
 	// 工具
 	tool := r.Group("/tool")
-	tool.GET("/getfile", file.GetFile)
-	tool.POST("/uploadfile", file.UploadFile)
+	tool.GET("/getfile", tools.GetFile)
+	tool.POST("/uploadfile", tools.UploadFile)
 
 	// websocket
 	r.GET("/ws", ws.Ws)

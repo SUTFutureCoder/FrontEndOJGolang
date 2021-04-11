@@ -2,6 +2,7 @@ package models
 
 import (
 	"FrontEndOJGolang/pkg/utils"
+	"database/sql"
 	"errors"
 	"log"
 	"strings"
@@ -95,17 +96,26 @@ func (c *Contest) GetListById(contestId uint64, status int) ([]*Contest, error) 
 	return contestList, err
 }
 
-func (c *Contest) GetByIds(contestIds []interface{}) []*Contest {
+func (c *Contest) GetByIds(contestIds []interface{}, validCheck bool) []*Contest {
 	var contests []*Contest
 	if len(contestIds) == 0 {
 		return contests
 	}
-	rows, err := DB.Query("SELECT id, contest_name, contest_desc, contest_start_time, contest_end_time, signup_start_time, sigup_end_time, status, creator_id, creator, create_time, update_time FROM contest WHERE id IN (?"+strings.Repeat(",?", len(contestIds)-1)+")", contestIds...)
-	defer rows.Close()
+	rows := &sql.Rows{}
+	var err error
+	if validCheck {
+		var sqlQuery []interface{}
+		sqlQuery = append(append(sqlQuery, contestIds...), STATUS_ENABLE, utils.GetMillTime(), utils.GetMillTime())
+		rows, err = DB.Query("SELECT id, contest_name, contest_desc, contest_start_time, contest_end_time, signup_start_time, signup_end_time, status, creator_id, creator, create_time, update_time FROM contest WHERE id IN (?"+strings.Repeat(",?", len(contestIds)-1)+") AND status=? AND contest_start_time <= ? AND contest_end_time >= ?", sqlQuery...)
+	} else {
+		rows, err = DB.Query("SELECT id, contest_name, contest_desc, contest_start_time, contest_end_time, signup_start_time, signup_end_time, status, creator_id, creator, create_time, update_time FROM contest WHERE id IN (?"+strings.Repeat(",?", len(contestIds)-1)+")", contestIds...)
+	}
+
 	if err != nil {
 		log.Printf("get contest list by ids error [%v]\n", err)
 		return contests
 	}
+	defer rows.Close()
 	for rows.Next() {
 		contest := &Contest{}
 		err = rows.Scan(
@@ -169,7 +179,7 @@ func (c *Contest) CheckParams() error {
 	if c.SignupEndTime > c.ContestEndTime {
 		return errors.New("contest end time must greater than signup end time")
 	}
-	if c.ContestEndTime < utils.GetMillTime() || c.SignupEndTime < utils.GetMillTime() {
+	if c.ContestEndTime < utils.GetMillTime() {
 		return errors.New("end time must greater than now")
 	}
 	return nil

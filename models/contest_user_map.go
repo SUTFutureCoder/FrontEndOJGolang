@@ -135,6 +135,33 @@ func (c *ContestUserMap) CheckUserSignIn() bool {
 	return cnt >= 1
 }
 
+func (c *ContestUserMap) CheckUserSignInByContestIds(contestIds []interface{}, creatorId uint64) []interface{} {
+	if len(contestIds) == 0 {
+		return contestIds
+	}
+
+	var query []interface{}
+	query = append(append(query, contestIds...), creatorId, STATUS_ENABLE)
+	rows, err := DB.Query("SELECT contest_id FROM contest_user_map WHERE contest_id IN(?"+strings.Repeat(",?", len(contestIds)-1)+") AND creator_id=? AND status=?", query...)
+
+	var signInContestIds []interface{}
+	if err != nil {
+		log.Printf("check user sign in by contest ids error:%#v", err)
+		return signInContestIds
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		var tmpContestId uint64
+		err = rows.Scan(&tmpContestId)
+		if err != nil {
+			return signInContestIds
+		}
+		signInContestIds = append(signInContestIds, tmpContestId)
+	}
+	return signInContestIds
+}
+
 func (c *ContestUserMap) CheckUserExists() bool {
 	stmt, err := DB.Prepare("SELECT count(1) as cnt FROM contest_user_map WHERE contest_id=? AND creator_id=?")
 	if err != nil {

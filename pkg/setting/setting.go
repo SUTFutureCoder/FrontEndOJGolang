@@ -1,9 +1,9 @@
 package setting
 
 import (
-	"fmt"
 	"log"
 	"os"
+	"path/filepath"
 	"time"
 
 	"github.com/go-ini/ini"
@@ -50,6 +50,8 @@ var SessionSetting = &Session{}
 
 type Tool struct {
 	FileBaseDir string
+	FileToolType string
+	CloudFileBaseUrl bool
 }
 
 var ToolSetting = &Tool{}
@@ -112,7 +114,7 @@ func checkAndFixDirExists(targetDir string, suffix string) string {
 	if err != nil {
 		log.Fatalf("Can not create target dir and your home dir, please check your config in conf/*.ini was set correctly.")
 	}
-	newDir := fmt.Sprintf("%s/%s", homeDir, suffix)
+	newDir := filepath.Join(homeDir, suffix)
 	// try create dir if not exist
 	err = os.MkdirAll(newDir, 0777)
 	if err == nil {

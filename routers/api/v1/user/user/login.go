@@ -25,7 +25,7 @@ func Login(c *gin.Context) {
 		return
 	}
 
-	user := new(models.User)
+	user := &models.User{}
 	user.Creator = req.UserName
 	err := user.GetByName()
 	if err != nil {

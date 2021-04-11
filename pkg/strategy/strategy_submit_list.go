@@ -22,8 +22,6 @@ type submitListReq struct {
 }
 
 func (s *submitList) execute(v ...interface{}) {
-	fmt.Println(s)
-
 	if c, ok := s.Context.(*websocket.WsClientConn); ok {
 		if str, ok := v[0].(string); ok {
 			req := &submitListReq{}
@@ -40,6 +38,4 @@ func (s *submitList) execute(v ...interface{}) {
 			websocket.SendToClient(c, e.SUCCESS, *s)
 		}
 	}
-
-	fmt.Println(v)
 }

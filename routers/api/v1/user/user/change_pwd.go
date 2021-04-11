@@ -29,7 +29,7 @@ func ChangePwd(c *gin.Context) {
 		appG.RespErr(e.PARSE_PARAM_ERROR, nil)
 	}
 
-	user := new(models.User)
+	user := &models.User{}
 	user.Creator = userSession.Name
 	err := user.GetByName()
 	if err != nil {

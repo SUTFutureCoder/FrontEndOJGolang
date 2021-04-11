@@ -13,11 +13,18 @@ type LabSubmit struct {
 	LabID uint64 `json:"lab_id"`
 	// SubmitData 提交内容
 	SubmitData string `json:"submit_data"`
+	// SubmitType 提交类型
+	SubmitType int8 `json:"submit_type"`
 	// SubmitResult 提交结果
 	SubmitResult string `json:"submit_result"`
 	// SubmitTimeUsage 消耗时间
 	SubmitTimeUsage int64 `json:"submit_time_usage"`
 }
+
+const (
+	SUBMIT_TYPE_SOURCE = 0
+	SUBMIT_TYPE_PACKAGE = 1
+)
 
 /**
 使用标准ACM OnlineJudget状态
@@ -61,11 +68,16 @@ const (
 const PENAL_TIME = 20
 
 func (labSubmit *LabSubmit) Insert() (int64, error) {
-	stmt, err := DB.Prepare("INSERT INTO lab_submit (lab_id, submit_data, submit_result, creator_id, creator, create_time) VALUES (?,?,?,?,?,?)")
+	stmt, err := DB.Prepare("INSERT INTO lab_submit (lab_id, submit_data, submit_type, submit_result, creator_id, creator, create_time) VALUES (?,?,?,?,?,?,?)")
+	if err != nil {
+		log.Printf("insert into lab submit error:%#v", err)
+		return 0, err
+	}
 	defer stmt.Close()
 	insertRet, err := stmt.Exec(
 		labSubmit.LabID,
 		labSubmit.SubmitData,
+		labSubmit.SubmitType,
 		labSubmit.SubmitResult,
 		labSubmit.CreatorId,
 		labSubmit.Creator,

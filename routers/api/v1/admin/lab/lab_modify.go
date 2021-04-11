@@ -48,5 +48,5 @@ func ModifyLab(c *gin.Context) {
 	lab.LabSample = req.LabSample
 
 	lab.Modify()
-
+	appG.RespSucc(nil)
 }

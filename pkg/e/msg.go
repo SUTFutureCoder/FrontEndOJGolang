@@ -9,6 +9,7 @@ var MsgFlags = map[int]string{
 	INVALID_PARAMS: "please check your request",
 	UNAUTHORIZED:   "please check your authorize",
 	PARSE_PARAM_ERROR: "parse param error",
+	LAB_INVALID: 	"lab was not valid, please check lab status",
 }
 
 func GetMsg(code int) string {
