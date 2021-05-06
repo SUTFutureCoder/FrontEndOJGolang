@@ -46,7 +46,9 @@ func (labTestCaseMap *LabTestcaseMap) Insert(tx *sql.Tx) (sql.Result, error) {
 
 func (labTestCaseMap *LabTestcaseMap) GetCntByLabIds(labIds []interface{}) map[uint64]int {
 	testcaseCntMap := make(map[uint64]int)
-	rows, err := DB.Query("SELECT lab_id, count(*) as cnt FROM lab_testcase_map WHERE lab_id IN (?"+strings.Repeat(",?", len(labIds)-1)+")"+" GROUP BY lab_id", labIds...)
+	tmpInterface := labIds
+	tmpInterface = append(tmpInterface, STATUS_ENABLE)
+	rows, err := DB.Query("SELECT lab_id, count(*) as cnt FROM lab_testcase_map WHERE lab_id IN (?"+strings.Repeat(",?", len(labIds)-1)+") AND status=? GROUP BY lab_id", tmpInterface...)
 	if err != nil {
 		log.Printf("get lab testcase cnt from db error [%#v]", err)
 		return nil

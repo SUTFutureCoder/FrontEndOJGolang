@@ -22,6 +22,12 @@ type httpTestResult struct {
 	Msg  string
 	Data testResult
 }
+
+type httpTestByteResult struct {
+	Code int
+	Msg string
+	Data []byte
+}
 type testResult struct {
 	Id             uint64
 	TestCaseId     int
@@ -36,7 +42,6 @@ func Run(c *gin.Context) {
 	appG := app.Gin{
 		C: c,
 	}
-
 	var req testcaseRunReq
 	var res httpTestResult
 	err := c.BindJSON(&req)
@@ -45,20 +50,48 @@ func Run(c *gin.Context) {
 		return
 	}
 
+	userSession := app.GetUserFromSession(appG)
+	req.LabTestcase.CreatorId = userSession.Id
 	jsonData, err := json.Marshal(req)
 	if err != nil {
 		appG.RespErr(e.ERROR, err.Error())
 		return
 	}
-	resp, err := http.Post(fmt.Sprintf("%s:%s/%s", setting.JudgerSetting.JudgerAddr, setting.JudgerSetting.HttpPort, "httpjudger"), "application/json", bytes.NewBuffer(jsonData))
+
+	lab := &models.Lab{}
+	err = lab.GetFullInfo(req.LabId)
 	if err != nil {
 		appG.RespErr(e.ERROR, err.Error())
 		return
 	}
+
+	var resp *http.Response
+	switch lab.LabType {
+	case models.LABTYPE_NORMAL:
+		resp, err = reqToJudger("httpjudger", jsonData)
+	case models.LABTYPE_IMITATE:
+		resp, err = reqToJudger("screenshot", jsonData)
+	}
+
+	if err != nil {
+		appG.RespErr(e.ERROR, err.Error())
+		return
+	}
+
 	json.NewDecoder(resp.Body).Decode(&res)
+
 	if res.Code != e.SUCCESS {
-		appG.RespErr(res.Code, res.Data)
+		appG.RespErr(res.Code, res.Msg)
 		return
 	}
 	appG.RespSucc(res.Data)
+}
+
+
+func reqToJudger(judgerApi string, jsonData []byte) (*http.Response, error){
+	resp, err := http.Post(fmt.Sprintf("%s:%s/%s", setting.JudgerSetting.JudgerAddr, setting.JudgerSetting.HttpPort, judgerApi), "application/json", bytes.NewBuffer(jsonData))
+	if err != nil {
+		return nil, err
+	}
+	return resp, nil
 }

@@ -44,11 +44,6 @@ func GetFile(c *gin.Context) {
 		C: c,
 	}
 
-	userSession := app.GetUserFromSession(appG)
-	if userSession.Id == 0 {
-		return
-	}
-
 	fileParam := c.Query("file")
 	if fileParam == "" || strings.Contains(fileParam, "..") {
 		appG.RespErr(e.INVALID_PARAMS, "invalid file url")
