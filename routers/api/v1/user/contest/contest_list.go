@@ -83,6 +83,7 @@ func prepareSummaryRet(contests []*models.Contest, contestLabIdMap map[uint64][]
 	for _, contest := range contests {
 		var tmpListWithSummary listWithSummaryData
 		tmpListWithSummary.ContestInfo = contest
+		tmpListWithSummary.SubmitSummary = &models.SubmitSummary{}
 		if _, labMapOk := contestLabIdMap[contest.ID]; labMapOk {
 			for _, labId := range contestLabIdMap[contest.ID] {
 				if _, summaryMapOk := labSubmitSummary[labId]; summaryMapOk {
