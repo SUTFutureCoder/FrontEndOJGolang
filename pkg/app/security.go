@@ -2,7 +2,6 @@ package app
 
 import (
 	"FrontEndOJGolang/models"
-	"FrontEndOJGolang/pkg/utils"
 )
 
 /**
@@ -15,8 +14,8 @@ func LimitUserSubmitFluency(userId uint64) bool {
 		return false
 	}
 
-	if utils.GetMillTime()-labSubmit.CreateTime < 1000*5 {
-		return true
-	}
+	//if utils.GetMillTime()-labSubmit.CreateTime < 1000*5 {
+	//	return true
+	//}
 	return false
 }

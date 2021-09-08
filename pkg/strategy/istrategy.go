@@ -13,7 +13,7 @@ type istrategy interface {
 type strategyDto struct {
 	StraType string `json:"type"`
 	Context  interface{} `json:"-"`
-	Data     interface{} `json:"data"`
+	Data     interface{} `jsson:"data"`
 }
 
 func strategyFactory(strategyType string, strategy *Strategy) istrategy {

@@ -10,6 +10,7 @@ var MsgFlags = map[int]string{
 	UNAUTHORIZED:   "please check your authorize",
 	PARSE_PARAM_ERROR: "parse param error",
 	LAB_INVALID: 	"lab was not valid, please check lab status",
+	CONTEST_ACCESS_DENIED: 	"contest access denied, please check contest status and signin status",
 }
 
 func GetMsg(code int) string {

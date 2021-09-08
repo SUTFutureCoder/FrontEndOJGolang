@@ -47,5 +47,8 @@ func main() {
 
 	log.Printf("[SUCCESS] Project Caroline Started 🎂")
 
-	server.ListenAndServe()
+	err := server.ListenAndServe()
+	if err != nil {
+		log.Fatalf("[FATAL] listen and serve error:%v", err)
+	}
 }

@@ -4,7 +4,6 @@ import (
 	"FrontEndOJGolang/models"
 	"FrontEndOJGolang/pkg/app"
 	"FrontEndOJGolang/pkg/e"
-	"FrontEndOJGolang/pkg/utils"
 	"github.com/gin-gonic/gin"
 )
 
@@ -46,21 +45,11 @@ func Info(c *gin.Context) {
 	}
 	contest = contests[0]
 
-	contestUserMap := &models.ContestUserMap{
-		ContestId: req.ContestId,
-		Model : models.Model{
-			CreatorId: userSession.Id,
-		},
-	}
 	// protect future contest
 	if status != models.STATUS_ALL {
-		if contest.ContestStartTime > utils.GetMillTime() {
-			appG.RespErr(e.UNAUTHORIZED, "Contest Not Start")
-			return
-		}
-		// check user have signed
-		if !contestUserMap.CheckUserSignIn() {
-			appG.RespErr(e.UNAUTHORIZED, "Please Signin The Contest First")
+		reason := checkAccess(contest, userSession.Id)
+		if reason != "" {
+			appG.RespErr(e.CONTEST_ACCESS_DENIED, reason)
 			return
 		}
 	}

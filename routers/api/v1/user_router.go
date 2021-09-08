@@ -42,6 +42,7 @@ func InitUserRouter(r *gin.Engine) {
 	contestGroup.POST("/list_with_summary", contest.ListWithSummary)
 	contestGroup.POST("/info", contest.Info)
 	contestGroup.POST("/sign", contest.Sign)
+	contestGroup.POST("/try_access", contest.TryAccess)
 	contestGroup.POST("/dashboard", contest.Dashboard)
 
 	contestGroup.POST("/users", contest.Users)
