@@ -26,7 +26,6 @@ type dashboardResp struct {
 	LabInfos []models.Lab `json:"lab_infos"`
 }
 
-// dashboard 仅统计开始到结束时间段的提交分数
 func Dashboard(c *gin.Context) {
 	appG := app.Gin{
 		C: c,
@@ -59,7 +58,7 @@ func Dashboard(c *gin.Context) {
 	labInfoList := lab.GetByIds(labIdList)
 
 	labSubmit := &models.LabSubmit{}
-	submitGroupData := labSubmit.GroupByUserAndLabIds(labIdList, userIdList)
+	submitGroupData := labSubmit.GroupByUserAndLabIds(contest.ID, labIdList, userIdList)
 
 	resp := &dashboardResp{}
 	resp.UserInfos = userInfoList

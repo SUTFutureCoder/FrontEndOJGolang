@@ -88,7 +88,7 @@ func checkUserStatus(userSession *app.UserSession, labInfo *models.Lab) error {
 			return errors.New("empty valid contest")
 		}
 
-		if len(contestUserMap.CheckUserSignInByContestIds(validContestIds, userSession.Id)) == 0 {
+		if len(contestUserMap.GetUserSignInByContestIds(validContestIds, userSession.Id)) == 0 {
 			return errors.New("user not signin any contest")
 		}
 

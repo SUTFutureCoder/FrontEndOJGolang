@@ -17,6 +17,8 @@ func InitUserRouter(r *gin.Engine) {
 	labGroup.POST("/list", lab.LabList)
 	labGroup.POST("/info", lab.LabInfo)
 	labGroup.POST("/list_with_summary", lab.LabListAndSummary)
+	labGroup.POST("/get_by_ids", lab.LabGetByIds)
+	labGroup.POST("/get_by_ids_with_user_summary", lab.LabGetByIdsWithUserSummary)
 
 	labSubmitGroup := r.Group("/lab_submit")
 	labSubmitGroup.POST("/submit", lab_submit.Submit)
@@ -42,6 +44,8 @@ func InitUserRouter(r *gin.Engine) {
 	contestGroup.POST("/list_with_summary", contest.ListWithSummary)
 	contestGroup.POST("/info", contest.Info)
 	contestGroup.POST("/sign", contest.Sign)
+	contestGroup.POST("/get_contests_sign_status", contest.GetContestsSignStatus)
+	contestGroup.POST("/get_user_contest_ac_labids", contest.GetUserContestAcLabIds)
 	contestGroup.POST("/try_access", contest.TryAccess)
 	contestGroup.POST("/dashboard", contest.Dashboard)
 

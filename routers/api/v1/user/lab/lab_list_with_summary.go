@@ -86,6 +86,7 @@ func LabListAndSummary(c *gin.Context) {
 		if s, ok := labTestcaseCnt[lab.ID]; ok {
 			tmpLabListwithsummary.TeseCaseCnt = s
 		}
+		lab.HideLabDetail()
 		resp.LabList = append(resp.LabList, tmpLabListwithsummary)
 	}
 	appG.RespSucc(resp)

@@ -61,3 +61,20 @@ func TestToPager(t *testing.T) {
 		})
 	}
 }
+
+func TestAppend(t *testing.T) {
+	var list []interface{}
+	var labIds []interface{}
+	labIds = append(labIds, 1)
+	labIds = append(labIds, 2)
+	labIds = append(labIds, 3)
+	labIds = append(labIds, 4)
+
+	list = append(list, 6)
+	list = append(list, labIds...)
+
+	for i := range list {
+		println(list[i])
+	}
+
+}

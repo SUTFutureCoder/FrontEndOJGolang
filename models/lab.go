@@ -178,3 +178,27 @@ func (lab *Lab) HideLabs(labIds []interface{}, tx *sql.Tx) bool {
 	}
 	return true
 }
+
+// HideLabDetail 脱敏
+func (lab *Lab) HideLabDetail() {
+	lab.LabDesc = ""
+	lab.LabSample = ""
+	lab.LabTemplate = ""
+}
+
+
+func (lab *Lab) SortLabs(sortedIds []uint64, info []Lab) []Lab {
+	labs := make([]Lab, len(sortedIds))
+
+	labSortMap := make(map[uint64]int)
+	for i := range sortedIds {
+		labSortMap[sortedIds[i]] = i
+	}
+
+	for i := range info {
+		if idx, ok := labSortMap[info[i].ID]; ok {
+			labs[idx] = info[i]
+		}
+	}
+	return labs
+}

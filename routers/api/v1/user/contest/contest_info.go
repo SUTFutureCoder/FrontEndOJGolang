@@ -13,7 +13,7 @@ type infoReq struct {
 
 type infoResp struct {
 	ContestInfo models.Contest `json:"contest_info"`
-	LabList []models.Lab `json:"lab_list"`
+	LabListIds []interface{} `json:"lab_list_ids"`
 }
 
 func Info(c *gin.Context) {
@@ -56,21 +56,42 @@ func Info(c *gin.Context) {
 
 	contestLabMap := &models.ContestLabMap{}
 	_, labIds, err := contestLabMap.GetIdMap([]interface{}{contest.ID}, status)
-	labList := make([]models.Lab, 0)
-
-	if len(labIds) != 0 {
-		lab := &models.Lab{}
-		labList = lab.GetByIds(labIds)
-		for k, _ := range labList {
-			labList[k].LabSample = ""
-		}
-	}
 
 	appG.RespSucc(infoResp{
 		ContestInfo: *contest,
-		LabList: labList,
+		LabListIds: labIds,
 	})
 }
 
+type userContestAcLabIdsReq struct {
+	ContestId uint64 `json:"contest_id"`
+}
+type userContestAcLabIdsResp struct {
+	AcLabIds []uint64 `json:"ac_lab_ids"`
+}
+func GetUserContestAcLabIds(c *gin.Context) {
+	appG := app.Gin{
+		C: c,
+	}
+
+	req := &userContestAcLabIdsReq{}
+	err := c.BindJSON(req)
+	if err != nil {
+		appG.RespErr(e.PARSE_PARAM_ERROR, err)
+		return
+	}
+
+	userSession := app.GetUserFromSessionNoRespErr(appG)
+
+	labSubmit := &models.LabSubmit{
+		ContestId: req.ContestId,
+		Model: models.Model{
+			CreatorId: userSession.Id,
+		},
+	}
+	resp := &userContestAcLabIdsResp{}
+	resp.AcLabIds = labSubmit.GetUserContestAcLabIds()
+	appG.RespSucc(resp)
+}
 
 

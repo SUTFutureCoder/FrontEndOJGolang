@@ -42,5 +42,9 @@ func LabList(c *gin.Context) {
 		appGin.RespErr(e.ERROR, err)
 		return
 	}
+	for i := range resp.LabList {
+		// 脱敏
+		resp.LabList[i].HideLabDetail()
+	}
 	appGin.RespSucc(resp)
 }

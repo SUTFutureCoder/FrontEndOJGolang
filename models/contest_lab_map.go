@@ -68,11 +68,7 @@ func (c *ContestLabMap) GetIdMap(contestIds []interface{}, status int) (map[uint
 		return contestLabIdMap, labIdList, nil
 	}
 
-	query := "SELECT contest_id, lab_id, status FROM contest_lab_map WHERE contest_id IN (?"+strings.Repeat(",?", len(contestIds)-1)+") ORDER BY lab_order"
-	if status != STATUS_ALL {
-		contestIds = append(contestIds, status)
-		query += " AND status=?"
-	}
+	query := "SELECT contest_id, lab_id, status FROM contest_lab_map WHERE contest_id IN (?"+strings.Repeat(",?", len(contestIds)-1)+") AND status=1 ORDER BY lab_order"
 	rows, err := DB.Query(query, contestIds...)
 	defer rows.Close()
 	if err != nil {

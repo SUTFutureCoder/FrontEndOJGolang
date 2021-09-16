@@ -52,3 +52,35 @@ func Sign(c *gin.Context) {
 	}
 	appG.RespSucc(lastId)
 }
+
+
+type getSignStatusReq struct {
+	ContestIds []uint64 `json:"contest_ids"`
+}
+type getSignStatusResp struct {
+	SignInContestIds []uint64 `json:"sign_in_contest_ids"`
+}
+func GetContestsSignStatus(c *gin.Context) {
+	appG := app.Gin{
+		C: c,
+	}
+
+	req := &getSignStatusReq{}
+	err := c.BindJSON(req)
+	if err != nil {
+		appG.RespErr(e.PARSE_PARAM_ERROR, nil)
+		return
+	}
+
+	userSession := app.GetUserFromSession(appG)
+	if userSession.Id == 0 {
+		return
+	}
+
+	contestUserMap := &models.ContestUserMap{}
+	signInContestIds := contestUserMap.GetUserSignInByContestIds(models.ConvertUint64ToInterface(req.ContestIds), userSession.Id);
+	resp := &getSignStatusResp{
+		SignInContestIds: models.ConvertInterfaceToUint64(signInContestIds),
+	}
+	appG.RespSucc(resp)
+}

@@ -14,6 +14,7 @@ import (
 
 type submitReq struct {
 	LabId      uint64 `json:"lab_id"`
+	ContestId uint64 `json:"contest_id"`
 	SubmitData string `json:"submit_data"`
 }
 
@@ -24,7 +25,11 @@ func Submit(c *gin.Context) {
 	}
 
 	var req submitReq
-	c.BindJSON(&req)
+	err := c.BindJSON(&req)
+	if err != nil {
+		appG.RespErr(e.PARSE_PARAM_ERROR, err)
+		return
+	}
 
 	userSession := app.GetUserFromSession(appG)
 	if userSession.Id == 0 {
@@ -38,6 +43,7 @@ func Submit(c *gin.Context) {
 
 	labSubmit := &models.LabSubmit{
 		LabID: req.LabId,
+		ContestId: req.ContestId,
 		SubmitData: req.SubmitData,
 		Model: models.Model{
 			CreatorId: userSession.Id,
@@ -67,11 +73,13 @@ func SubmitWithFile(c *gin.Context) {
 		return
 	}
 
-	labId, err := strconv.ParseUint(c.GetHeader("data"), 10, 64)
+	labId, err := strconv.ParseUint(c.GetHeader("labId"), 10, 64)
 	if labId == 0 || err != nil{
 		appG.RespErr(e.INVALID_PARAMS, "header must have lab id")
 		return
 	}
+
+	contestId, _ := strconv.ParseUint(c.GetHeader("contestId"), 10, 64)
 	userSession := app.GetUserFromSession(appG)
 	if userSession.Id == 0 {
 		return
@@ -94,6 +102,7 @@ func SubmitWithFile(c *gin.Context) {
 	// insert to submit table
 	labSubmit := &models.LabSubmit{
 		LabID: labId,
+		ContestId: contestId,
 		SubmitData: filePath,
 		SubmitType: models.SUBMIT_TYPE_PACKAGE,
 		Model: models.Model{

@@ -41,6 +41,10 @@ func GetLabs(c *gin.Context) {
 
 	lab := &models.Lab{}
 	labInfo := lab.GetByIds(labIdList)
+
+	// sort
+	labInfo = lab.SortLabs(models.ConvertInterfaceToUint64(labIdList), labInfo)
+
 	for _, l := range labInfo {
 		resp.ContestLabs = append(resp.ContestLabs, l)
 	}

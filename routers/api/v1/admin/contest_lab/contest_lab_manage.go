@@ -42,6 +42,9 @@ func ManageLabs(c *gin.Context) {
 		return
 	}
 
+	// sort labIds
+	labIdsInfo = lab.SortLabs(req.LabIds, labIdsInfo)
+
 	// start trans
 	// update formal to 0
 	// set trans

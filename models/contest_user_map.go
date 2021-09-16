@@ -135,7 +135,7 @@ func (c *ContestUserMap) CheckUserSignIn() bool {
 	return cnt >= 1
 }
 
-func (c *ContestUserMap) CheckUserSignInByContestIds(contestIds []interface{}, creatorId uint64) []interface{} {
+func (c *ContestUserMap) GetUserSignInByContestIds(contestIds []interface{}, creatorId uint64) []interface{} {
 	if len(contestIds) == 0 {
 		return contestIds
 	}

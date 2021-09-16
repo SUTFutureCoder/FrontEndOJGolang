@@ -11,6 +11,8 @@ type LabSubmit struct {
 	Model
 	// LabID 实验室id
 	LabID uint64 `json:"lab_id"`
+	// ContestId 竞赛id
+	ContestId uint64 `json:"contest_id"`
 	// SubmitData 提交内容
 	SubmitData string `json:"submit_data"`
 	// SubmitType 提交类型
@@ -68,7 +70,7 @@ const (
 const PENAL_TIME = 20
 
 func (labSubmit *LabSubmit) Insert() (int64, error) {
-	stmt, err := DB.Prepare("INSERT INTO lab_submit (lab_id, submit_data, submit_type, submit_result, creator_id, creator, create_time) VALUES (?,?,?,?,?,?,?)")
+	stmt, err := DB.Prepare("INSERT INTO lab_submit (lab_id, contest_id, submit_data, submit_type, submit_result, creator_id, creator, create_time) VALUES (?,?,?,?,?,?,?,?)")
 	if err != nil {
 		log.Printf("insert into lab submit error:%#v", err)
 		return 0, err
@@ -76,6 +78,7 @@ func (labSubmit *LabSubmit) Insert() (int64, error) {
 	defer stmt.Close()
 	insertRet, err := stmt.Exec(
 		labSubmit.LabID,
+		labSubmit.ContestId,
 		labSubmit.SubmitData,
 		labSubmit.SubmitType,
 		labSubmit.SubmitResult,
@@ -94,9 +97,9 @@ func (labSubmit *LabSubmit) GetUserSubmits(creatorId uint64, pager Pager) ([]Lab
 	var stmt *sql.Stmt
 	var err error
 	if creatorId == 0 {
-		stmt, err = DB.Prepare("SELECT id, lab_id, submit_data, submit_result, submit_time_usage, status, creator_id, creator, create_time, update_time FROM lab_submit WHERE creator_id != ? ORDER BY id desc LIMIT ? OFFSET ? ")
+		stmt, err = DB.Prepare("SELECT id, lab_id, contest_id, submit_data, submit_result, submit_time_usage, status, creator_id, creator, create_time, update_time FROM lab_submit WHERE creator_id != ? ORDER BY id desc LIMIT ? OFFSET ? ")
 	} else {
-		stmt, err = DB.Prepare("SELECT id, lab_id, submit_data, submit_result, submit_time_usage, status, creator_id, creator, create_time, update_time FROM lab_submit WHERE creator_id = ? ORDER BY id desc LIMIT ? OFFSET ? ")
+		stmt, err = DB.Prepare("SELECT id, lab_id, contest_id, submit_data, submit_result, submit_time_usage, status, creator_id, creator, create_time, update_time FROM lab_submit WHERE creator_id = ? ORDER BY id desc LIMIT ? OFFSET ? ")
 	}
 	rows, err := stmt.Query(
 		creatorId,
@@ -111,6 +114,7 @@ func (labSubmit *LabSubmit) GetUserSubmits(creatorId uint64, pager Pager) ([]Lab
 		err = rows.Scan(
 			&labSubmitRow.ID,
 			&labSubmitRow.LabID,
+			&labSubmitRow.ContestId,
 			&labSubmitRow.SubmitData,
 			&labSubmitRow.SubmitResult,
 			&labSubmitRow.SubmitTimeUsage,
@@ -128,7 +132,7 @@ func (labSubmit *LabSubmit) GetUserSubmits(creatorId uint64, pager Pager) ([]Lab
 
 func (labSubmit *LabSubmit) GetUserSubmitsByLabId(creatorId uint64, labId uint64) ([]LabSubmit, error) {
 	var err error
-	stmt, err := DB.Prepare("SELECT id, lab_id, submit_result, submit_time_usage, status, creator_id, creator, create_time, update_time FROM lab_submit WHERE creator_id = ? AND lab_id = ? ORDER BY id desc")
+	stmt, err := DB.Prepare("SELECT id, lab_id, contest_id, submit_result, submit_time_usage, status, creator_id, creator, create_time, update_time FROM lab_submit WHERE creator_id = ? AND lab_id = ? ORDER BY id desc")
 	defer stmt.Close()
 	rows, err := stmt.Query(
 		creatorId,
@@ -140,6 +144,7 @@ func (labSubmit *LabSubmit) GetUserSubmitsByLabId(creatorId uint64, labId uint64
 		err = rows.Scan(
 			&labSubmitRow.ID,
 			&labSubmitRow.LabID,
+			&labSubmitRow.ContestId,
 			&labSubmitRow.SubmitResult,
 			&labSubmitRow.SubmitTimeUsage,
 			&labSubmitRow.Status,
@@ -154,7 +159,7 @@ func (labSubmit *LabSubmit) GetUserSubmitsByLabId(creatorId uint64, labId uint64
 }
 
 func (labSubmit *LabSubmit) GetUserLastSubmit(userId uint64) error {
-	stmt, err := DB.Prepare("SELECT id, lab_id, submit_result, submit_time_usage, status, creator_id, creator, create_time, update_time FROM lab_submit WHERE creator_id = ? ORDER BY id desc LIMIT 1")
+	stmt, err := DB.Prepare("SELECT id, lab_id, contest_id, submit_result, submit_time_usage, status, creator_id, creator, create_time, update_time FROM lab_submit WHERE creator_id = ? ORDER BY id desc LIMIT 1")
 	defer stmt.Close()
 	row := stmt.QueryRow(
 		userId,
@@ -163,6 +168,7 @@ func (labSubmit *LabSubmit) GetUserLastSubmit(userId uint64) error {
 	err = row.Scan(
 		&labSubmitRow.ID,
 		&labSubmitRow.LabID,
+		&labSubmitRow.ContestId,
 		&labSubmitRow.SubmitResult,
 		&labSubmitRow.SubmitTimeUsage,
 		&labSubmitRow.Status,
@@ -192,6 +198,39 @@ func (labSubmit *LabSubmit) GetSummary(labIds []interface{}) map[uint64]*SubmitS
 		log.Printf("get lab submit summary from db error [%#v]", err)
 		return submitSummaryMap
 	}
+	submitSummaryMap, err = labSubmit.execGetSummary(rows)
+	if err != nil {
+		log.Printf("exec get summary from db error [%#v]", err)
+	}
+	return submitSummaryMap
+}
+
+
+func (labSubmit *LabSubmit) GetSummaryByUserId(labIds []interface{}, contestId uint64, userId uint64) map[uint64]*SubmitSummary {
+	submitSummaryMap := make(map[uint64]*SubmitSummary)
+	if len(labIds) == 0 {
+		return submitSummaryMap
+	}
+	// user to labIds
+	var sqlParams []interface{}
+	sqlParams = append(sqlParams, userId)
+	sqlParams = append(sqlParams, contestId)
+	sqlParams = append(sqlParams, labIds...)
+	rows, err := DB.Query("SELECT lab_id, count(*) as cnt, status FROM lab_submit WHERE creator_id=? AND contest_id=? AND lab_id IN (?"+strings.Repeat(",?", len(labIds)-1)+")"+" GROUP BY lab_id, status", sqlParams...)
+	if err != nil {
+		log.Printf("get lab submit summary from db error [%#v]", err)
+		return submitSummaryMap
+	}
+	submitSummaryMap, err = labSubmit.execGetSummary(rows)
+	if err != nil {
+		log.Printf("exec get summary from db error [%#v]", err)
+	}
+	return submitSummaryMap
+}
+
+func (LabSubmit *LabSubmit) execGetSummary(rows *sql.Rows) (map[uint64]*SubmitSummary, error) {
+	submitSummaryMap := make(map[uint64]*SubmitSummary)
+
 	defer rows.Close()
 	for rows.Next() {
 		var (
@@ -199,7 +238,10 @@ func (labSubmit *LabSubmit) GetSummary(labIds []interface{}) map[uint64]*SubmitS
 			count  int
 			status int8
 		)
-		err = rows.Scan(&id, &count, &status)
+		err := rows.Scan(&id, &count, &status)
+		if err != nil {
+			return nil, err
+		}
 		// analysis
 		if _, ok := submitSummaryMap[id]; !ok {
 			submitSummaryMap[id] = &SubmitSummary{}
@@ -217,7 +259,7 @@ func (labSubmit *LabSubmit) GetSummary(labIds []interface{}) map[uint64]*SubmitS
 		}
 	}
 
-	return submitSummaryMap
+	return submitSummaryMap, nil
 }
 
 type UserSubmitSummary struct {
@@ -344,11 +386,12 @@ type SubmitGroupData struct {
 	Cnt int `json:"cnt"`
 }
 
-func (labSubmit *LabSubmit) GroupByUserAndLabIds(labIds []interface{}, userIds []interface{}) []SubmitGroupData {
+func (labSubmit *LabSubmit) GroupByUserAndLabIds(contestId uint64, labIds []interface{}, userIds []interface{}) []SubmitGroupData {
 	var submitGroupDataList []SubmitGroupData
 	params := labIds
+	params = append(params, contestId)
 	params = append(params, userIds...)
-	rows, err := DB.Query("SELECT lab_id, status, creator_id, ANY_VALUE(creator) as creator, count(1) as cnt FROM lab_submit WHERE lab_id IN(?" + strings.Repeat(",?", len(labIds) - 1) + ") AND creator_id IN(?" + strings.Repeat(",?", len(userIds) - 1) + ") GROUP BY lab_id, creator, status", params...)
+	rows, err := DB.Query("SELECT lab_id, status, creator_id, ANY_VALUE(creator) as creator, count(1) as cnt FROM lab_submit WHERE lab_id IN(?" + strings.Repeat(",?", len(labIds) - 1) + ") AND contestId = ? AND creator_id IN(?" + strings.Repeat(",?", len(userIds) - 1) + ") GROUP BY lab_id, creator, status", params...)
 	if err != nil {
 		log.Printf("group submits by user and labids error [%#v] params [%#v]", err, params)
 		return submitGroupDataList
@@ -365,4 +408,25 @@ func (labSubmit *LabSubmit) GroupByUserAndLabIds(labIds []interface{}, userIds [
 		)
 	}
 	return submitGroupDataList
+}
+
+func (labSubmit *LabSubmit) GetUserContestAcLabIds() []uint64 {
+	var acLabIds []uint64
+	rows, err := DB.Query("SELECT lab_id FROM lab_submit WHERE contest_id = ? AND creator_id = ? AND status = ? GROUP BY lab_id", labSubmit.ContestId, labSubmit.CreatorId, LABSUBMITSTATUS_ACCEPTED)
+	if err != nil {
+		log.Printf("get user contest summary by user and creator error [%#v] contestId [%d] creatorId [%d]", err, labSubmit.ContestId, labSubmit.CreatorId)
+		return acLabIds
+	}
+	defer rows.Close()
+	for rows.Next() {
+		var labId uint64
+		err := rows.Scan(&labId)
+		if err != nil {
+			log.Printf("scan data error [%#v]", err)
+			continue
+		}
+
+		acLabIds = append(acLabIds, labId)
+	}
+	return acLabIds
 }

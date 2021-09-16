@@ -155,3 +155,13 @@ func ConvertUint64ToInterface(ids []uint64) []interface{} {
 	}
 	return interfaceList
 }
+
+func ConvertInterfaceToUint64(ids []interface{}) []uint64 {
+	var uint64List []uint64
+	for _, id := range ids {
+		if uint64Id, ok := id.(uint64); ok {
+			uint64List = append(uint64List, uint64Id)
+		}
+	}
+	return uint64List
+}
