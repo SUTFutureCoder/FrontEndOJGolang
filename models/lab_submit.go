@@ -386,12 +386,11 @@ type SubmitGroupData struct {
 	Cnt int `json:"cnt"`
 }
 
-func (labSubmit *LabSubmit) GroupByUserAndLabIds(contestId uint64, labIds []interface{}, userIds []interface{}) []SubmitGroupData {
+func (labSubmit *LabSubmit) GroupByUserAndLabIds(contestId uint64, labIds []interface{}) []SubmitGroupData {
 	var submitGroupDataList []SubmitGroupData
 	params := labIds
 	params = append(params, contestId)
-	params = append(params, userIds...)
-	rows, err := DB.Query("SELECT lab_id, status, creator_id, ANY_VALUE(creator) as creator, count(1) as cnt FROM lab_submit WHERE lab_id IN(?" + strings.Repeat(",?", len(labIds) - 1) + ") AND contestId = ? AND creator_id IN(?" + strings.Repeat(",?", len(userIds) - 1) + ") GROUP BY lab_id, creator, status", params...)
+	rows, err := DB.Query("SELECT lab_id, status, creator_id, ANY_VALUE(creator) as creator, count(1) as cnt FROM lab_submit WHERE lab_id IN(?" + strings.Repeat(",?", len(labIds) - 1) + ") AND contest_id = ? GROUP BY lab_id, creator_id, status", params...)
 	if err != nil {
 		log.Printf("group submits by user and labids error [%#v] params [%#v]", err, params)
 		return submitGroupDataList
@@ -406,6 +405,7 @@ func (labSubmit *LabSubmit) GroupByUserAndLabIds(contestId uint64, labIds []inte
 			&submitGroupData.Creator,
 			&submitGroupData.Cnt,
 		)
+		submitGroupDataList = append(submitGroupDataList, submitGroupData)
 	}
 	return submitGroupDataList
 }

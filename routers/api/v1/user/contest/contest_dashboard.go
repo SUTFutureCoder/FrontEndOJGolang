@@ -21,9 +21,8 @@ type dashboardUserData struct {
 
 type dashboardResp struct {
 	RankDataMap map[uint64]map[uint64]dashboardUserData `json:"rank_data"`
-	ContestInfo models.Contest `json:"contest_info"`
-	UserInfos []*models.ContestUserMap `json:"user_infos"`
-	LabInfos []models.Lab `json:"lab_infos"`
+	UserAcList map[uint64][]uint64 `json:"user_ac_list"`
+	UserTimeSumList map[uint64]int `json:"user_time_sum_list"`
 }
 
 func Dashboard(c *gin.Context) {
@@ -32,38 +31,28 @@ func Dashboard(c *gin.Context) {
 	}
 
 	req := &dashboardReq{}
+	resp := &dashboardResp{}
 	if err := c.BindJSON(req); err != nil {
 		appG.RespErr(e.INVALID_PARAMS, "parse dashboard param error")
 		return
 	}
 
-	contest := &models.Contest{}
-	if !checkParams(req, contest, &appG) {
+	contest := checkParamsAndGetContest(req, &appG)
+	if nil == contest {
 		return
 	}
 
-	contestUserMap := &models.ContestUserMap{}
-	userInfoList, userIdList := contestUserMap.GetIdListByContestIds([]interface{}{contest.ID}, models.STATUS_ENABLE)
-
 	contestLabMap := &models.ContestLabMap{}
-	_, labIdList, err := contestLabMap.GetIdMap([]interface{}{contest.ID}, models.STATUS_ENABLE)
+	_, labIdList, err := contestLabMap.GetIdMap([]interface{}{contest.ID}, models.STATUS_ALL)
 	if err != nil {
 		log.Printf("get dashboard contest lab map error [%#v] data [%#v]", err, contest)
 		appG.RespErr(e.ERROR, "get dashboard contest lab map error")
 		return
 	}
 
-	// get lab id
-	lab := &models.Lab{}
-	labInfoList := lab.GetByIds(labIdList)
-
 	labSubmit := &models.LabSubmit{}
-	submitGroupData := labSubmit.GroupByUserAndLabIds(contest.ID, labIdList, userIdList)
+	submitGroupData := labSubmit.GroupByUserAndLabIds(contest.ID, labIdList)
 
-	resp := &dashboardResp{}
-	resp.UserInfos = userInfoList
-	resp.LabInfos = labInfoList
-	resp.ContestInfo = *contest
 	err = summaryAndSort(submitGroupData, resp)
 	if err != nil {
 		appG.RespErr(e.ERROR, fmt.Sprintf("summary dashboard failed [%#v]", err))
@@ -76,6 +65,8 @@ func Dashboard(c *gin.Context) {
 func summaryAndSort(groupData []models.SubmitGroupData, resp *dashboardResp) error {
 	if resp.RankDataMap == nil {
 		resp.RankDataMap = make(map[uint64]map[uint64]dashboardUserData)
+		resp.UserAcList = make(map[uint64][]uint64)
+		resp.UserTimeSumList = make(map[uint64]int)
 	}
 
 	for _, v := range groupData {
@@ -84,9 +75,11 @@ func summaryAndSort(groupData []models.SubmitGroupData, resp *dashboardResp) err
 		}
 		tmp := resp.RankDataMap[v.CreatorId][v.LabID]
 		if v.Status == models.LABSUBMITSTATUS_ACCEPTED {
+			resp.UserAcList[v.CreatorId] = append(resp.UserAcList[v.CreatorId], v.LabID)
 			tmp.IsAc = true
 		} else {
-			tmp.TimeSum += models.PENAL_TIME
+			tmp.TimeSum += models.PENAL_TIME * v.Cnt
+			resp.UserTimeSumList[v.CreatorId] += tmp.TimeSum
 		}
 		tmp.SubmitTimes += v.Cnt
 		resp.RankDataMap[v.CreatorId][v.LabID] = tmp
@@ -94,18 +87,18 @@ func summaryAndSort(groupData []models.SubmitGroupData, resp *dashboardResp) err
 	return nil
 }
 
-func checkParams(req *dashboardReq, contest *models.Contest, appG *app.Gin) bool {
+func checkParamsAndGetContest(req *dashboardReq, appG *app.Gin) *models.Contest {
 	if req.ContestId == 0 {
 		appG.RespErr(e.INVALID_PARAMS, "please check contest id")
-		return false
+		return nil
 	}
 
 	// check exists
+	contest := &models.Contest{}
 	contests, err := contest.GetListById(req.ContestId, models.STATUS_ENABLE)
 	if err != nil || len(contests) == 0 {
 		appG.RespErr(e.INVALID_PARAMS, "contest id not exist")
-		return false
+		return nil
 	}
-	contest = contests[0]
-	return true
+	return contests[0]
 }
