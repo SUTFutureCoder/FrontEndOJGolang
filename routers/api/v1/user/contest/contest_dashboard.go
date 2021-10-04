@@ -21,8 +21,9 @@ type dashboardUserData struct {
 
 type dashboardResp struct {
 	RankDataMap map[uint64]map[uint64]dashboardUserData `json:"rank_data"`
-	UserAcList map[uint64][]uint64 `json:"user_ac_list"`
-	UserTimeSumList map[uint64]int `json:"user_time_sum_list"`
+	UserAc map[uint64][]uint64 `json:"user_ac"`
+	UserIdMap map[uint64]string `json:"user_id_map"`
+	UserTimeSum map[uint64]int `json:"user_time_sum"`
 }
 
 func Dashboard(c *gin.Context) {
@@ -65,21 +66,23 @@ func Dashboard(c *gin.Context) {
 func summaryAndSort(groupData []models.SubmitGroupData, resp *dashboardResp) error {
 	if resp.RankDataMap == nil {
 		resp.RankDataMap = make(map[uint64]map[uint64]dashboardUserData)
-		resp.UserAcList = make(map[uint64][]uint64)
-		resp.UserTimeSumList = make(map[uint64]int)
+		resp.UserAc = make(map[uint64][]uint64)
+		resp.UserIdMap = make(map[uint64]string)
+		resp.UserTimeSum = make(map[uint64]int)
 	}
 
 	for _, v := range groupData {
 		if _, ok := resp.RankDataMap[v.CreatorId]; !ok {
 			resp.RankDataMap[v.CreatorId] = make(map[uint64]dashboardUserData)
 		}
+		resp.UserIdMap[v.CreatorId] = v.Creator
 		tmp := resp.RankDataMap[v.CreatorId][v.LabID]
 		if v.Status == models.LABSUBMITSTATUS_ACCEPTED {
-			resp.UserAcList[v.CreatorId] = append(resp.UserAcList[v.CreatorId], v.LabID)
+			resp.UserAc[v.CreatorId] = append(resp.UserAc[v.CreatorId], v.LabID)
 			tmp.IsAc = true
 		} else {
 			tmp.TimeSum += models.PENAL_TIME * v.Cnt
-			resp.UserTimeSumList[v.CreatorId] += tmp.TimeSum
+			resp.UserTimeSum[v.CreatorId] += tmp.TimeSum
 		}
 		tmp.SubmitTimes += v.Cnt
 		resp.RankDataMap[v.CreatorId][v.LabID] = tmp

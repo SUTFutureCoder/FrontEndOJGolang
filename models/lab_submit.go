@@ -388,6 +388,9 @@ type SubmitGroupData struct {
 
 func (labSubmit *LabSubmit) GroupByUserAndLabIds(contestId uint64, labIds []interface{}) []SubmitGroupData {
 	var submitGroupDataList []SubmitGroupData
+	if len(labIds) == 0 {
+		return submitGroupDataList
+	}
 	params := labIds
 	params = append(params, contestId)
 	rows, err := DB.Query("SELECT lab_id, status, creator_id, ANY_VALUE(creator) as creator, count(1) as cnt FROM lab_submit WHERE lab_id IN(?" + strings.Repeat(",?", len(labIds) - 1) + ") AND contest_id = ? GROUP BY lab_id, creator_id, status", params...)
