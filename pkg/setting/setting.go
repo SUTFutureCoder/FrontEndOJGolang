@@ -34,7 +34,6 @@ type Database struct {
 	Password     string
 	Host         string
 	Name         string
-	TablePrefix  string
 	MaxOpenConns int
 	MaxIdleConns int
 }
@@ -51,7 +50,6 @@ var SessionSetting = &Session{}
 type Tool struct {
 	FileBaseDir string
 	FileToolType string
-	CloudFileBaseUrl bool
 }
 
 var ToolSetting = &Tool{}

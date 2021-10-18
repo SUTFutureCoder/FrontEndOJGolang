@@ -68,6 +68,8 @@ type userContestAcLabIdsReq struct {
 }
 type userContestAcLabIdsResp struct {
 	AcLabIds []uint64 `json:"ac_lab_ids"`
+	ContestLabIds []uint64 `json:"contest_lab_ids"`
+	AcNum int `json:"ac_num"`
 }
 func GetUserContestAcLabIds(c *gin.Context) {
 	appG := app.Gin{
@@ -89,8 +91,25 @@ func GetUserContestAcLabIds(c *gin.Context) {
 			CreatorId: userSession.Id,
 		},
 	}
+
+	contestLabMap := &models.ContestLabMap{}
+	_, labIds, err := contestLabMap.GetIdMap([]interface{}{req.ContestId}, models.STATUS_ENABLE)
+	labIdsUint64 := models.ConvertInterfaceToUint64(labIds)
+	labIdsUint64Map := make(map[uint64]uint64)
+	for _, v := range labIdsUint64 {
+		labIdsUint64Map[v] = v
+	}
+
 	resp := &userContestAcLabIdsResp{}
 	resp.AcLabIds = labSubmit.GetUserContestAcLabIds()
+	resp.ContestLabIds = labIdsUint64
+	resp.AcNum = 0
+	for _, v := range resp.AcLabIds {
+		if _, ok := labIdsUint64Map[v]; ok {
+			resp.AcNum++
+		}
+	}
+
 	appG.RespSucc(resp)
 }
 
