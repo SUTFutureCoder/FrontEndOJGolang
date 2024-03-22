@@ -1,9 +1,9 @@
 # FrontEndOJGolang
-## 面向前端开发者的在线评测系统
+## 面向前端开发者的在线评测系统——后端接口
 
 随着在线评测系统（OnlineJudge）相关技术的不断发展，在线评测系统越来越多地应用于数据结构和算法教学、程序设计竞赛以及企业在线面试领域。
 
-然而大多数的在线评测系统仅能评测在服务器环境直接运行的程序语言，尚缺少对前端开发者技能练习和竞赛需求的支持。
+然而大多数的在线评测系统仅能评测在服务器环境直接运行的程序语言（如Java、C、C++），尚缺少对前端开发者技能练习和竞赛需求的支持。
 
 因此，为解决上述问题，需要设计一种面向前端开发者的在线评测系统，该系统能够在服务器环境渲染、执行前端代码，并提供前端界面相似度对比等功能。
 
@@ -51,11 +51,15 @@ RUN go run main.go
 
 ### MySQL结构
 
-caroline_feoj.sql
+导入 caroline.sql
+
+
 
 ### 配置
 
 conf/app.ini
+
+
 
 ### 默认密码
 
@@ -66,6 +70,8 @@ conf/app.ini
 #### 密码
 
 654321
+
+
 
 ## 效果预览
 
@@ -103,7 +109,7 @@ conf/app.ini
 
 ### 题目配置界面
 
-![题目配置界面](https://github.com/SUTFutureCoder/FrontEndOJGolang/blob/master/sample/image47.png?raw=true)
+![题目配置界面](https://github.com/SUTFutureCoder/FrontEndOJGolang/blob/master/sample/image48.png?raw=true)
 
 ## 代码流程
 
@@ -119,15 +125,15 @@ conf/app.ini
 
 ![E-R图](https://github.com/SUTFutureCoder/FrontEndOJGolang/blob/master/sample/image25.png?raw=true)
 
-### 核心活动图
+### 活动图
 
 ![核心活动图](https://github.com/SUTFutureCoder/FrontEndOJGolang/blob/master/sample/image30.png?raw=true)
 
-### 核心流程图
+### 评测流程图
 
 ![核心流程图](https://github.com/SUTFutureCoder/FrontEndOJGolang/blob/master/sample/image31.png?raw=true)
 
-### 延迟评测核心流程图
+### 延迟评测流程图
 
 当需要评测动画或是动态效果，需要等待一定时间再执行时，系统支持延迟一定时间再评测。
 
@@ -137,7 +143,12 @@ conf/app.ini
 
 ![界面相似度对比流程图](https://github.com/SUTFutureCoder/FrontEndOJGolang/blob/master/sample/image38.png?raw=true)
 
-## 注意
+## 说明
+
+### 关于使用效果
 
 此系统为作者攻读硕士学位所设计，时间较为久远，暂不保证使用效果，可供代码参考。
 
+### 关于名字
+
+作者当时重玩Protal2上头，所以起了caroline的名字，测试也用lab指代。
