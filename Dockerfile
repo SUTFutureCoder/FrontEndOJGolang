@@ -23,5 +23,5 @@ RUN apt install -y ./google-chrome-stable_current_amd64.deb
 # run golang
 COPY . /root/go/FrontEndOJGolang
 WORKDIR /root/go/FrontEndOJGolang
-#RUN go run main.go
+RUN go run main.go
 

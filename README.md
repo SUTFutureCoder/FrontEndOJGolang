@@ -17,11 +17,125 @@
 
 [评测核心](https://github.com/SUTFutureCoder/FrontEndOJGolang) 基于Golang ChromeDP WebSocket
 
+## 运行方法
+
+### 安装部署
+
+请参考DockerFile
+
+```bash
+ENV PATH="/root/anaconda3/bin:${PATH}"
+ENV GOPROXY https://goproxy.io
+ENV GO111MODULE on
+WORKDIR /root
+RUN apt-get install -y wget
+# install anaconda3 pytorch
+RUN wget http://mirrors.tuna.tsinghua.edu.cn/anaconda/archive/Anaconda3-2021.05-Linux-x86_64.sh
+RUN /bin/bash Anaconda3-2021.05-Linux-x86_64.sh -b
+RUN conda config --add channels https://mirrors.tuna.tsinghua.edu.cn/anaconda/pkgs/free/
+RUN conda config --add channels https://mirrors.tuna.tsinghua.edu.cn/anaconda/pkgs/main/
+RUN conda install pytorch -c pytorch
+RUN conda install torchvision -c pytorch
+RUN conda install ipython
+RUN conda install matplotlib pandas seaborn scipy numpy
+# install google-chrome
+RUN apt-get update
+RUN apt-get -f install -y
+RUN wget https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
+RUN apt install -y ./google-chrome-stable_current_amd64.deb
+# run golang
+COPY . /root/go/FrontEndOJGolang
+WORKDIR /root/go/FrontEndOJGolang
+RUN go run main.go
+```
+
+### MySQL结构
+
+caroline_feoj.sql
+
+### 配置
+
+conf/app.ini
+
+### 默认密码
+
+#### 用户名
+
+管理员
+
+#### 密码
+
+654321
+
+## 效果预览
+
+### 题目列表
+
+![题目列表](https://github.com/SUTFutureCoder/FrontEndOJGolang/blob/master/sample/image40.png?raw=true)
+
+### 题目浏览及提交
+
+![题目浏览及提交](https://github.com/SUTFutureCoder/FrontEndOJGolang/blob/master/sample/image41.png?raw=true)
+
+### 提交结果
+
+使用WebSocket实现实时通信
+
+![提交结果界面](https://github.com/SUTFutureCoder/FrontEndOJGolang/blob/master/sample/image42.png?raw=true)
+
+### 界面相似度对比
+
+基于ResNet对比界面相似度
+
+![界面相似度对比](https://github.com/SUTFutureCoder/FrontEndOJGolang/blob/master/sample/image43.png?raw=true)
+
+### 竞赛列表
+
+![竞赛列表界面](https://github.com/SUTFutureCoder/FrontEndOJGolang/blob/master/sample/image44.png?raw=true)
+
+### 竞赛榜单
+
+![竞赛榜单界面](https://github.com/SUTFutureCoder/FrontEndOJGolang/blob/master/sample/image45.png?raw=true)
+
+### 个人信息面板
+
+![个人信息面板](https://github.com/SUTFutureCoder/FrontEndOJGolang/blob/master/sample/image46.png?raw=true)
+
+### 题目配置界面
+
+![题目配置界面](https://github.com/SUTFutureCoder/FrontEndOJGolang/blob/master/sample/image47.png?raw=true)
+
 ## 代码流程
+
+### 代码用例图
 
 ![代码用例图](https://github.com/SUTFutureCoder/FrontEndOJGolang/blob/master/sample/image21.png?raw=true)
 
-## 效果预览
+### 系统功能结构图
+
+![系统功能结构图](https://github.com/SUTFutureCoder/FrontEndOJGolang/blob/master/sample/image22.png?raw=true)
+
+### E-R图
+
+![E-R图](https://github.com/SUTFutureCoder/FrontEndOJGolang/blob/master/sample/image25.png?raw=true)
+
+### 核心活动图
+
+![核心活动图](https://github.com/SUTFutureCoder/FrontEndOJGolang/blob/master/sample/image30.png?raw=true)
+
+### 核心流程图
+
+![核心流程图](https://github.com/SUTFutureCoder/FrontEndOJGolang/blob/master/sample/image31.png?raw=true)
+
+### 延迟评测核心流程图
+
+当需要评测动画或是动态效果，需要等待一定时间再执行时，系统支持延迟一定时间再评测。
+
+![延迟评测核心流程图](https://github.com/SUTFutureCoder/FrontEndOJGolang/blob/master/sample/image31.png?raw=true)
+
+### 界面相似度对比流程图
+
+![界面相似度对比流程图](https://github.com/SUTFutureCoder/FrontEndOJGolang/blob/master/sample/image38.png?raw=true)
 
 ## 注意
 
