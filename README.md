@@ -19,7 +19,7 @@
 
 ## 代码流程
 
-
+![代码用例图](https://github.com/SUTFutureCoder/FrontEndOJGolang/blob/master/sample/image21.png?raw=true)
 
 ## 效果预览
 
