@@ -27,9 +27,17 @@ https://oj.project256.com/login
 
 ## 运行方法
 
-### 安装部署
+### 安装部署&运行
 
-请参考DockerFile
+依赖Go、MySQL、google-chrome
+
+```bash
+go run main.go
+```
+
+
+
+更多请参考DockerFile
 
 ```bash
 ENV PATH="/root/anaconda3/bin:${PATH}"
